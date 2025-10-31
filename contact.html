@@ -1,0 +1,260 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Shop</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	<meta name="author" content="" />
+
+  	<!-- facebook ve twitter integration -->
+	<meta property="og:title" content=""/>
+	<meta property="og:image" content=""/>
+	<meta property="og:url" content=""/>
+	<meta property="og:site_name" content=""/>
+	<meta property="og:description" content=""/>
+	<meta name="twitter:title" content="" />
+	<meta name="twitter:image" content="" />
+	<meta name="twitter:url" content="" />
+	<meta name="twitter:card" content="" />
+
+	<!-- <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet"> -->
+	<!-- <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i" rel="stylesheet"> -->
+	
+	<!-- animate.css -->
+	<link rel="stylesheet" href="css/animate.css">
+	<!-- icomoon icon fonts -->
+	<link rel="stylesheet" href="css/icomoon.css">
+	<!-- bootstrap -->
+	<link rel="stylesheet" href="css/bootstrap.css">
+
+	<!-- flexslider -->
+	<link rel="stylesheet" href="css/flexslider.css">
+
+	
+	<!-- owl carousel -->
+	<link rel="stylesheet" href="css/owl.carousel.min.css">
+	<link rel="stylesheet" href="css/owl.theme.default.min.css">
+
+	<!-- theme style -->
+	<link rel="stylesheet" href="css/style.css">
+
+	<!-- free openstreetmap + leaflet map -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+	<!-- modernizr js -->
+	<script src="js/modernizr-2.6.2.min.js"></script>
+	<!-- for ie9 below -->
+	<!--[if lt IE 9]>
+	<script src="js/respond.min.js"></script>
+	<![endif]-->
+
+	</head>
+	<body>
+		
+	<div class="fh5co-loader"></div>
+	
+	<div id="page" style="opacity: 1 !important; visibility: visible !important; transition: none !important; -webkit-transition: none !important;">
+	<nav class="fh5co-nav" role="navigation">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-3 col-xs-2">
+					<div id="fh5co-logo"><a href="index.html">Shop.</a></div>
+				</div>
+				<div class="col-md-6 col-xs-6 text-center menu-1">
+					<ul>
+						<li><a href="index.html" data-i18n="nav.home">Home</a></li>
+						<li><a href="product.html" data-i18n="nav.products">Products</a></li>
+						<li><a href="about.html" data-i18n="nav.about">About</a></li>
+						<li><a href="services.html" data-i18n="nav.services">Services</a></li>
+						<li class="active"><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
+					</ul>
+				</div>
+				<div class="col-md-3 col-xs-4 text-right">
+					<button class="language-switcher" data-lang="en" style="background: #d1c286; color: #fff; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">EN</button>
+				</div>
+				<!-- search cart kısmı kapalı - lazım olursa açarsın
+					<ul>
+						<li class="search">
+							<div class="input-group">
+						      <input type="text" placeholder="Search..">
+						      <span class="input-group-btn">
+						        <button class="btn btn-primary" type="button"><i class="icon-search"></i></button>
+						      </span>
+						    </div>
+						</li>
+						<li class="shopping-cart"><a href="#" class="cart"><span><small>0</small><i class="icon-shopping-cart"></i></span></a></li>
+					</ul>
+				</div> -->
+			</div>
+			
+		</div>
+	</nav>
+
+	<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url(images/img_bg_2.jpg);">
+		<div class="overlay"></div>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-8 col-md-offset-2 text-center">
+					<div class="display-t">
+						<div class="display-tc animate-box" data-animate-effect="fadeIn">
+							<h1 data-i18n="contact.title">Contact Us</h1>
+							<h2><span data-i18n="contact.subtitle">by</span> <a href="https://ulik.vercel.app/" target="_blank">Ulik</a></h2>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+	
+	<div id="fh5co-contact">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-5 col-md-push-1 animate-box">
+					
+					<div class="fh5co-contact-info">
+						<h3 data-i18n="contact.contactInfo">Contact Information</h3>
+						<ul>
+							<li class="address" data-i18n="contact.address">198 West 21th Street, <br> Suite 721 New York NY 10016</li>
+							<li class="phone"><a href="tel://1234567920" data-i18n="contact.phone">+ 1235 2355 98</a></li>
+							<li class="email"><a href="mailto:info@yoursite.com" data-i18n="contact.emailAddress">info@yoursite.com</a></li>
+							<li class="url"><a href="http://gettemplates.co" data-i18n="contact.website">gettemplates.co</a></li>
+						</ul>
+					</div>
+
+				</div>
+				<div class="col-md-6 animate-box">
+					<h3 data-i18n="contact.getInTouch">Get In Touch</h3>
+					<form action="#">
+						<div class="row form-group">
+							<div class="col-md-6">
+								<!-- label'lar kapalı - placeholder kullanıyoruz işte -->
+								<input type="text" id="fname" class="form-control" data-i18n-placeholder="contact.firstname" placeholder="Your firstname">
+							</div>
+							<div class="col-md-6">
+								<input type="text" id="lname" class="form-control" data-i18n-placeholder="contact.lastname" placeholder="Your lastname">
+							</div>
+						</div>
+
+						<div class="row form-group">
+							<div class="col-md-12">
+								<input type="text" id="email" class="form-control" data-i18n-placeholder="contact.email" placeholder="Your email address">
+							</div>
+						</div>
+
+						<div class="row form-group">
+							<div class="col-md-12">
+								<input type="text" id="subject" class="form-control" data-i18n-placeholder="contact.subject" placeholder="Your subject of this message">
+							</div>
+						</div>
+
+						<div class="row form-group">
+							<div class="col-md-12">
+								<textarea name="message" id="message" cols="30" rows="10" class="form-control" data-i18n-placeholder="contact.message" placeholder="Say something about us"></textarea>
+							</div>
+						</div>
+						<div class="form-group">
+							<input type="submit" data-i18n-value="contact.sendMessage" value="Send Message" class="btn btn-primary">
+						</div>
+
+					</form>		
+				</div>
+			</div>
+			
+		</div>
+	</div>
+
+	<div id="map" class="animate-box" data-animate-effect="fadeIn"></div>
+
+	<footer id="fh5co-footer" role="contentinfo">
+		<div class="container">
+			<div class="row row-pb-md">
+				<div class="col-md-4 fh5co-widget">
+					<h3>Shop.</h3>
+					<p data-i18n="footer.description">Facilis ipsum reprehenderit nemo molestias. Aut cum mollitia reprehenderit. Eos cumque dicta adipisci architecto culpa amet.</p>
+				</div>
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#" data-i18n="footer.links.about">About</a></li>
+						<li><a href="#" data-i18n="footer.links.help">Help</a></li>
+						<li><a href="#" data-i18n="footer.links.contact">Contact</a></li>
+						<li><a href="#" data-i18n="footer.links.terms">Terms</a></li>
+						<li><a href="#" data-i18n="footer.links.meetups">Meetups</a></li>
+					</ul>
+				</div>
+
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#" data-i18n="footer.links.shop">Shop</a></li>
+						<li><a href="#" data-i18n="footer.links.privacy">Privacy</a></li>
+						<li><a href="#" data-i18n="footer.links.testimonials">Testimonials</a></li>
+						<li><a href="#" data-i18n="footer.links.handbook">Handbook</a></li>
+						<li><a href="#" data-i18n="footer.links.heldDesk">Held Desk</a></li>
+					</ul>
+				</div>
+
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#" data-i18n="footer.links.findDesigners">Find Designers</a></li>
+						<li><a href="#" data-i18n="footer.links.findDevelopers">Find Developers</a></li>
+						<li><a href="#" data-i18n="footer.links.teams">Teams</a></li>
+						<li><a href="#" data-i18n="footer.links.advertise">Advertise</a></li>
+						<li><a href="#" data-i18n="footer.links.api">API</a></li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="row copyright">
+				<div class="col-md-12 text-center">
+					<p>
+						<small class="block">&copy; 2025 Shop. <span data-i18n="footer.copyright">All Rights Reserved.</span></small> 
+						<small class="block"><span data-i18n="footer.designedBy">Designed by</span> <a href="https://ulik.vercel.app/" target="_blank">Ulik</a></small>
+					</p>
+					<p>
+						<ul class="fh5co-social-icons">
+							<li><a href="#"><i class="icon-twitter"></i></a></li>
+							<li><a href="#"><i class="icon-facebook"></i></a></li>
+							<li><a href="#"><i class="icon-linkedin"></i></a></li>
+							<li><a href="#"><i class="icon-dribbble"></i></a></li>
+						</ul>
+					</p>
+				</div>
+			</div>
+
+		</div>
+	</footer>
+	</div>
+
+	<div class="gototop js-top">
+		<a href="#" class="js-gotop"><i class="icon-arrow-up"></i></a>
+	</div>
+	
+	<!-- çift dil desteği - tr/en (jquery'den önce yükle) -->
+	<script src="js/i18n.js"></script>
+	<!-- jquery -->
+	<script src="js/jquery.min.js"></script>
+	<!-- jquery easing -->
+	<script src="js/jquery.easing.1.3.js"></script>
+	<!-- bootstrap -->
+	<script src="js/bootstrap.min.js"></script>
+	<!-- waypoints -->
+	<script src="js/jquery.waypoints.min.js"></script>
+	<!-- carousel -->
+	<script src="js/owl.carousel.min.js"></script>
+	<!-- countto -->
+	<script src="js/jquery.countTo.js"></script>
+	<!-- flexslider -->
+	<script src="js/jquery.flexslider-min.js"></script>
+	<!-- google map - kendi api key'ini ekle buraya -->
+	<!-- <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE&sensor=false"></script> -->
+	<script src="js/google_map.js"></script>
+
+	<!-- main -->
+	<script src="js/main.js"></script>
+
+	</body>
+</html>
+
