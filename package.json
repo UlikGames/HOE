@@ -7,10 +7,12 @@
     "build": "node js/generate-category-pages.js",
     "predeploy": "node js/generate-category-pages.js",
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "postinstall": "node js/generate-category-pages.js"
   },
   "engines": {
-    "node": "18.x"
+    "node": "18.x",
+    "npm": ">=9.0.0"
   },
   "keywords": [],
   "author": "",
