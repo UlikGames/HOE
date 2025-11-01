@@ -130,6 +130,83 @@
 			display: flex;
 			gap: 10px;
 		}
+		/* Admin Modal Stilleri */
+		.admin-modal-overlay {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.75);
+			z-index: 10000;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			padding: 20px;
+			overflow-y: auto;
+		}
+		.admin-modal-overlay[style*="display: flex"],
+		.admin-modal-overlay[style*="display:flex"] {
+			display: flex !important;
+		}
+		.admin-modal {
+			background: #fff;
+			border-radius: 12px;
+			width: 100%;
+			max-width: 900px;
+			max-height: 90vh;
+			box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+			display: flex;
+			flex-direction: column;
+			overflow: hidden;
+		}
+		.admin-modal-header {
+			padding: 20px 30px;
+			border-bottom: 2px solid #e5e7eb;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+			color: #fff;
+		}
+		.admin-modal-header h2 {
+			margin: 0;
+			font-size: 24px;
+			color: #fff;
+		}
+		.admin-modal-close {
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			color: #fff;
+			font-size: 32px;
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			line-height: 1;
+			transition: background 0.3s;
+		}
+		.admin-modal-close:hover {
+			background: rgba(255, 255, 255, 0.3);
+		}
+		.admin-modal-body {
+			padding: 30px;
+			overflow-y: auto;
+			flex: 1;
+		}
+		@media (max-width: 768px) {
+			.admin-modal {
+				max-width: 100%;
+				max-height: 100vh;
+				border-radius: 0;
+			}
+			.admin-modal-header {
+				padding: 15px 20px;
+			}
+			.admin-modal-body {
+				padding: 20px;
+			}
+		}
 		.alert {
 			padding: 15px 20px;
 			border-radius: 8px;
@@ -193,14 +270,183 @@
 			<button onclick="logout()" class="btn-admin btn-admin-danger" style="margin-top: 15px;">🚪 Çıkış Yap</button>
 		</div>
 
-		<div class="alert alert-success" id="successAlert"></div>
-		<div class="alert alert-error" id="errorAlert"></div>
+		<!-- Alert Pop-up Modal -->
+		<div id="alertModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 99999; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center;">
+			<div id="alertModalContent" style="background: #fff; border-radius: 16px; padding: 30px 40px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); position: relative; animation: alertSlideIn 0.3s ease-out;">
+				<button id="alertCloseBtn" style="position: absolute; top: 15px; right: 15px; background: transparent; border: none; font-size: 28px; cursor: pointer; color: #6b7280; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">&times;</button>
+				<div id="alertIcon" style="font-size: 48px; text-align: center; margin-bottom: 20px;"></div>
+				<div id="alertMessage" style="font-size: 16px; line-height: 1.6; color: #1a1a1a; text-align: center; word-wrap: break-word;"></div>
+			</div>
+		</div>
+		
+		<style>
+			@keyframes alertSlideIn {
+				from {
+					opacity: 0;
+					transform: translateY(-30px) scale(0.9);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0) scale(1);
+				}
+			}
+			@keyframes alertSlideOut {
+				from {
+					opacity: 1;
+					transform: translateY(0) scale(1);
+				}
+				to {
+					opacity: 0;
+					transform: translateY(-30px) scale(0.9);
+				}
+			}
+			#alertModal {
+				display: none !important;
+			}
+			#alertModal.show {
+				display: flex !important;
+			}
+			#alertCloseBtn:hover {
+				background: #f3f4f6 !important;
+				color: #1a1a1a !important;
+			}
+		</style>
 
-		<!-- Ürün Ekleme Formu -->
+		<!-- Kategori Playground - Ana ve Alt Kategori Oluşturma Butonları -->
+		<div class="admin-card" style="padding: 20px;">
+			<div style="display: flex; gap: 15px; flex-wrap: wrap;">
+				<button type="button" id="openMainCategoryModalBtn" class="btn-admin" style="flex: 1; min-width: 200px; padding: 15px 25px; font-size: 18px; font-weight: 600;">
+					➕ Ana Kategori Ekle
+				</button>
+				<button type="button" id="openSubCategoryModalBtn" class="btn-admin" style="flex: 1; min-width: 200px; padding: 15px 25px; font-size: 18px; font-weight: 600;">
+					➕ Alt Kategori Ekle
+				</button>
+			</div>
+		</div>
+		
+		<!-- Ana Kategori Ekleme Modal'ı -->
+		<div id="addMainCategoryModal" class="admin-modal-overlay" style="display: none;">
+			<div class="admin-modal" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+				<div class="admin-modal-header">
+					<h2 style="margin: 0; font-size: 24px;">Ana Kategori Ekle</h2>
+					<button type="button" class="admin-modal-close" id="closeMainCategoryModalBtn">&times;</button>
+				</div>
+				<div class="admin-modal-body">
+					<div class="lang-tabs" style="margin-bottom: 15px;">
+						<button type="button" class="lang-tab active" data-lang="tr" data-section="mainCat">🇹🇷 Türkçe</button>
+						<button type="button" class="lang-tab" data-lang="en" data-section="mainCat">🇬🇧 English</button>
+					</div>
+					
+					<div class="lang-content active" data-lang="tr" data-section="mainCat">
+						<div class="admin-form-group">
+							<label>Ana Kategori Adı (TR) *</label>
+							<input type="text" id="newMainCategoryTr" placeholder="Örn: Temizlik Ürünleri" style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+						</div>
+					</div>
+					
+					<div class="lang-content" data-lang="en" data-section="mainCat" style="display: none;">
+						<div class="admin-form-group">
+							<label>Main Category Name (EN) *</label>
+							<input type="text" id="newMainCategoryEn" placeholder="E.g: Cleaning Products" style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+						</div>
+					</div>
+					
+					<button type="button" id="addMainCategoryBtn" class="btn-admin" style="margin-top: 20px; width: 100%;">➕ Ana Kategori Ekle</button>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Alt Kategori Ekleme Modal'ı -->
+		<div id="addSubCategoryModal" class="admin-modal-overlay" style="display: none;">
+			<div class="admin-modal" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+				<div class="admin-modal-header">
+					<h2 style="margin: 0; font-size: 24px;">Alt Kategori Ekle</h2>
+					<button type="button" class="admin-modal-close" id="closeSubCategoryModalBtn">&times;</button>
+				</div>
+				<div class="admin-modal-body">
+					<div class="admin-form-group" style="margin-bottom: 15px;">
+						<label>Ana Kategori Seç *</label>
+						<select id="mainCategoryForSub" required style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+							<option value="">-- Ana Kategori Seç --</option>
+							<!-- Dinamik doldurulacak -->
+						</select>
+					</div>
+					
+					<div class="lang-tabs" style="margin-bottom: 15px;">
+						<button type="button" class="lang-tab active" data-lang="tr" data-section="subCat">🇹🇷 Türkçe</button>
+						<button type="button" class="lang-tab" data-lang="en" data-section="subCat">🇬🇧 English</button>
+					</div>
+					
+					<div class="lang-content active" data-lang="tr" data-section="subCat">
+						<div class="admin-form-group">
+							<label>Alt Kategori Adı (TR) *</label>
+							<input type="text" id="newSubCategoryTr" placeholder="Örn: Çamaşır Suyu" style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+						</div>
+					</div>
+					
+					<div class="lang-content" data-lang="en" data-section="subCat" style="display: none;">
+						<div class="admin-form-group">
+							<label>Sub Category Name (EN) *</label>
+							<input type="text" id="newSubCategoryEn" placeholder="E.g: Bleach" style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+						</div>
+					</div>
+					
+					<button type="button" id="addSubCategoryBtn" class="btn-admin" style="margin-top: 20px; width: 100%;">➕ Alt Kategori Ekle</button>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Mevcut Kategoriler Listesi -->
 		<div class="admin-card">
-			<h2 style="margin-top: 0; margin-bottom: 25px; font-size: 24px;">Yeni Ürün Ekle</h2>
+			<h3 style="margin-top: 0; margin-bottom: 15px; font-size: 18px; color: #1a1a1a;">
+				📋 Mevcut Kategoriler 
+				<span id="categoriesCount" style="color: #6b7280; font-size: 14px; font-weight: 400;">(0)</span>
+				<button type="button" id="toggleCategoriesBtn" style="margin-left: 10px; padding: 4px 12px; font-size: 12px; background: #6366f1; color: #fff; border: none; border-radius: 4px; cursor: pointer;">▼ Göster</button>
+			</h3>
+			<div id="categoriesList" style="display: none; margin-top: 15px;">
+				<!-- Kategoriler buraya eklenecek -->
+			</div>
+		</div>
+
+		<!-- Kategori Ayarları -->
+		<div class="admin-card">
+			<h2 style="margin-top: 0; margin-bottom: 25px; font-size: 24px;">📂 Kategori Ayarları</h2>
+			<p style="margin-bottom: 20px; color: #6b7280; font-size: 14px;">Düzenlemek istediğin kategoriyi seç ve ayarlarını yap. Kategoriler ürünlerden ve kategori playground'dan otomatik tespit edilir.</p>
 			
-			<form id="productForm">
+			<div class="admin-form-group" style="margin-bottom: 25px;">
+				<label style="display: block; margin-bottom: 10px; font-weight: 600; color: #1a1a1a;">Kategori Seç *</label>
+				<select id="categorySelector" required style="width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px; background: #fff; cursor: pointer;">
+					<option value="">-- Kategori Seç --</option>
+					<!-- Dinamik doldurulacak -->
+				</select>
+			</div>
+			
+			<div id="categorySettings" style="display: none;">
+				<!-- Seçilen kategorinin ayarları buraya eklenecek -->
+			</div>
+		</div>
+
+		<!-- Ürün Ekleme Butonu ve Sunucuya Kaydet -->
+		<div class="admin-card" style="padding: 20px;">
+			<div style="display: flex; gap: 15px; flex-wrap: wrap;">
+				<button type="button" id="openProductModalBtn" class="btn-admin" style="flex: 1; min-width: 200px; padding: 15px 25px; font-size: 18px; font-weight: 600;">
+					➕ Yeni Ürün Ekle
+				</button>
+				<button type="button" class="btn-admin" onclick="saveToServer()" style="flex: 1; min-width: 200px; padding: 15px 25px; font-size: 18px; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+					💾 Sunucuya Kaydet & Kategoriler Oluştur
+				</button>
+			</div>
+		</div>
+
+		<!-- Ürün Ekleme Modal'ı -->
+		<div id="addProductModal" class="admin-modal-overlay" style="display: none;">
+			<div class="admin-modal" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+				<div class="admin-modal-header">
+					<h2 style="margin: 0; font-size: 24px;">Yeni Ürün Ekle</h2>
+					<button type="button" class="admin-modal-close" id="closeProductModalBtn">&times;</button>
+				</div>
+				<div class="admin-modal-body">
+					<form id="productForm">
 				<div class="lang-tabs">
 					<button type="button" class="lang-tab active" data-lang="tr">🇹🇷 Türkçe</button>
 					<button type="button" class="lang-tab" data-lang="en">🇬🇧 English</button>
@@ -210,11 +456,17 @@
 				<div class="lang-content active" data-lang="tr">
 					<div class="admin-form-group">
 						<label>Ana Kategori (TR) *</label>
-						<input type="text" id="mainCategoryTr" required placeholder="Örn: Temizlik Ürünleri">
+						<select id="mainCategoryTr" required style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+							<option value="">-- Ana Kategori Seç --</option>
+							<!-- Dinamik doldurulacak -->
+						</select>
 					</div>
 					<div class="admin-form-group">
-						<label>Kategori (TR) *</label>
-						<input type="text" id="categoryTr" required placeholder="Örn: Çamaşır Suyu">
+						<label>Alt Kategori (TR) *</label>
+						<select id="categoryTr" required style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+							<option value="">-- Önce Ana Kategori Seç --</option>
+							<!-- Dinamik doldurulacak -->
+						</select>
 					</div>
 					<div class="admin-form-group">
 						<label>Ürün Adı (TR) *</label>
@@ -230,11 +482,17 @@
 				<div class="lang-content" data-lang="en">
 					<div class="admin-form-group">
 						<label>Main Category (EN) *</label>
-						<input type="text" id="mainCategoryEn" required placeholder="E.g: Cleaning Products">
+						<select id="mainCategoryEn" required style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+							<option value="">-- Select Main Category --</option>
+							<!-- Dinamik doldurulacak -->
+						</select>
 					</div>
 					<div class="admin-form-group">
-						<label>Category (EN) *</label>
-						<input type="text" id="categoryEn" required placeholder="E.g: Bleach">
+						<label>Sub Category (EN) *</label>
+						<select id="categoryEn" required style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+							<option value="">-- Select Main Category First --</option>
+							<!-- Dinamik doldurulacak -->
+						</select>
 					</div>
 					<div class="admin-form-group">
 						<label>Product Name (EN) *</label>
@@ -248,38 +506,61 @@
 
 				<!-- Ortak Alanlar -->
 				<div class="admin-form-group">
-					<label>Resim URL *</label>
-					<input type="text" id="imageUrl" required placeholder="https://images.unsplash.com/...">
-				</div>
-				<div class="admin-form-group">
-					<label>Fiyat *</label>
-					<input type="text" id="price" required placeholder="₺49.90">
+					<label>Ürün Resimleri * <small style="font-weight: normal; color: #6b7280;">(Modal'da carousel için birden fazla resim ekleyebilirsin)</small></label>
+					
+					<!-- URL ile ekleme -->
+					<div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 15px;">
+						<div style="flex: 1; min-width: 250px;">
+							<input type="text" id="imageUrlInput" placeholder="https://images.unsplash.com/photo-...?w=800&q=80" style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+							<small style="display: block; margin-top: 5px; color: #6b7280; font-size: 12px;">URL ekle (Unsplash vb.)</small>
+						</div>
+						<div style="flex: 0 0 auto;">
+							<button type="button" id="addImageUrlBtn" style="padding: 10px 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.3s; border: none;">
+								➕ URL Ekle
+							</button>
+						</div>
+						<div style="flex: 0 0 auto;">
+							<label for="imageFileInput" style="display: inline-block; padding: 10px 20px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.3s; border: none;">
+								📁 Dosyadan Yükle
+							</label>
+							<input type="file" id="imageFileInput" accept="image/*" multiple style="display: none;">
+						</div>
+					</div>
+					
+					<!-- Yüklenen resimler listesi -->
+					<div id="productImagesList" style="margin-top: 15px; display: none;">
+						<div style="display: flex; flex-wrap: wrap; gap: 12px; padding: 15px; background: #f9fafb; border-radius: 8px; border: 2px dashed #e5e7eb;">
+							<!-- Resim kartları buraya eklenecek -->
+						</div>
+					</div>
+					
+					<!-- Eski tek resim alanı - gizli, geriye uyumluluk için -->
+					<input type="hidden" id="imageUrl" value="">
 				</div>
 				<div class="admin-form-group">
 					<label>SKU (Ürün Kodu)</label>
 					<input type="text" id="sku" placeholder="DOM-ULTRA-001">
 				</div>
+				
+				<div class="admin-form-group">
+					<label>Stok Miktarı *</label>
+					<input type="number" id="stock" min="0" step="1" required placeholder="0" value="0" style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+					<small style="display: block; margin-top: 5px; color: #6b7280; font-size: 12px;">Depoda bulunan ürün sayısı</small>
+				</div>
 
 						<div style="display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap;">
-					<button type="submit" class="btn-admin">➕ Ürün Ekle</button>
-					<button type="button" class="btn-admin btn-admin-secondary" onclick="resetForm()">🔄 Formu Temizle</button>
-					<button type="button" class="btn-admin" onclick="saveToServer()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">💾 Sunucuya Kaydet & Kategoriler Oluştur</button>
+							<button type="submit" class="btn-admin">➕ Ürün Ekle</button>
+							<button type="button" class="btn-admin btn-admin-secondary" onclick="resetForm()">🔄 Formu Temizle</button>
+						</div>
+					</form>
 				</div>
-			</form>
-		</div>
-
-		<!-- Kategori Ayarları -->
-		<div class="admin-card">
-			<h2 style="margin-top: 0; margin-bottom: 25px; font-size: 24px;">📂 Kategori Ayarları</h2>
-			<p style="margin-bottom: 20px; color: #6b7280; font-size: 14px;">Kategorilerin header görsellerini buradan ayarlayabilirsin. Kategoriler ürünlerden otomatik tespit edilir.</p>
-			<div id="categorySettings">
-				<!-- Kategoriler buraya eklenecek -->
 			</div>
 		</div>
 
 		<!-- Ürün Listesi -->
 		<div class="admin-card">
-			<h2 style="margin-top: 0; margin-bottom: 25px; font-size: 24px;">Mevcut Ürünler (<span id="productCount">0</span>)</h2>
+			<h2 style="margin-top: 0; margin-bottom: 10px; font-size: 24px;">Mevcut Ürünler (<span id="productCount">0</span>)</h2>
+			<p style="margin-bottom: 20px; color: #6b7280; font-size: 14px;">📦 Toplam Depo Stoku: <strong id="totalStock" style="color: #6366f1; font-size: 16px;">0</strong> adet</p>
 			<div class="products-list" id="productsList">
 				<!-- Ürünler buraya eklenecek -->
 			</div>
@@ -299,6 +580,126 @@
 		var LOGIN_ATTEMPTS_KEY = 'adminLoginAttempts';
 		var LOCKOUT_TIME_KEY = 'adminLockoutUntil';
 		var LOCKOUT_DURATION = 15 * 60 * 1000; // 15 dakika kilitleme süresi
+		
+		// kategori veri yapısı - ana ve alt kategoriler
+		// localStorage'dan yükle, yoksa boş başlat
+		var categoriesData = {
+			mainCategories: [], // { id, title: { tr, en }, slug }
+			subCategories: [] // { id, mainCategoryId, title: { tr, en }, slug }
+		};
+		
+		// kategori verilerini localStorage'dan yükle
+		function loadCategoriesData() {
+			var stored = localStorage.getItem('adminCategories');
+			if (stored) {
+				try {
+					categoriesData = JSON.parse(stored);
+					// id'ler yoksa ekle (geriye uyumluluk)
+					if (!categoriesData.mainCategories || !categoriesData.subCategories) {
+						categoriesData = { mainCategories: [], subCategories: [] };
+					}
+				} catch (e) {
+					console.error('Kategori verileri yüklenemedi:', e);
+					categoriesData = { mainCategories: [], subCategories: [] };
+				}
+			}
+			
+			// eğer localStorage'da kategori yoksa ama mainCategories varsa, ondan oluştur
+			if ((!categoriesData.mainCategories || categoriesData.mainCategories.length === 0) && typeof mainCategories !== 'undefined' && mainCategories && mainCategories.length > 0) {
+				// mainCategories array'inden categoriesData'ya dönüştür
+				categoriesData.mainCategories = mainCategories.map(function(mc, index) {
+					return {
+						id: 'main_' + (mc.slug || 'cat' + index),
+						title: mc.title || { tr: '', en: '' },
+						slug: mc.slug || ''
+					};
+				});
+				
+				// alt kategorileri ürünlerden çıkar
+				if (typeof productsData !== 'undefined' && productsData && productsData.length > 0) {
+					var subCatMap = {};
+					productsData.forEach(function(product, prodIndex) {
+						if (product.mainCategory && product.category) {
+							var mainCatTitle = typeof product.mainCategory === 'object' ? product.mainCategory.tr : product.mainCategory;
+							var mainCat = categoriesData.mainCategories.find(function(mc) {
+								return (mc.title.tr && mc.title.tr === mainCatTitle) || (mc.title.en && mc.title.en === mainCatTitle) || mc.title.tr === mainCatTitle;
+							});
+							
+							if (mainCat) {
+								var subCatTitle = typeof product.category === 'object' ? product.category.tr : product.category;
+								var subCatTitleEn = typeof product.category === 'object' ? product.category.en : product.category;
+								var key = mainCat.id + '_' + subCatTitle;
+								
+								if (!subCatMap[key]) {
+									subCatMap[key] = {
+										id: 'sub_' + mainCat.id + '_' + (prodIndex || Math.random()),
+										mainCategoryId: mainCat.id,
+										title: typeof product.category === 'object' ? product.category : { tr: subCatTitle, en: subCatTitleEn || subCatTitle },
+										slug: createSlug(subCatTitle)
+									};
+								}
+							}
+						}
+					});
+					
+					categoriesData.subCategories = Object.values(subCatMap);
+					saveCategoriesData(); // localStorage'a kaydet
+				}
+			}
+		}
+		
+		// kategori verilerini localStorage'a kaydet
+		function saveCategoriesData() {
+			// silinmiş/geçersiz kategorileri temizle
+			cleanCategoriesData();
+			localStorage.setItem('adminCategories', JSON.stringify(categoriesData));
+		}
+		
+		// silinmiş/geçersiz kategorileri temizle
+		function cleanCategoriesData() {
+			// ana kategorileri temizle
+			if (categoriesData.mainCategories) {
+				categoriesData.mainCategories = categoriesData.mainCategories.filter(function(mc) {
+					return mc && 
+					       mc.id && 
+					       mc.title && 
+					       (mc.title.tr || mc.title.en) &&
+					       ((mc.title.tr && mc.title.tr.trim()) || (mc.title.en && mc.title.en.trim()));
+				});
+			}
+			
+			// alt kategorileri temizle
+			if (categoriesData.subCategories) {
+				// önce geçerli ana kategori id'lerini topla
+				var validMainCatIds = {};
+				if (categoriesData.mainCategories) {
+					categoriesData.mainCategories.forEach(function(mc) {
+						if (mc && mc.id) {
+							validMainCatIds[mc.id] = true;
+						}
+					});
+				}
+				
+				categoriesData.subCategories = categoriesData.subCategories.filter(function(sc) {
+					return sc && 
+					       sc.id && 
+					       sc.mainCategoryId &&
+					       validMainCatIds[sc.mainCategoryId] && // ana kategori hala var mı kontrol et
+					       sc.title && 
+					       (sc.title.tr || sc.title.en) &&
+					       ((sc.title.tr && sc.title.tr.trim()) || (sc.title.en && sc.title.en.trim()));
+				});
+			}
+		}
+		
+		// slug oluştur - türkçe karakterleri temizle
+		function createSlug(text) {
+			return text.toLowerCase()
+				.replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u')
+				.replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/ı/g, 'i')
+				.replace(/[^a-z0-9]+/g, '-')
+				.replace(/^-|-$/g, '');
+		}
 
 		// sayfa yüklendiğinde giriş yapmış mı kontrol et - timeout var mı bak
 		function checkLogin() {
@@ -512,8 +913,8 @@
 				}
 			});
 			
-			// kategori listesini de güncelle (dil değiştiğinde)
-			renderCategorySettings();
+			// kategori dropdown'ını güncelle (dil değiştiğinde)
+			renderCategorySelector();
 		});
 
 		// localStorage'dan ürünleri yükle - sayfa yenilenince kaybolmasın diye
@@ -525,27 +926,217 @@
 					productsData = parsed;
 				}
 			}
+			loadCategoriesData(); // kategorileri yükle
+			renderCategoriesList(); // kategori listesini render et
+			renderCategoryDropdowns(); // dropdown'ları doldur
 			renderProducts();
-			renderCategorySettings(); // kategorileri de render et
+			renderCategorySelector(); // kategori dropdown'ını doldur
 		}
+		
+		// kategori dropdown'larını doldur
+		function renderCategoryDropdowns() {
+			var currentLang = $('.lang-tab.active').data('lang') || 'tr';
+			
+			// Ana kategori dropdown'ları
+			$('#mainCategoryTr, #mainCategoryEn, #mainCategoryForSub').each(function() {
+				var $select = $(this);
+				if (!$select.length) return; // element yoksa devam etme
+				
+				var lang = $select.attr('id') && $select.attr('id').includes('En') ? 'en' : 'tr';
+				
+				// mevcut seçimi sakla
+				var currentValue = $select.val();
+				$select.empty();
+				$select.append('<option value="">-- ' + (lang === 'tr' ? 'Ana Kategori Seç' : 'Select Main Category') + ' --</option>');
+				
+				if (categoriesData && categoriesData.mainCategories && categoriesData.mainCategories.length > 0) {
+					categoriesData.mainCategories.forEach(function(mainCat) {
+						// geçerli kategori kontrolü - id, title ve boş olmayan title kontrolü
+						if (mainCat && 
+						    mainCat.id && 
+						    mainCat.title && 
+						    (mainCat.title.tr || mainCat.title.en)) {
+							var title = mainCat.title[lang] || mainCat.title.tr || mainCat.title.en || '';
+							if (title && title.trim()) {
+								$select.append('<option value="' + escapeHtml(mainCat.id) + '">' + escapeHtml(title) + '</option>');
+							}
+						}
+					});
+				}
+				
+				// seçimi geri yükle
+				if (currentValue) {
+					$select.val(currentValue);
+				}
+			});
+			
+			// Alt kategori dropdown'larını güncelle
+			updateSubCategoryDropdowns();
+		}
+		
+		// alt kategori dropdown'larını güncelle (ana kategori seçimine göre)
+		function updateSubCategoryDropdowns() {
+			var currentLang = $('.lang-tab.active').data('lang') || 'tr';
+			var selectedMainCatId = currentLang === 'tr' ? $('#mainCategoryTr').val() : $('#mainCategoryEn').val();
+			
+			// her iki dil için de güncelle
+			$('#categoryTr, #categoryEn').each(function() {
+				var $select = $(this);
+				var lang = $select.attr('id').includes('En') ? 'en' : 'tr';
+				var mainCatId = lang === 'tr' ? $('#mainCategoryTr').val() : $('#mainCategoryEn').val();
+				
+				var currentValue = $select.val();
+				$select.empty();
+				
+				if (!mainCatId) {
+					$select.append('<option value="">-- ' + (lang === 'tr' ? 'Önce Ana Kategori Seç' : 'Select Main Category First') + ' --</option>');
+					return;
+				}
+				
+				$select.append('<option value="">-- ' + (lang === 'tr' ? 'Alt Kategori Seç' : 'Select Sub Category') + ' --</option>');
+				
+				// geçerli alt kategorileri filtrele - id, title ve boş olmayan title kontrolü
+				var subCats = (categoriesData.subCategories || []).filter(function(subCat) {
+					return subCat && 
+					       subCat.id && 
+					       subCat.mainCategoryId === mainCatId &&
+					       subCat.title && 
+					       (subCat.title.tr || subCat.title.en);
+				});
+				
+				subCats.forEach(function(subCat) {
+					var title = subCat.title[lang] || subCat.title.tr || subCat.title.en || '';
+					// boş title'ları atla
+					if (title && title.trim()) {
+						$select.append('<option value="' + escapeHtml(subCat.id) + '">' + escapeHtml(title) + '</option>');
+					}
+				});
+				
+				// seçimi geri yükle (eğer hala geçerliyse)
+				if (currentValue && subCats.find(function(sc) { return sc.id === currentValue; })) {
+					$select.val(currentValue);
+				}
+			});
+		}
+		
+		// kategori listesini render et
+		function renderCategoriesList() {
+			var $container = $('#categoriesList');
+			if (!$container.length) return; // element yoksa çık
+			
+			var html = '';
+			var mainCatCount = 0;
+			var subCatCount = 0;
+			
+			if (!categoriesData || !categoriesData.mainCategories || categoriesData.mainCategories.length === 0) {
+				html = '<p style="color: #6b7280; text-align: center; padding: 20px;">Henüz kategori eklenmemiş. Yukarıdan kategori ekleyebilirsin.</p>';
+				$('#categoriesCount').text('(0)');
+			} else {
+				mainCatCount = categoriesData.mainCategories.filter(function(mc) { return mc && mc.id; }).length;
+				subCatCount = categoriesData.subCategories ? categoriesData.subCategories.filter(function(sc) { return sc && sc.id; }).length : 0;
+				$('#categoriesCount').text('(' + mainCatCount + ' ana kategori, ' + subCatCount + ' alt kategori)');
+				categoriesData.mainCategories.forEach(function(mainCat) {
+					if (!mainCat || !mainCat.id) return; // geçersiz kategori
+					
+					var subCats = (categoriesData.subCategories || []).filter(function(subCat) {
+						return subCat && subCat.mainCategoryId === mainCat.id;
+					});
+					
+					var mainCatIdSafe = escapeHtml(mainCat.id);
+					
+					html += '<div style="margin-bottom: 20px; padding: 15px; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px;">';
+					html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">';
+					html += '<div style="display: flex; align-items: center; gap: 10px; flex: 1;">';
+					html += '<strong style="font-size: 16px; color: #1a1a1a;">📂 ' + escapeHtml((mainCat.title && mainCat.title.tr) || (mainCat.title && mainCat.title.en) || 'Kategori') + '</strong>';
+					if (mainCat.title && mainCat.title.en) {
+						html += ' <span style="color: #6b7280; font-size: 14px;">(' + escapeHtml(mainCat.title.en) + ')</span>';
+					}
+					
+					// alt kategoriler için dropdown butonu
+					if (subCats.length > 0) {
+						html += '<button type="button" class="toggle-subcats-btn" data-maincat-id="' + mainCatIdSafe + '" style="padding: 4px 12px; font-size: 12px; background: #6366f1; color: #fff; border: none; border-radius: 4px; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 5px;">';
+						html += '<span>▼</span> Alt Kategoriler (' + subCats.length + ')';
+						html += '</button>';
+					}
+					
+					html += '</div>';
+					html += '<button type="button" class="btn-admin btn-admin-danger" onclick="deleteMainCategory(\'' + mainCatIdSafe + '\')" style="padding: 5px 15px; font-size: 12px;">🗑️ Sil</button>';
+					html += '</div>';
+					
+					// alt kategoriler dropdown içeriği
+					if (subCats.length > 0) {
+						html += '<div id="subcats-' + mainCatIdSafe + '" class="subcats-dropdown" style="display: none; margin-top: 10px; margin-left: 20px; padding: 10px 15px; background: #f9fafb; border-radius: 6px; border: 1px solid #e5e7eb;">';
+						subCats.forEach(function(subCat) {
+							if (!subCat || !subCat.id) return;
+							html += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">';
+							html += '<span style="color: #5a5a5a;">• ' + escapeHtml((subCat.title && subCat.title.tr) || (subCat.title && subCat.title.en) || 'Alt Kategori') + ' ';
+							if (subCat.title && subCat.title.en) {
+								html += '<span style="color: #9ca3af;">(' + escapeHtml(subCat.title.en) + ')</span>';
+							}
+							html += '</span>';
+							html += '<button type="button" class="btn-admin btn-admin-danger" onclick="deleteSubCategory(\'' + escapeHtml(subCat.id) + '\')" style="padding: 3px 10px; font-size: 11px;">🗑️</button>';
+							html += '</div>';
+						});
+						html += '</div>';
+					} else {
+						html += '<p style="color: #9ca3af; font-size: 13px; margin: 10px 0 0 20px;">Alt kategori yok</p>';
+					}
+					
+					html += '</div>';
+				});
+			}
+			
+			$container.html(html);
+			
+			// dropdown toggle butonlarına event listener ekle
+			$(document).off('click', '.toggle-subcats-btn').on('click', '.toggle-subcats-btn', function() {
+				var $btn = $(this);
+				var mainCatId = $btn.data('maincat-id');
+				var $dropdown = $('#subcats-' + mainCatId);
+				var $arrow = $btn.find('span');
+				
+				if ($dropdown.is(':visible')) {
+					$dropdown.slideUp(200);
+					$arrow.text('▼');
+				} else {
+					$dropdown.slideDown(200);
+					$arrow.text('▲');
+				}
+			});
+		}
+		
+		// kategori listesini aç/kapat
+		$(document).on('click', '#toggleCategoriesBtn', function() {
+			var $list = $('#categoriesList');
+			var $btn = $('#toggleCategoriesBtn');
+			if ($list.is(':visible')) {
+				$list.slideUp(300);
+				$btn.text('▼ Göster');
+			} else {
+				$list.slideDown(300);
+				$btn.text('▲ Gizle');
+			}
+		});
 
 		// localStorage'a kaydet - geçici olarak burada tutuyoruz
 		function saveProducts() {
 			localStorage.setItem('adminProducts', JSON.stringify(productsData));
 		}
 
-		// kategorileri listele - header görseli ayarlamak için
-		function renderCategorySettings() {
-			var $container = $('#categorySettings');
-			if (!$container.length) return;
+		// kategori dropdown'ını doldur ve seçilen kategoriyi göster
+		function renderCategorySelector() {
+			var $selector = $('#categorySelector');
+			if (!$selector.length) return;
 			
-			// mainCategories'ı tespit et (ürünlerden)
-			var detectedCategories = {};
+			// tüm kategorileri topla (ürünlerden ve categoriesData'dan)
+			var allCategories = {};
+			
+			// 1. ürünlerden kategorileri tespit et
 			productsData.forEach(function(product) {
 				var mainCat = product.mainCategory;
 				if (mainCat) {
 					var key = typeof mainCat === 'object' ? mainCat.tr || mainCat.en : mainCat;
-					if (key && !detectedCategories[key]) {
+					if (key && !allCategories[key]) {
 						var slug = key.toLowerCase()
 							.replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u')
 							.replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/ı/g, 'i')
@@ -555,57 +1146,214 @@
 						var enTitle = typeof mainCat === 'object' ? mainCat.en || mainCat.tr : mainCat;
 						var trTitle = typeof mainCat === 'object' ? mainCat.tr || mainCat.en : mainCat;
 						
-						// mevcut mainCategories'dan headerImage'i al (varsa)
-						var existingCategory = null;
-						if (typeof mainCategories !== 'undefined' && mainCategories.length > 0) {
-							existingCategory = mainCategories.find(function(cat) {
-								return cat.slug === slug;
-							});
-						}
-						
-						detectedCategories[key] = {
+						allCategories[key] = {
 							slug: slug,
 							title: { tr: trTitle, en: enTitle },
-							headerImage: existingCategory ? (existingCategory.headerImage || '') : ''
+							source: 'products'
 						};
 					}
 				}
 			});
 			
-			var categories = Object.values(detectedCategories);
+			// 2. categoriesData'dan kategorileri ekle
+			if (categoriesData && categoriesData.mainCategories && categoriesData.mainCategories.length > 0) {
+				categoriesData.mainCategories.forEach(function(mainCat) {
+					if (!mainCat || !mainCat.id || !mainCat.title) return;
+					
+					var trTitle = (mainCat.title.tr || '').trim();
+					var enTitle = (mainCat.title.en || '').trim();
+					var key = trTitle || enTitle;
+					
+					if (key && !allCategories[key]) {
+						// slug oluştur
+						var slug = key.toLowerCase()
+							.replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u')
+							.replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/ı/g, 'i')
+							.replace(/[^a-z0-9]+/g, '-')
+							.replace(/^-|-$/g, '');
+						
+						allCategories[key] = {
+							slug: slug,
+							title: { tr: trTitle, en: enTitle },
+							source: 'categoriesData',
+							id: mainCat.id
+						};
+					}
+				});
+			}
+			
+			var categories = Object.values(allCategories);
+			
+			// dropdown'ı doldur
+			var currentValue = $selector.val(); // mevcut seçimi koru
+			$selector.empty();
+			$selector.append('<option value="">-- Kategori Seç --</option>');
 			
 			if (categories.length === 0) {
-				$container.html('<p style="color: #6b7280; text-align: center; padding: 20px;">Henüz kategori yok. Ürün eklediğinde kategoriler otomatik oluşacak.</p>');
+				$selector.append('<option value="" disabled>Henüz kategori yok</option>');
+				$('#categorySettings').hide().html('');
 				return;
 			}
 			
-			var html = '';
 			var currentLang = $('.lang-tab.active').data('lang') || 'tr';
-			
 			categories.forEach(function(cat) {
-				var title = cat.title[currentLang] || cat.title.tr || cat.title.en;
-				
-				html += '<div class="category-setting-item" style="margin-bottom: 25px; padding: 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: #fafafa;">';
-				html += '<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">';
-				html += '<div style="flex: 1; min-width: 200px;">';
-				html += '<strong style="display: block; margin-bottom: 5px; font-size: 16px; color: #1a1a1a;">' + escapeHtml(title) + '</strong>';
-				html += '<span style="font-size: 12px; color: #6b7280;">Slug: <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px;">' + escapeHtml(cat.slug) + '.html</code></span>';
-				html += '</div>';
-				html += '</div>';
-				html += '<div class="admin-form-group">';
-				html += '<label>Header Görsel URL (1920px genişlik önerilir)</label>';
-				html += '<input type="text" class="category-header-image" data-slug="' + escapeHtml(cat.slug) + '" placeholder="https://images.unsplash.com/..." value="' + escapeHtml(cat.headerImage || '') + '" style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">';
-				html += '<small style="display: block; margin-top: 5px; color: #6b7280; font-size: 12px;">Boş bırakırsan otomatik generic görsel kullanılır</small>';
-				html += '</div>';
-				html += '</div>';
+				var displayName = cat.title[currentLang] || cat.title.tr || cat.title.en || 'Kategori';
+				var isSelected = currentValue === cat.slug ? ' selected' : '';
+				$selector.append('<option value="' + escapeHtml(cat.slug) + '" data-cat-data="' + escapeHtml(JSON.stringify(cat)) + '"' + isSelected + '>' + escapeHtml(displayName) + '</option>');
 			});
 			
-			$container.html(html);
+			// mevcut seçimi geri yükle (varsa)
+			if (currentValue) {
+				$selector.val(currentValue);
+				renderCategorySettings(currentValue);
+			}
 		}
+		
+		// seçilen kategorinin ayarlarını göster
+		function renderCategorySettings(selectedSlug) {
+			var $container = $('#categorySettings');
+			if (!$container.length) return;
+			
+			// eğer slug verilmemişse dropdown'dan al
+			if (!selectedSlug) {
+				selectedSlug = $('#categorySelector').val();
+			}
+			
+			if (!selectedSlug) {
+				$container.hide().html('');
+				return;
+			}
+			
+			// seçilen kategorinin bilgilerini bul
+			var selectedOption = $('#categorySelector option:selected');
+			if (!selectedOption.length || !selectedOption.val()) {
+				$container.hide().html('');
+				return;
+			}
+			
+			var catData;
+			try {
+				catData = JSON.parse(selectedOption.attr('data-cat-data') || '{}');
+			} catch(e) {
+				// data-cat-data yoksa, slug'dan kategoriyi bul
+				var allCategories = {};
+				productsData.forEach(function(product) {
+					var mainCat = product.mainCategory;
+					if (mainCat) {
+						var key = typeof mainCat === 'object' ? mainCat.tr || mainCat.en : mainCat;
+						if (key && !allCategories[key]) {
+							var slug = key.toLowerCase()
+								.replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u')
+								.replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/ı/g, 'i')
+								.replace(/[^a-z0-9]+/g, '-')
+								.replace(/^-|-$/g, '');
+							
+							if (slug === selectedSlug) {
+								var enTitle = typeof mainCat === 'object' ? mainCat.en || mainCat.tr : mainCat;
+								var trTitle = typeof mainCat === 'object' ? mainCat.tr || mainCat.en : mainCat;
+								catData = {
+									slug: slug,
+									title: { tr: trTitle, en: enTitle }
+								};
+							}
+						}
+					}
+				});
+			}
+			
+			if (!catData || !catData.slug) {
+				$container.hide().html('');
+				return;
+			}
+			
+			// mevcut mainCategories'dan bilgileri al (varsa)
+			var existingCategory = null;
+			if (typeof mainCategories !== 'undefined' && mainCategories.length > 0) {
+				existingCategory = mainCategories.find(function(mc) {
+					return mc.slug === catData.slug;
+				});
+			}
+			
+			var titleTr = '';
+			var titleEn = '';
+			if (existingCategory && existingCategory.title) {
+				titleTr = existingCategory.title.tr || catData.title.tr || '';
+				titleEn = existingCategory.title.en || catData.title.en || '';
+			} else {
+				titleTr = catData.title.tr || '';
+				titleEn = catData.title.en || '';
+			}
+			
+			var descTr = '';
+			var descEn = '';
+			if (existingCategory && existingCategory.description) {
+				descTr = existingCategory.description.tr || '';
+				descEn = existingCategory.description.en || '';
+			}
+			
+			var headerImage = existingCategory ? (existingCategory.headerImage || '') : '';
+			
+			// ayarları göster
+			var html = '<div class="category-setting-item" style="padding: 20px; border: 2px solid #6366f1; border-radius: 8px; background: #f8f9ff;">';
+			html += '<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">';
+			html += '<div style="flex: 1; min-width: 200px;">';
+			var currentLang = $('.lang-tab.active').data('lang') || 'tr';
+			var displayName = catData.title[currentLang] || catData.title.tr || catData.title.en || 'Kategori';
+			html += '<strong style="display: block; margin-bottom: 5px; font-size: 18px; color: #1a1a1a;">📂 ' + escapeHtml(displayName) + '</strong>';
+			html += '<span style="font-size: 12px; color: #6b7280;">Slug: <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px;">' + escapeHtml(catData.slug) + '.html</code></span>';
+			html += '</div>';
+			html += '</div>';
+			
+			// kategori başlıkları - TR ve EN
+			html += '<div style="margin-bottom: 15px;">';
+			html += '<label style="display: block; margin-bottom: 10px; font-weight: 600; color: #1a1a1a;">📝 Kategori Başlıkları</label>';
+			html += '<div class="admin-form-group" style="margin-bottom: 10px;">';
+			html += '<label>Başlık (TR) *</label>';
+			html += '<input type="text" class="category-title" data-slug="' + escapeHtml(catData.slug) + '" data-lang="tr" placeholder="Kategori adı (TR)..." value="' + escapeHtml(titleTr) + '" required style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">';
+			html += '</div>';
+			html += '<div class="admin-form-group">';
+			html += '<label>Title (EN) *</label>';
+			html += '<input type="text" class="category-title" data-slug="' + escapeHtml(catData.slug) + '" data-lang="en" placeholder="Category name (EN)..." value="' + escapeHtml(titleEn) + '" required style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">';
+			html += '</div>';
+			html += '</div>';
+			
+			// açıklama alanları - TR ve EN
+			html += '<div style="margin-bottom: 15px;">';
+			html += '<div class="admin-form-group" style="margin-bottom: 10px;">';
+			html += '<label>Açıklama (TR)</label>';
+			html += '<textarea class="category-description" data-slug="' + escapeHtml(catData.slug) + '" data-lang="tr" placeholder="Kategori açıklaması..." style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px; min-height: 80px; font-family: inherit;">' + escapeHtml(descTr) + '</textarea>';
+			html += '</div>';
+			html += '<div class="admin-form-group">';
+			html += '<label>Description (EN)</label>';
+			html += '<textarea class="category-description" data-slug="' + escapeHtml(catData.slug) + '" data-lang="en" placeholder="Category description..." style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px; min-height: 80px; font-family: inherit;">' + escapeHtml(descEn) + '</textarea>';
+			html += '</div>';
+			html += '</div>';
+			
+			html += '<div class="admin-form-group">';
+			html += '<label>Header Görsel URL (1920px genişlik önerilir)</label>';
+			html += '<input type="text" class="category-header-image" data-slug="' + escapeHtml(catData.slug) + '" placeholder="https://images.unsplash.com/..." value="' + escapeHtml(headerImage) + '" style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">';
+			html += '<small style="display: block; margin-top: 5px; color: #6b7280; font-size: 12px;">Boş bırakırsan otomatik generic görsel kullanılır</small>';
+			html += '</div>';
+			html += '</div>';
+			
+			$container.html(html).show();
+		}
+		
+		// kategori dropdown değiştiğinde ayarları göster
+		$(document).on('change', '#categorySelector', function() {
+			var selectedSlug = $(this).val();
+			if (selectedSlug) {
+				renderCategorySettings(selectedSlug);
+			} else {
+				$('#categorySettings').hide().html('');
+			}
+		});
 
 		// ürünleri listele - DOM'a yazıyoruz
 		function renderProducts() {
 			var html = '';
+			var totalStock = 0; // toplam stok sayısını hesapla
+			
 			if (productsData.length === 0) {
 				html = '<p style="color: #6b7280; text-align: center; padding: 40px;">Henüz ürün eklenmemiş.</p>';
 			} else {
@@ -613,14 +1361,26 @@
 					var currentLang = 'tr';
 					var title = typeof product.title === 'object' ? product.title[currentLang] || product.title.tr || product.title.en : product.title;
 					var category = typeof product.category === 'object' ? product.category[currentLang] || product.category.tr || product.category.en : product.category;
-					var price = product.price || 'Fiyat belirtilmemiş';
+					var stock = product.stock || 0;
+					totalStock += parseInt(stock) || 0;
+					
+					// stok durumuna göre renk
+					var stockColor = '#10b981'; // yeşil
+					var stockText = stock + ' adet';
+					if (stock === 0) {
+						stockColor = '#ef4444'; // kırmızı
+						stockText = 'Stokta Yok';
+					} else if (stock < 10) {
+						stockColor = '#f59e0b'; // turuncu
+						stockText = stock + ' adet (Az Stok)';
+					}
 					
 					html += '<div class="product-item-admin">';
 					html += '<div class="product-item-info">';
 					html += '<h3>' + escapeHtml(title) + '</h3>';
-					html += '<p><strong>Kategori:</strong> ' + escapeHtml(category) + '</p>';
-					html += '<p><strong>Fiyat:</strong> ' + escapeHtml(price) + '</p>';
+					html += '<p><strong>Alt Kategori:</strong> ' + escapeHtml(category) + '</p>';
 					html += '<p><strong>SKU:</strong> ' + escapeHtml(product.sku || '-') + '</p>';
+					html += '<p><strong>Stok:</strong> <span style="color: ' + stockColor + '; font-weight: 600;">' + escapeHtml(stockText) + '</span></p>';
 					html += '</div>';
 					html += '<div class="product-item-actions">';
 					html += '<button class="btn-admin btn-admin-secondary" onclick="editProduct(' + index + ')">✏️ Düzenle</button>';
@@ -629,6 +1389,9 @@
 					html += '</div>';
 				});
 			}
+			
+			// toplam stok sayısını güncelle (ürün yoksa 0 olacak)
+			$('#totalStock').text(totalStock);
 			$('#productsList').html(html);
 			$('#productCount').text(productsData.length);
 		}
@@ -639,7 +1402,7 @@
 				productsData.splice(index, 1);
 				saveProducts();
 				renderProducts();
-				renderCategorySettings(); // kategorileri de güncelle
+				renderCategorySelector(); // kategori dropdown'ını güncelle
 				showAlert('success', 'Ürün silindi!');
 			}
 		}
@@ -651,20 +1414,51 @@
 			var product = productsData[index];
 			editingIndex = index;
 
-			$('#imageUrl').val(product.image);
-			$('#mainCategoryTr').val(product.mainCategory.tr || '');
-			$('#mainCategoryEn').val(product.mainCategory.en || '');
-			$('#categoryTr').val(product.category.tr || '');
-			$('#categoryEn').val(product.category.en || '');
+			// resimleri yükle - çoklu resim desteği
+			if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+				productImages = product.images.slice(); // copy array
+			} else if (product.image) {
+				// geriye uyumluluk - tek resim varsa array'e çevir
+				productImages = [product.image];
+			} else {
+				productImages = [];
+			}
+			
+			renderProductImages();
+			
+			// kategori ID'lerini bul (title'dan)
+			var mainCatTr = categoriesData.mainCategories.find(function(mc) {
+				return mc.title.tr === product.mainCategory.tr || mc.title.en === product.mainCategory.tr;
+			});
+			var mainCatEn = categoriesData.mainCategories.find(function(mc) {
+				return mc.title.en === product.mainCategory.en || mc.title.tr === product.mainCategory.en;
+			});
+			var categoryTr = categoriesData.subCategories.find(function(sc) {
+				return sc.title.tr === product.category.tr || sc.title.en === product.category.tr;
+			});
+			var categoryEn = categoriesData.subCategories.find(function(sc) {
+				return sc.title.en === product.category.en || sc.title.tr === product.category.en;
+			});
+			
+			// dropdown'ları doldur
+			renderCategoryDropdowns();
+			if (mainCatTr) $('#mainCategoryTr, #mainCategoryEn').val(mainCatTr.id);
+			if (categoryTr) $('#categoryTr, #categoryEn').val(categoryTr.id);
+			updateSubCategoryDropdowns();
+			if (categoryTr) $('#categoryTr, #categoryEn').val(categoryTr.id);
 			$('#titleTr').val(product.title.tr || '');
 			$('#titleEn').val(product.title.en || '');
 			$('#descriptionTr').val(product.description.tr || '');
 			$('#descriptionEn').val(product.description.en || '');
-			$('#price').val(product.price || '');
 			$('#sku').val(product.sku || '');
+			$('#stock').val(product.stock || 0);
 
 			$('#productForm button[type="submit"]').text('💾 Değişiklikleri Kaydet').data('editing', true);
-			$('html, body').animate({ scrollTop: $('#productForm').offset().top - 50 }, 500);
+			
+			// modal'ı aç (eğer kapalıysa)
+			if (!$('#addProductModal').is(':visible')) {
+				openProductModal();
+			}
 		}
 
 		// form submit - hem yeni ekleme hem düzenleme burada
@@ -674,21 +1468,54 @@
 			// gizli input'lardan required attribute'unu kaldır - HTML5 validation hatası vermesin diye
 			$('.lang-content:not(.active) [required]').prop('required', false);
 			
+			// resimleri al - birden fazla resim desteği
+			var images = productImages.length > 0 ? productImages : [];
+			
+			// eğer resim yoksa hata ver
+			if (images.length === 0) {
+				showAlert('error', '❌ En az bir resim eklenmesi gerekiyor!');
+				return;
+			}
+			
+			// dropdown'dan seçilen kategori ID'lerini al
+			var mainCatIdTr = $('#mainCategoryTr').val();
+			var mainCatIdEn = $('#mainCategoryEn').val();
+			var categoryIdTr = $('#categoryTr').val();
+			var categoryIdEn = $('#categoryEn').val();
+			
+			// ID'lerden kategori bilgilerini bul
+			var mainCatTr = categoriesData.mainCategories.find(function(mc) { return mc.id === mainCatIdTr; });
+			var mainCatEn = categoriesData.mainCategories.find(function(mc) { return mc.id === mainCatIdEn; });
+			var categoryTr = categoriesData.subCategories.find(function(sc) { return sc.id === categoryIdTr; });
+			var categoryEn = categoriesData.subCategories.find(function(sc) { return sc.id === categoryIdEn; });
+			
+			if (!mainCatTr || !mainCatEn) {
+				showAlert('error', '❌ Ana kategori seçmelisin!');
+				return;
+			}
+			
+			if (!categoryTr || !categoryEn) {
+				showAlert('error', '❌ Alt kategori seçmelisin!');
+				return;
+			}
+			
+			// geriye uyumluluk için ilk resmi image olarak da ekle
+			// ama images array'ini de kullan (modal carousel için)
 			var product = {
-				image: $('#imageUrl').val().trim(),
+				image: images[0], // geriye uyumluluk için
+				images: images, // yeni çoklu resim desteği
 				mainCategory: {
-					tr: $('#mainCategoryTr').val().trim(),
-					en: $('#mainCategoryEn').val().trim()
+					tr: mainCatTr.title.tr,
+					en: mainCatEn.title.en
 				},
 				category: {
-					tr: $('#categoryTr').val().trim(),
-					en: $('#categoryEn').val().trim()
+					tr: categoryTr.title.tr,
+					en: categoryEn.title.en
 				},
 				title: {
 					tr: $('#titleTr').val().trim(),
 					en: $('#titleEn').val().trim()
 				},
-				price: $('#price').val().trim(),
 				description: {
 					tr: $('#descriptionTr').val().trim(),
 					en: $('#descriptionEn').val().trim()
@@ -698,6 +1525,7 @@
 					en: ''
 				},
 				sku: $('#sku').val().trim() || '',
+				stock: parseInt($('#stock').val()) || 0,
 				shipping: {
 					tr: '',
 					en: ''
@@ -723,24 +1551,596 @@
 			
 			saveProducts();
 			renderProducts();
-			renderCategorySettings(); // kategorileri de güncelle
-			resetForm();
+			renderCategorySelector(); // kategori dropdown'ını güncelle
+			
+			// düzenleme modunda değilse modal'ı kapat
+			var isEditing = $('#productForm button[type="submit"]').data('editing');
+			if (!isEditing) {
+				closeProductModal();
+			} else {
+				// düzenleme modunda formu temizle ama modal açık kalsın (kullanıcı isterse kapatır)
+				resetForm();
+			}
 		});
 
 		function resetForm() {
 			$('#productForm')[0].reset();
+			productImages = []; // resimleri de temizle
+			renderProductImages();
 			editingIndex = -1;
 			$('#productForm button[type="submit"]').text('➕ Ürün Ekle').data('editing', false);
 			$('.lang-tab[data-lang="tr"]').click();
+			// dropdown'ları sıfırla
+			renderCategoryDropdowns();
 		}
+		
+		// modal aç/kapat fonksiyonları
+		function openProductModal() {
+			$('#addProductModal').css({
+				'display': 'flex',
+				'align-items': 'center',
+				'justify-content': 'center'
+			}).fadeIn(200);
+			$('body').css('overflow', 'hidden');
+		}
+		
+		function closeProductModal() {
+			$('#addProductModal').fadeOut(200, function() {
+				$(this).css('display', 'none');
+				$('body').css('overflow', '');
+				resetForm(); // modal kapandığında formu temizle
+			});
+		}
+		
+		// modal butonları
+		$(document).on('click', '#openProductModalBtn', function() {
+			openProductModal();
+		});
+		
+		$(document).on('click', '#closeProductModalBtn', function() {
+			closeProductModal();
+		});
+		
+		// overlay'e tıklayınca kapat
+		$(document).on('click', '#addProductModal', function(e) {
+			if ($(e.target).is('#addProductModal')) {
+				closeProductModal();
+			}
+		});
+		
+		// ESC tuşu ile kapat
+		$(document).on('keydown', function(e) {
+			if (e.key === 'Escape') {
+				if ($('#addProductModal').is(':visible')) {
+					closeProductModal();
+				} else if ($('#addMainCategoryModal').is(':visible')) {
+					closeMainCategoryModal();
+				} else if ($('#addSubCategoryModal').is(':visible')) {
+					closeSubCategoryModal();
+				}
+			}
+		});
+		
+		// Ana Kategori Modal fonksiyonları
+		function openMainCategoryModal() {
+			$('#addMainCategoryModal').css({
+				'display': 'flex',
+				'align-items': 'center',
+				'justify-content': 'center'
+			}).fadeIn(200);
+			$('body').css('overflow', 'hidden');
+		}
+		
+		function closeMainCategoryModal() {
+			$('#addMainCategoryModal').fadeOut(200, function() {
+				$(this).css('display', 'none');
+				$('body').css('overflow', '');
+				$('#newMainCategoryTr').val('');
+				$('#newMainCategoryEn').val('');
+				$('.lang-tab[data-section="mainCat"][data-lang="tr"]').click();
+			});
+		}
+		
+		// Alt Kategori Modal fonksiyonları
+		function openSubCategoryModal() {
+			// dropdown'ı güncelle
+			updateMainCategoryForSubDropdown();
+			$('#addSubCategoryModal').css({
+				'display': 'flex',
+				'align-items': 'center',
+				'justify-content': 'center'
+			}).fadeIn(200);
+			$('body').css('overflow', 'hidden');
+		}
+		
+		function closeSubCategoryModal() {
+			$('#addSubCategoryModal').fadeOut(200, function() {
+				$(this).css('display', 'none');
+				$('body').css('overflow', '');
+				$('#mainCategoryForSub').val('');
+				$('#newSubCategoryTr').val('');
+				$('#newSubCategoryEn').val('');
+				$('.lang-tab[data-section="subCat"][data-lang="tr"]').click();
+			});
+		}
+		
+		// modal butonları
+		$(document).on('click', '#openMainCategoryModalBtn', function() {
+			openMainCategoryModal();
+		});
+		
+		$(document).on('click', '#closeMainCategoryModalBtn', function() {
+			closeMainCategoryModal();
+		});
+		
+		$(document).on('click', '#addMainCategoryModal', function(e) {
+			if ($(e.target).is('#addMainCategoryModal')) {
+				closeMainCategoryModal();
+			}
+		});
+		
+		$(document).on('click', '#openSubCategoryModalBtn', function() {
+			openSubCategoryModal();
+		});
+		
+		$(document).on('click', '#closeSubCategoryModalBtn', function() {
+			closeSubCategoryModal();
+		});
+		
+		$(document).on('click', '#addSubCategoryModal', function(e) {
+			if ($(e.target).is('#addSubCategoryModal')) {
+				closeSubCategoryModal();
+			}
+		});
+		
+		// Ana kategori dropdown'unu güncelle (alt kategori modal'ı için)
+		function updateMainCategoryForSubDropdown() {
+			var $select = $('#mainCategoryForSub');
+			$select.empty().append('<option value="">-- Ana Kategori Seç --</option>');
+			
+			if (categoriesData && categoriesData.mainCategories && categoriesData.mainCategories.length > 0) {
+				categoriesData.mainCategories.forEach(function(mainCat) {
+					if (!mainCat || !mainCat.id) return;
+					var title = (mainCat.title && mainCat.title.tr) || (mainCat.title && mainCat.title.en) || 'Kategori';
+					$select.append('<option value="' + escapeHtml(mainCat.id) + '">' + escapeHtml(title) + '</option>');
+				});
+			}
+		}
+		
+		// ana kategori dropdown değiştiğinde alt kategori dropdown'ını güncelle
+		$(document).on('change', '#mainCategoryTr, #mainCategoryEn', function() {
+			// aynı dili diğer dropdown'a da senkronize et
+			var isTr = $(this).attr('id').includes('Tr');
+			if (isTr) {
+				$('#mainCategoryEn').val($(this).val());
+			} else {
+				$('#mainCategoryTr').val($(this).val());
+			}
+			updateSubCategoryDropdowns();
+		});
+		
+		// alt kategori dropdown değiştiğinde diğer dile de senkronize et
+		$(document).on('change', '#categoryTr, #categoryEn', function() {
+			var isTr = $(this).attr('id').includes('Tr');
+			if (isTr) {
+				$('#categoryEn').val($(this).val());
+			} else {
+				$('#categoryTr').val($(this).val());
+			}
+		});
+		
+		// ana kategori ekle butonu
+		$('#addMainCategoryBtn').on('click', function() {
+			var titleTr = $('#newMainCategoryTr').val().trim();
+			var titleEn = $('#newMainCategoryEn').val().trim();
+			
+			if (!titleTr || !titleEn) {
+				showAlert('error', '❌ Türkçe ve İngilizce başlık zorunludur!');
+				return;
+			}
+			
+			// aynı isimde kategori var mı kontrol et
+			var existing = categoriesData.mainCategories.find(function(mc) {
+				return mc.title.tr.toLowerCase() === titleTr.toLowerCase() || 
+				       mc.title.en.toLowerCase() === titleEn.toLowerCase();
+			});
+			
+			if (existing) {
+				showAlert('error', '❌ Bu isimde bir ana kategori zaten var!');
+				return;
+			}
+			
+			// yeni ana kategori oluştur
+			var newMainCat = {
+				id: 'main_' + Date.now(),
+				title: { tr: titleTr, en: titleEn },
+				slug: createSlug(titleTr)
+			};
+			
+			categoriesData.mainCategories.push(newMainCat);
+			saveCategoriesData();
+			
+			// input'ları temizle
+			$('#newMainCategoryTr, #newMainCategoryEn').val('');
+			
+			// listeyi ve dropdown'ları güncelle
+			renderCategoriesList();
+			renderCategoryDropdowns();
+			
+			showAlert('success', '✅ Ana kategori eklendi! Not: Backend\'e kaydetmek için "💾 Sunucuya Kaydet" butonuna tıklayın.');
+		});
+		
+		// alt kategori ekle butonu
+		$('#addSubCategoryBtn').on('click', function() {
+			var mainCatId = $('#mainCategoryForSub').val();
+			var titleTr = $('#newSubCategoryTr').val().trim();
+			var titleEn = $('#newSubCategoryEn').val().trim();
+			
+			if (!mainCatId) {
+				showAlert('error', '❌ Ana kategori seçmelisin!');
+				return;
+			}
+			
+			if (!titleTr || !titleEn) {
+				showAlert('error', '❌ Türkçe ve İngilizce başlık zorunludur!');
+				return;
+			}
+			
+			// aynı ana kategori altında aynı isimde alt kategori var mı kontrol et
+			var existing = categoriesData.subCategories.find(function(sc) {
+				return sc.mainCategoryId === mainCatId && 
+				       (sc.title.tr.toLowerCase() === titleTr.toLowerCase() || 
+				        sc.title.en.toLowerCase() === titleEn.toLowerCase());
+			});
+			
+			if (existing) {
+				showAlert('error', '❌ Bu ana kategori altında bu isimde bir alt kategori zaten var!');
+				return;
+			}
+			
+			// yeni alt kategori oluştur
+			var newSubCat = {
+				id: 'sub_' + Date.now(),
+				mainCategoryId: mainCatId,
+				title: { tr: titleTr, en: titleEn },
+				slug: createSlug(titleTr)
+			};
+			
+			categoriesData.subCategories.push(newSubCat);
+			saveCategoriesData();
+			
+			// input'ları temizle
+			$('#newSubCategoryTr, #newSubCategoryEn').val('');
+			
+			// listeyi ve dropdown'ları güncelle
+			renderCategoriesList();
+			renderCategoryDropdowns();
+			updateSubCategoryDropdowns();
+			
+			closeSubCategoryModal(); // modal'ı kapat
+			showAlert('success', '✅ Alt kategori eklendi! Not: Backend\'e kaydetmek için "💾 Sunucuya Kaydet" butonuna tıklayın.');
+		});
+		
+		// ana kategori sil
+		window.deleteMainCategory = function(id) {
+			// silinecek ana kategorinin bilgilerini al
+			var mainCatToDelete = categoriesData.mainCategories.find(function(mc) {
+				return mc.id === id;
+			});
+			
+			if (!mainCatToDelete) {
+				showAlert('error', '❌ Ana kategori bulunamadı!');
+				return;
+			}
+			
+			// bu ana kategoriye ait alt kategorileri bul
+			var subCatsToDelete = categoriesData.subCategories.filter(function(sc) {
+				return sc.mainCategoryId === id;
+			});
+			
+			// bu ana kategoriye sahip ürünleri bul
+			var affectedProducts = [];
+			if (typeof productsData !== 'undefined' && productsData && productsData.length > 0) {
+				productsData.forEach(function(product, index) {
+					if (product.mainCategory) {
+						var productMainCatTr = typeof product.mainCategory === 'object' ? product.mainCategory.tr : product.mainCategory;
+						var productMainCatEn = typeof product.mainCategory === 'object' ? product.mainCategory.en : product.mainCategory;
+						
+						// ana kategori eşleşiyor mu kontrol et
+						if ((mainCatToDelete.title.tr && mainCatToDelete.title.tr === productMainCatTr) ||
+						    (mainCatToDelete.title.en && mainCatToDelete.title.en === productMainCatEn) ||
+						    (mainCatToDelete.title.tr === productMainCatTr) ||
+						    (mainCatToDelete.title.en === productMainCatEn)) {
+							affectedProducts.push({
+								index: index,
+								title: typeof product.title === 'object' ? product.title.tr || product.title.en : product.title
+							});
+						}
+					}
+				});
+			}
+			
+			// eğer bu kategoriye sahip ürünler varsa uyarı göster
+			var confirmMessage = 'Bu ana kategoriyi ve tüm alt kategorilerini (' + subCatsToDelete.length + ' adet) silmek istediğinize emin misiniz?';
+			if (affectedProducts.length > 0) {
+				confirmMessage += '\n\n⚠️ Bu ana kategoriye sahip ' + affectedProducts.length + ' ürün var:\n';
+				affectedProducts.slice(0, 5).forEach(function(p) {
+					confirmMessage += '• ' + p.title + '\n';
+				});
+				if (affectedProducts.length > 5) {
+					confirmMessage += '... ve ' + (affectedProducts.length - 5) + ' ürün daha\n';
+				}
+				confirmMessage += '\nBu ürünlerin ana kategori ve alt kategori bilgisi temizlenecek. Devam etmek istiyor musunuz?';
+			}
+			
+			if (!confirm(confirmMessage)) {
+				return;
+			}
+			
+			// ana kategoriyi sil
+			categoriesData.mainCategories = categoriesData.mainCategories.filter(function(mc) {
+				return mc.id !== id;
+			});
+			
+			// alt kategorilerini de sil
+			categoriesData.subCategories = categoriesData.subCategories.filter(function(sc) {
+				return sc.mainCategoryId !== id;
+			});
+			
+			// bu ana kategoriye sahip ürünlerin kategori bilgisini temizle
+			if (affectedProducts.length > 0) {
+				affectedProducts.forEach(function(p) {
+					var product = productsData[p.index];
+					// ana kategori ve alt kategori bilgisini temizle
+					product.mainCategory = {
+						tr: '',
+						en: ''
+					};
+					product.category = {
+						tr: '',
+						en: ''
+					};
+				});
+				
+				saveProducts(); // ürünleri kaydet
+				renderProducts(); // ürün listesini güncelle
+			}
+			
+			// önce temizle, sonra kaydet
+			cleanCategoriesData();
+			saveCategoriesData();
+			renderCategoriesList();
+			renderCategoryDropdowns();
+			updateSubCategoryDropdowns();
+			renderCategorySelector(); // kategori dropdown'ını güncelle
+			
+			// backend'e kaydet - kategori silindiği için güncelleme yapılmalı (silent mode - alert gösterme)
+			saveToServer(true);
+			
+			// kategori HTML sayfasını da sil
+			if (mainCatToDelete.slug) {
+				var adminPassword = sessionStorage.getItem('adminPassword');
+				if (adminPassword) {
+					$.ajax({
+						url: '/api/categories/' + mainCatToDelete.slug,
+						method: 'DELETE',
+						headers: {
+							'X-Admin-Password': adminPassword
+						},
+						success: function(response) {
+							console.log('✅ Kategori HTML sayfası silindi:', response);
+						},
+						error: function(xhr, status, error) {
+							console.error('⚠️ Kategori HTML sayfası silinirken hata:', error);
+							// hata olsa bile devam et - kategori zaten silindi
+						}
+					});
+				}
+			}
+			
+			var successMsg = '✅ Ana kategori ve ' + subCatsToDelete.length + ' alt kategori silindi!';
+			if (affectedProducts.length > 0) {
+				successMsg += ' ' + affectedProducts.length + ' ürünün kategori bilgisi temizlendi.';
+			}
+			if (mainCatToDelete.slug) {
+				successMsg += ' HTML sayfası da silindi.';
+			}
+			successMsg += ' Backend\'e kaydedildi.';
+			showAlert('success', successMsg);
+		};
+		
+		// alt kategori sil
+		window.deleteSubCategory = function(id) {
+			// silinecek kategorinin bilgilerini al
+			var categoryToDelete = categoriesData.subCategories.find(function(sc) {
+				return sc.id === id;
+			});
+			
+			if (!categoryToDelete) {
+				showAlert('error', '❌ Kategori bulunamadı!');
+				return;
+			}
+			
+			// bu kategoriye sahip ürünleri bul
+			var affectedProducts = [];
+			if (typeof productsData !== 'undefined' && productsData && productsData.length > 0) {
+				productsData.forEach(function(product, index) {
+					if (product.category) {
+						var productCategoryTr = typeof product.category === 'object' ? product.category.tr : product.category;
+						var productCategoryEn = typeof product.category === 'object' ? product.category.en : product.category;
+						
+						// kategori eşleşiyor mu kontrol et
+						if ((categoryToDelete.title.tr && categoryToDelete.title.tr === productCategoryTr) ||
+						    (categoryToDelete.title.en && categoryToDelete.title.en === productCategoryEn) ||
+						    (categoryToDelete.title.tr === productCategoryTr) ||
+						    (categoryToDelete.title.en === productCategoryEn)) {
+							affectedProducts.push({
+								index: index,
+								title: typeof product.title === 'object' ? product.title.tr || product.title.en : product.title
+							});
+						}
+					}
+				});
+			}
+			
+			// eğer bu kategoriye sahip ürünler varsa uyarı göster
+			var confirmMessage = 'Bu alt kategoriyi silmek istediğinize emin misiniz?';
+			if (affectedProducts.length > 0) {
+				confirmMessage += '\n\n⚠️ Bu kategoriye sahip ' + affectedProducts.length + ' ürün var:\n';
+				affectedProducts.slice(0, 5).forEach(function(p) {
+					confirmMessage += '• ' + p.title + '\n';
+				});
+				if (affectedProducts.length > 5) {
+					confirmMessage += '... ve ' + (affectedProducts.length - 5) + ' ürün daha\n';
+				}
+				confirmMessage += '\nBu ürünlerin kategori bilgisi temizlenecek. Devam etmek istiyor musunuz?';
+			}
+			
+			if (!confirm(confirmMessage)) {
+				return;
+			}
+			
+			// kategoriyi sil
+			categoriesData.subCategories = categoriesData.subCategories.filter(function(sc) {
+				return sc.id !== id;
+			});
+			
+			// bu kategoriye sahip ürünlerin kategori bilgisini temizle
+			if (affectedProducts.length > 0) {
+				affectedProducts.forEach(function(p) {
+					var product = productsData[p.index];
+					// kategori bilgisini temizle (boş string yap)
+					product.category = {
+						tr: '',
+						en: ''
+					};
+				});
+				
+				saveProducts(); // ürünleri kaydet
+				renderProducts(); // ürün listesini güncelle
+			}
+			
+			saveCategoriesData();
+			renderCategoriesList();
+			renderCategoryDropdowns();
+			updateSubCategoryDropdowns();
+			
+			// backend'e kaydet - kategori silindiği için güncelleme yapılmalı (silent mode - alert gösterme)
+			saveToServer(true);
+			
+			var successMsg = '✅ Alt kategori silindi!';
+			if (affectedProducts.length > 0) {
+				successMsg += ' ' + affectedProducts.length + ' ürünün kategori bilgisi temizlendi.';
+			}
+			successMsg += ' Backend\'e kaydedildi.';
+			showAlert('success', successMsg);
+		};
+		
+		// dil tab değiştiğinde kategori playground'ı güncelle
+		$(document).on('click', '.lang-tab[data-section]', function() {
+			var section = $(this).data('section');
+			var lang = $(this).data('lang');
+			
+			// sadece ilgili section'ın tab'larını güncelle
+			$('.lang-tab[data-section="' + section + '"]').removeClass('active');
+			$(this).addClass('active');
+			
+			// tüm ilgili section içeriklerini gizle (hem class hem display)
+			$('.lang-content[data-section="' + section + '"]').removeClass('active').hide();
+			
+			// seçilen dil içeriğini göster (hem class hem display)
+			$('.lang-content[data-section="' + section + '"][data-lang="' + lang + '"]').addClass('active').show();
+			
+			// required attribute'ları güncelle
+			$('.lang-content[data-section="' + section + '"] [required]').prop('required', false);
+			$('.lang-content[data-section="' + section + '"][data-lang="' + lang + '"] [required]').prop('required', true);
+		});
 
-		// Alert göster
+		// Alert göster - pop-up modal şeklinde
 		function showAlert(type, message) {
-			var $alert = type === 'success' ? $('#successAlert') : $('#errorAlert');
-			$alert.text(message).fadeIn(300);
+			var $modal = $('#alertModal');
+			var $content = $('#alertModalContent');
+			var $icon = $('#alertIcon');
+			var $msg = $('#alertMessage');
+			
+			// renk ve ikon ayarları
+			var config = {
+				success: {
+					icon: '✅',
+					bgColor: '#10b981',
+					iconBg: '#d1fae5',
+					borderColor: '#10b981'
+				},
+				error: {
+					icon: '❌',
+					bgColor: '#ef4444',
+					iconBg: '#fee2e2',
+					borderColor: '#ef4444'
+				},
+				warning: {
+					icon: '⚠️',
+					bgColor: '#f59e0b',
+					iconBg: '#fef3c7',
+					borderColor: '#f59e0b'
+				}
+			};
+			
+			var alertConfig = config[type] || config.error;
+			
+			// modal içeriğini ayarla
+			$icon.text(alertConfig.icon);
+			$icon.css({
+				'background': alertConfig.iconBg,
+				'width': '80px',
+				'height': '80px',
+				'border-radius': '50%',
+				'display': 'flex',
+				'align-items': 'center',
+				'justify-content': 'center',
+				'margin': '0 auto 20px auto'
+			});
+			$msg.html(message);
+			$content.css({
+				'border-top': '4px solid ' + alertConfig.borderColor
+			});
+			
+			// modal'ı göster
+			$modal.addClass('show');
+			
+			// otomatik kapanma (5 saniye sonra)
+			var timeout = setTimeout(function() {
+				closeAlert();
+			}, 5000);
+			
+			// kapat butonu
+			$('#alertCloseBtn, #alertModal').off('click').on('click', function(e) {
+				if (e.target === this || $(e.target).attr('id') === 'alertCloseBtn') {
+					clearTimeout(timeout);
+					closeAlert();
+				}
+			});
+			
+			// ESC tuşu ile kapat
+			$(document).off('keydown.alert').on('keydown.alert', function(e) {
+				if (e.key === 'Escape' || e.keyCode === 27) {
+					clearTimeout(timeout);
+					closeAlert();
+				}
+			});
+		}
+		
+		// Alert'i kapat
+		function closeAlert() {
+			var $modal = $('#alertModal');
+			var $content = $('#alertModalContent');
+			
+			// animasyonlu kapatma
+			$content.css('animation', 'alertSlideOut 0.3s ease-out');
 			setTimeout(function() {
-				$alert.fadeOut(300);
-			}, 3000);
+				$modal.removeClass('show');
+				$content.css('animation', 'alertSlideIn 0.3s ease-out');
+				$(document).off('keydown.alert');
+			}, 300);
 		}
 
 		// HTML escape - XSS'den korunmak için lazım bu
@@ -757,7 +2157,72 @@
 		}
 
 		// backend'e kaydet - asıl iş burada oluyor amk
-		function saveToServer() {
+		function saveToServer(silent) {
+			// silent = true ise alert gösterme (otomatik kaydetme için)
+			silent = silent || false;
+			
+			// önce kategori playground'dan eklenen kategorileri al - backend'e gönderilecek format
+			var playgroundCategories = {};
+			
+			if (categoriesData && categoriesData.mainCategories && categoriesData.mainCategories.length > 0) {
+				categoriesData.mainCategories.forEach(function(mc) {
+					if (mc && mc.title && mc.slug) {
+						var slug = mc.slug || createSlug(mc.title.tr || mc.title.en || '');
+						
+						// header görseli - önce admin panelden ayarlanan varsa onu al
+						var headerImageInput = $('.category-header-image[data-slug="' + slug + '"]');
+						var headerImage = '';
+						
+						if (headerImageInput.length && headerImageInput.val().trim()) {
+							headerImage = headerImageInput.val().trim();
+						} else {
+							// mevcut mainCategories'dan al (varsa)
+							var existingCat = null;
+							if (typeof mainCategories !== 'undefined' && mainCategories.length > 0) {
+								existingCat = mainCategories.find(function(cat) {
+									return cat.slug === slug;
+								});
+							}
+							if (existingCat && existingCat.headerImage) {
+								headerImage = existingCat.headerImage;
+							} else {
+								// generic görsel
+								headerImage = 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80';
+							}
+						}
+						
+						// açıklama - önce admin panelden ayarlanan varsa onu al
+						var descTrInput = $('.category-description[data-slug="' + slug + '"][data-lang="tr"]');
+						var descEnInput = $('.category-description[data-slug="' + slug + '"][data-lang="en"]');
+						
+						var descTr = descTrInput.length && descTrInput.val().trim() ? descTrInput.val().trim() : '';
+						var descEn = descEnInput.length && descEnInput.val().trim() ? descEnInput.val().trim() : '';
+						
+						// mevcut mainCategories'dan açıklamayı al (varsa ve boşsa)
+						if (!descTr || !descEn) {
+							var existingCat = null;
+							if (typeof mainCategories !== 'undefined' && mainCategories.length > 0) {
+								existingCat = mainCategories.find(function(cat) {
+									return cat.slug === slug;
+								});
+							}
+							if (existingCat && existingCat.description) {
+								if (!descTr && existingCat.description.tr) descTr = existingCat.description.tr;
+								if (!descEn && existingCat.description.en) descEn = existingCat.description.en;
+							}
+						}
+						
+						var key = mc.title.tr || mc.title.en || slug;
+						playgroundCategories[slug] = {
+							title: { tr: mc.title.tr || '', en: mc.title.en || '' },
+							slug: slug,
+							headerImage: headerImage,
+							description: { tr: descTr, en: descEn }
+						};
+					}
+				});
+			}
+			
 			// mainCategories'ı otomatik tespit et - ürünlerden çıkarıyoruz
 			var detectedCategories = {};
 			
@@ -773,64 +2238,181 @@
 							.replace(/[^a-z0-9]+/g, '-')
 							.replace(/^-|-$/g, '');
 						
-						// tr/en title'ları al
-						var enTitle = typeof mainCat === 'object' ? mainCat.en || mainCat.tr : mainCat;
-						var trTitle = typeof mainCat === 'object' ? mainCat.tr || mainCat.en : mainCat;
+						// önce playground'dan eklenen kategoriyi kontrol et
+						var catData = playgroundCategories[slug];
 						
-						// açıklama için ilk üründen al - lazy approach
-						var firstProduct = productsData.find(function(p) {
-							var pMainCat = p.mainCategory;
-							var pKey = typeof pMainCat === 'object' ? pMainCat.tr || pMainCat.en : pMainCat;
-							return pKey === key;
-						});
-						
-						// header görseli - önce admin panelden ayarlanan varsa onu al, yoksa generic kullan
-						var headerImageInput = $('.category-header-image[data-slug="' + slug + '"]');
-						var headerImage = '';
-						
-						if (headerImageInput.length && headerImageInput.val().trim()) {
-							// admin panelden ayarlanan görsel
-							headerImage = headerImageInput.val().trim();
-						} else {
-							// generic görsel - kategoriye göre özel
-							headerImage = 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80';
+						if (catData) {
+							// playground'dan geliyor, onu kullan (ama ürünlerden gelen bilgileri de merge et)
+							var firstProduct = productsData.find(function(p) {
+								var pMainCat = p.mainCategory;
+								var pKey = typeof pMainCat === 'object' ? pMainCat.tr || pMainCat.en : pMainCat;
+								return pKey === key;
+							});
 							
-							// kategoriye göre özel header görseli
-							if (key.toLowerCase().indexOf('temizlik') !== -1 || key.toLowerCase().indexOf('cleaning') !== -1) {
-								headerImage = 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80';
+							// header görseli - önce admin panelden ayarlanan varsa onu al, yoksa playground'dan
+							var headerImageInput = $('.category-header-image[data-slug="' + slug + '"]');
+							var headerImage = '';
+							
+							if (headerImageInput.length && headerImageInput.val().trim()) {
+								headerImage = headerImageInput.val().trim();
+							} else {
+								headerImage = catData.headerImage || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80';
 							}
+							
+							// açıklama - önce admin panelden ayarlanan varsa onu al, yoksa playground'dan
+							var descTrInput = $('.category-description[data-slug="' + slug + '"][data-lang="tr"]');
+							var descEnInput = $('.category-description[data-slug="' + slug + '"][data-lang="en"]');
+							
+							var descTr = descTrInput.length && descTrInput.val().trim() ? descTrInput.val().trim() : catData.description.tr || '';
+							var descEn = descEnInput.length && descEnInput.val().trim() ? descEnInput.val().trim() : catData.description.en || '';
+							
+							// eğer açıklama hala boşsa, ürün açıklamasından al
+							if (!descTr || !descEn) {
+								if (!descTr) {
+									descTr = firstProduct ? (typeof firstProduct.description === 'object' ? firstProduct.description.tr : firstProduct.description) : '';
+								}
+								if (!descEn) {
+									descEn = firstProduct ? (typeof firstProduct.description === 'object' ? firstProduct.description.en : firstProduct.description) : '';
+								}
+							}
+							
+							detectedCategories[key] = {
+								slug: slug,
+								headerImage: headerImage,
+								title: catData.title,
+								description: { tr: descTr, en: descEn }
+							};
+							
+							// playground'dan alınan kategoriyi listeden çıkar (çünkü ürünlerden de var)
+							delete playgroundCategories[slug];
+						} else {
+							// ürünlerden tespit ediliyor (playground'da yok)
+							// tr/en title'ları al
+							var enTitle = typeof mainCat === 'object' ? mainCat.en || mainCat.tr : mainCat;
+							var trTitle = typeof mainCat === 'object' ? mainCat.tr || mainCat.en : mainCat;
+							
+							// açıklama için ilk üründen al - lazy approach
+							var firstProduct = productsData.find(function(p) {
+								var pMainCat = p.mainCategory;
+								var pKey = typeof pMainCat === 'object' ? pMainCat.tr || pMainCat.en : pMainCat;
+								return pKey === key;
+							});
+							
+							// header görseli - önce admin panelden ayarlanan varsa onu al, yoksa generic kullan
+							var headerImageInput = $('.category-header-image[data-slug="' + slug + '"]');
+							var headerImage = '';
+							
+							if (headerImageInput.length && headerImageInput.val().trim()) {
+								// admin panelden ayarlanan görsel
+								headerImage = headerImageInput.val().trim();
+							} else {
+								// mevcut mainCategories'dan al (varsa)
+								var existingCategory = null;
+								if (typeof mainCategories !== 'undefined' && mainCategories.length > 0) {
+									existingCategory = mainCategories.find(function(cat) {
+										return cat.slug === slug;
+									});
+								}
+								if (existingCategory && existingCategory.headerImage) {
+									headerImage = existingCategory.headerImage;
+								} else {
+									// generic görsel
+									headerImage = 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80';
+								}
+							}
+							
+							// açıklama - önce admin panelden ayarlanan varsa onu al, yoksa ürün açıklamasını kullan
+							var descTrInput = $('.category-description[data-slug="' + slug + '"][data-lang="tr"]');
+							var descEnInput = $('.category-description[data-slug="' + slug + '"][data-lang="en"]');
+							
+							var descTr = '';
+							var descEn = '';
+							
+							if (descTrInput.length && descTrInput.val().trim()) {
+								// admin panelden ayarlanan açıklama
+								descTr = descTrInput.val().trim();
+							} else {
+								// mevcut mainCategories'dan al (varsa)
+								var existingCategory = null;
+								if (typeof mainCategories !== 'undefined' && mainCategories.length > 0) {
+									existingCategory = mainCategories.find(function(cat) {
+										return cat.slug === slug;
+									});
+								}
+								if (existingCategory && existingCategory.description && existingCategory.description.tr) {
+									descTr = existingCategory.description.tr;
+								} else {
+									// ürün açıklamasından al (fallback)
+									descTr = firstProduct ? (typeof firstProduct.description === 'object' ? firstProduct.description.tr : firstProduct.description) : '';
+								}
+							}
+							
+							if (descEnInput.length && descEnInput.val().trim()) {
+								// admin panelden ayarlanan açıklama
+								descEn = descEnInput.val().trim();
+							} else {
+								// mevcut mainCategories'dan al (varsa)
+								var existingCategory = null;
+								if (typeof mainCategories !== 'undefined' && mainCategories.length > 0) {
+									existingCategory = mainCategories.find(function(cat) {
+										return cat.slug === slug;
+									});
+								}
+								if (existingCategory && existingCategory.description && existingCategory.description.en) {
+									descEn = existingCategory.description.en;
+								} else {
+									// ürün açıklamasından al (fallback)
+									descEn = firstProduct ? (typeof firstProduct.description === 'object' ? firstProduct.description.en : firstProduct.description) : '';
+								}
+							}
+							
+							detectedCategories[key] = {
+								slug: slug,
+								headerImage: headerImage,
+								title: {
+									tr: trTitle,
+									en: enTitle
+								},
+								description: {
+									tr: descTr,
+									en: descEn
+								}
+							};
 						}
-						
-						detectedCategories[key] = {
-							slug: slug,
-							headerImage: headerImage,
-							title: {
-								tr: trTitle,
-								en: enTitle
-							},
-							description: {
-								tr: firstProduct ? (typeof firstProduct.description === 'object' ? firstProduct.description.tr : firstProduct.description) : '',
-								en: firstProduct ? (typeof firstProduct.description === 'object' ? firstProduct.description.en : firstProduct.description) : ''
-							},
-							image: firstProduct ? firstProduct.image : 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1920&q=80'
-						};
 					}
 				}
+			});
+			
+			// playground'dan eklenen ama ürünlerde kullanılmayan kategorileri de ekle (backend'e gönderilecek)
+			Object.keys(playgroundCategories).forEach(function(slug) {
+				var catData = playgroundCategories[slug];
+				var key = catData.title.tr || catData.title.en || slug;
+				detectedCategories[key] = catData;
 			});
 			
 			// array'e çevir
 			var mainCategories = Object.values(detectedCategories);
 			
-			// loading göster - butonu disable et
+			// loading göster - butonu disable et (eğer buton varsa)
 			var $btn = $('button[onclick="saveToServer()"]');
-			var originalText = $btn.text();
-			$btn.prop('disabled', true).text('⏳ Kaydediliyor...');
+			var originalText = '';
+			if ($btn.length) {
+				originalText = $btn.text();
+				$btn.prop('disabled', true).text('⏳ Kaydediliyor...');
+			}
 			
 			// şifreyi session'dan al - API isteği için lazım
 			var adminPassword = sessionStorage.getItem('adminPassword');
 			if (!adminPassword) {
-				showAlert('error', '❌ Oturum süresi dolmuş! Lütfen tekrar giriş yapın.');
-				logout();
+				if (!silent) {
+					showAlert('error', '❌ Oturum süresi dolmuş! Lütfen tekrar giriş yapın.');
+					if (typeof logout === 'function') {
+						logout();
+					}
+				}
+				if ($btn.length) {
+					$btn.prop('disabled', false).text(originalText);
+				}
 				return;
 			}
 			
@@ -847,26 +2429,188 @@
 					mainCategories: mainCategories
 				}),
 				success: function(response) {
-					$btn.prop('disabled', false).text(originalText);
-					showAlert('success', '✅ Başarılı! ' + response.productsCount + ' ürün kaydedildi, ' + response.categoriesCount + ' kategori oluşturuldu ve sayfalar hazırlandı!');
+					if ($btn.length) {
+						$btn.prop('disabled', false).text(originalText);
+					}
+					if (!silent) {
+						showAlert('success', '✅ Başarılı! ' + response.productsCount + ' ürün kaydedildi, ' + response.categoriesCount + ' kategori oluşturuldu ve sayfalar hazırlandı!');
+					}
 					console.log('Backend response:', response);
 				},
 				error: function(xhr, status, error) {
-					$btn.prop('disabled', false).text(originalText);
+					if ($btn.length) {
+						$btn.prop('disabled', false).text(originalText);
+					}
 					var errorMsg = 'Hata: ';
 					if (xhr.responseJSON && xhr.responseJSON.error) {
 						errorMsg += xhr.responseJSON.error;
 					} else {
 						errorMsg += error || 'Sunucuya bağlanılamadı!';
 					}
-					showAlert('error', errorMsg);
+					if (!silent) {
+						showAlert('error', errorMsg);
+					}
 					console.error('Backend error:', xhr.responseJSON || error);
 				}
 			});
 		}
 
+		// ürün resimleri array'i - birden fazla resim için
+		var productImages = [];
+		
+		// resim listesini render et
+		function renderProductImages() {
+			var $list = $('#productImagesList');
+			var $container = $list.find('div');
+			$container.empty();
+			
+			if (productImages.length === 0) {
+				$list.hide();
+				$('#imageUrl').val('');
+				return;
+			}
+			
+			$list.show();
+			
+			productImages.forEach(function(img, index) {
+				var $card = $('<div style="position: relative; width: 120px; height: 120px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: #fff;">');
+				$card.html('<img src="' + img + '" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;"><button type="button" class="remove-image-btn" data-index="' + index + '" style="position: absolute; top: 5px; right: 5px; width: 28px; height: 28px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">×</button>');
+				$container.append($card);
+			});
+			
+			// geriye uyumluluk için ilk resmi imageUrl'e de yaz (eğer array varsa)
+			$('#imageUrl').val(productImages.length > 0 ? productImages[0] : '');
+		}
+		
+		// URL ekle butonu
+		$('#addImageUrlBtn').on('click', function() {
+			var url = $('#imageUrlInput').val().trim();
+			if (!url) {
+				showAlert('error', '❌ Lütfen bir URL girin!');
+				return;
+			}
+			
+			// Unsplash URL'si ise boyut parametresi ekle
+			if (url.indexOf('unsplash.com') !== -1 && url.indexOf('?w=') === -1) {
+				if (url.indexOf('?') !== -1) {
+					url += '&w=800&q=80';
+				} else {
+					url += '?w=800&q=80';
+				}
+			}
+			
+			productImages.push(url);
+			$('#imageUrlInput').val('');
+			renderProductImages();
+			showAlert('success', '✅ Resim eklendi!');
+		});
+		
+		// dosya yükleme - bilgisayardan resim seçme (çoklu)
+		$('#imageFileInput').on('change', function(e) {
+			var files = e.target.files;
+			if (!files || files.length === 0) return;
+			
+			var adminPassword = sessionStorage.getItem('adminPassword');
+			if (!adminPassword) {
+				showAlert('error', '❌ Oturum süresi dolmuş! Lütfen tekrar giriş yapın.');
+				return;
+			}
+			
+			var filesToUpload = [];
+			for (var i = 0; i < files.length; i++) {
+				var file = files[i];
+				
+				// sadece resim dosyaları
+				if (!file.type.startsWith('image/')) {
+					showAlert('error', '❌ "' + file.name + '" bir resim dosyası değil!');
+					continue;
+				}
+				
+				// dosya boyutu kontrolü (max 5MB)
+				if (file.size > 5 * 1024 * 1024) {
+					showAlert('error', '❌ "' + file.name + '" çok büyük! Maximum 5MB olmalı.');
+					continue;
+				}
+				
+				filesToUpload.push(file);
+			}
+			
+			if (filesToUpload.length === 0) return;
+			
+			// her dosyayı tek tek yükle (çünkü backend şu an tek dosya alıyor)
+			var uploadCount = 0;
+			var $list = $('#productImagesList');
+			
+			filesToUpload.forEach(function(file) {
+				var formData = new FormData();
+				formData.append('image', file);
+				
+				$.ajax({
+					url: '/api/upload-image',
+					method: 'POST',
+					data: formData,
+					processData: false,
+					contentType: false,
+					headers: {
+						'X-Admin-Password': adminPassword
+					},
+					success: function(response) {
+						if (response.success && response.url) {
+							productImages.push(response.url);
+							uploadCount++;
+							if (uploadCount === filesToUpload.length) {
+								renderProductImages();
+								showAlert('success', '✅ ' + uploadCount + ' resim başarıyla yüklendi!');
+							}
+						}
+					},
+					error: function(xhr, status, error) {
+						uploadCount++;
+						var errorMsg = 'Resim yüklenemedi: ';
+						if (xhr.responseJSON && xhr.responseJSON.error) {
+							errorMsg += xhr.responseJSON.error;
+						} else {
+							errorMsg += error || 'Sunucuya bağlanılamadı!';
+						}
+						showAlert('error', '❌ ' + errorMsg);
+						if (uploadCount === filesToUpload.length) {
+							renderProductImages();
+						}
+					}
+				});
+			});
+			
+			// input'u temizle
+			$(this).val('');
+		});
+		
+		// resim kaldır butonu
+		$(document).on('click', '.remove-image-btn', function() {
+			var index = parseInt($(this).data('index'));
+			productImages.splice(index, 1);
+			renderProductImages();
+		});
+
 		// sayfa yüklendiğinde - backend'den ürünleri çek
 		$(document).ready(function() {
+			// önce kategorileri yükle - dropdown'ları doldurmak için
+			// eğer data-products.js yüklendiyse mainCategories'ı kullan
+			if (typeof mainCategories !== 'undefined' && mainCategories && mainCategories.length > 0) {
+				// mainCategories'dan categoriesData'ya dönüştür
+				categoriesData.mainCategories = mainCategories.map(function(mc, index) {
+					return {
+						id: 'main_' + (mc.slug || 'cat' + index),
+						title: mc.title || { tr: '', en: '' },
+						slug: mc.slug || ''
+					};
+				});
+			}
+			
+			loadCategoriesData(); // localStorage'dan yükle veya mainCategories'dan oluştur
+			renderCategoriesList();
+			renderCategoryDropdowns();
+			
+			// sonra ürünleri yükle
 			$.ajax({
 				url: '/api/products',
 				method: 'GET',
@@ -878,10 +2622,83 @@
 						// mainCategories'ı da yükle (eğer varsa)
 						if (data.mainCategories && data.mainCategories.length > 0) {
 							mainCategories = data.mainCategories;
+							
+							// backend'den gelen kategorileri categoriesData ile birleştir
+							// önce mevcut categoriesData'yı yükle (localStorage'dan)
+							loadCategoriesData();
+							
+							// backend'den gelen kategorileri kontrol et ve senkronize et
+							var backendSlugs = {};
+							mainCategories.forEach(function(mc) {
+								var slug = mc.slug || createSlug(mc.title ? (mc.title.tr || mc.title.en) : '');
+								backendSlugs[slug] = true;
+							});
+							
+							// categoriesData'daki kategorileri kontrol et:
+							// 1. Backend'de olmayan kategorileri tut (yeni eklenen ama henüz backend'e kaydedilmemiş)
+							// 2. Backend'de olan kategorileri sil ve backend'den gelenle değiştir
+							var newCategories = [];
+							if (categoriesData.mainCategories && categoriesData.mainCategories.length > 0) {
+								categoriesData.mainCategories.forEach(function(mc) {
+									if (mc && mc.slug) {
+										if (!backendSlugs[mc.slug]) {
+											// backend'de yok - yeni eklenen kategori (henüz kaydedilmemiş)
+											newCategories.push(mc);
+										}
+										// backend'de varsa sil (çünkü backend'den gelen güncel versiyonunu kullanacağız)
+									}
+								});
+							}
+							
+							// backend'den gelen kategorileri categoriesData'ya ekle
+							categoriesData.mainCategories = newCategories; // önce yeni kategorileri ekle
+							mainCategories.forEach(function(mc, index) {
+								var slug = mc.slug || createSlug(mc.title ? (mc.title.tr || mc.title.en) : '');
+								categoriesData.mainCategories.push({
+									id: 'main_' + (mc.slug || 'cat' + Date.now() + index),
+									title: mc.title || { tr: '', en: '' },
+									slug: slug
+								});
+							});
+							
+							// localStorage'a kaydet
+							saveCategoriesData();
+							
+							// alt kategorileri ürünlerden çıkar
+							var subCatMap = {};
+							productsData.forEach(function(product, prodIndex) {
+								if (product.mainCategory && product.category) {
+									var mainCatTitle = typeof product.mainCategory === 'object' ? product.mainCategory.tr : product.mainCategory;
+									var mainCat = categoriesData.mainCategories.find(function(mc) {
+										return (mc.title.tr && mc.title.tr === mainCatTitle) || (mc.title.en && mc.title.en === mainCatTitle);
+									});
+									
+									if (mainCat) {
+										var subCatTitle = typeof product.category === 'object' ? product.category.tr : product.category;
+										var subCatTitleEn = typeof product.category === 'object' ? product.category.en : product.category;
+										var key = mainCat.id + '_' + subCatTitle;
+										
+										if (!subCatMap[key]) {
+											subCatMap[key] = {
+												id: 'sub_' + mainCat.id + '_' + (prodIndex || Math.random()),
+												mainCategoryId: mainCat.id,
+												title: typeof product.category === 'object' ? product.category : { tr: subCatTitle, en: subCatTitleEn || subCatTitle },
+												slug: createSlug(subCatTitle)
+											};
+										}
+									}
+								}
+							});
+							
+							categoriesData.subCategories = Object.values(subCatMap);
+							saveCategoriesData(); // localStorage'a kaydet
 						}
 						
 						renderProducts();
-						renderCategorySettings(); // kategorileri de render et
+						renderCategorySelector(); // kategori dropdown'ını güncelle
+						// kategori listesini ve dropdown'ları güncelle
+						renderCategoriesList();
+						renderCategoryDropdowns();
 						showAlert('success', 'Backend\'den ' + data.products.length + ' ürün yüklendi!');
 					} else {
 						loadProducts(); // backend'de yoksa localStorage'dan yükle

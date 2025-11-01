@@ -2445,9 +2445,17 @@ h6 { font-size: 1rem; font-weight: 600; }
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(0,0,0,.5);
+  background: rgba(0,0,0,0.75);
   display: none;
   padding: 20px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#productQuickView.pqv-overlay[style*="display: block"],
+#productQuickView.pqv-overlay[style*="display:flex"] {
+  display: flex !important;
 }
 
 #productQuickView .pqv-modal {
@@ -2462,6 +2470,7 @@ h6 { font-size: 1rem; font-weight: 600; }
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  align-self: center;
 }
 
 #productQuickView .pqv-close {
@@ -2538,9 +2547,9 @@ h6 { font-size: 1rem; font-weight: 600; }
   font-size: 14px; margin-bottom: 12px;
   display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
 }
-#productQuickView .pqv-price { font-weight: 700; letter-spacing: 1px; color: #6366f1; }
 #productQuickView .pqv-rating { opacity: .9; }
 #productQuickView .pqv-sku { color: #999; }
+#productQuickView .pqv-stock { color: #999; }
 /* pqv-actions kaldırıldı - Add to cart butonu yok artık */
 
 /* Tab'lar kaldırıldı - sadece açıklama gösteriliyor */

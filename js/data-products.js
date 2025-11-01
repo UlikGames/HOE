@@ -35,6 +35,9 @@ var productsData = [
     },
     {
       "image": "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=800&q=80"
+      ],
       "mainCategory": {
         "tr": "Temizlik Ürünleri",
         "en": "Cleaning Products"
@@ -47,23 +50,26 @@ var productsData = [
         "tr": "Ariel Ultra Konsantre Deterjan 4kg",
         "en": "Ariel Ultra Concentrated Detergent 4kg"
       },
-      "price": "₺89.90",
       "description": {
         "tr": "Leke çıkarma gücü yüksek, konsantre formül. Çamaşırlarınızı tertemiz yapar, renkleri korur. Hassas ciltler için uygun.",
         "en": "High stain removal power, concentrated formula. Makes your clothes spotless, preserves colors. Suitable for sensitive skin."
       },
       "specs": {
-        "tr": "4 kg | 30 yıkamaya kadar | Leke çıkarıcı enzimler | Renk koruyucu",
-        "en": "4 kg | Up to 30 washes | Stain-removing enzymes | Color protectant"
+        "tr": "",
+        "en": ""
       },
       "sku": "ARI-ULTRA-002",
+      "stock": 3,
       "shipping": {
-        "tr": "1-2 iş gününde kargo. Ücretsiz kargo.",
-        "en": "Ships in 1-2 business days. Free shipping."
+        "tr": "",
+        "en": ""
       }
     },
     {
       "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=80"
+      ],
       "mainCategory": {
         "tr": "Temizlik Ürünleri",
         "en": "Cleaning Products"
@@ -76,23 +82,26 @@ var productsData = [
         "tr": "Fairy Bulaşık Deterjanı 750ml x 3",
         "en": "Fairy Dish Soap 750ml x 3"
       },
-      "price": "₺34.90",
       "description": {
         "tr": "Yağlı bulaşıkları anında temizleyen, el dostu formül. Bulaşıklarınız parlak ve hijyenik kalacak. 3'lü paket.",
         "en": "Hand-friendly formula that instantly cleans greasy dishes. Your dishes will stay shiny and hygienic. 3-pack."
       },
       "specs": {
-        "tr": "750ml x 3 adet | Yağ çözücü formül | El dostu | Bakteri öldürücü",
-        "en": "750ml x 3 units | Grease-cutting formula | Hand-friendly | Antibacterial"
+        "tr": "",
+        "en": ""
       },
       "sku": "FAI-750-003",
+      "stock": 12,
       "shipping": {
-        "tr": "1-2 iş gününde kargo. Ücretsiz kargo.",
-        "en": "Ships in 1-2 business days. Free shipping."
+        "tr": "",
+        "en": ""
       }
     },
     {
       "image": "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=800&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=800&q=80"
+      ],
       "mainCategory": {
         "tr": "Temizlik Ürünleri",
         "en": "Cleaning Products"
@@ -111,13 +120,13 @@ var productsData = [
         "en": "Safe and effective cleaning for every surface, from kitchen to bathroom. Professional cleaning results at home."
       },
       "specs": {
-        "tr": "1 Litre | Çok amaçlı | Yüzey koruyucu | Leke çıkarıcı",
-        "en": "1 Liter | Multi-purpose | Surface protector | Stain remover"
+        "tr": "",
+        "en": ""
       },
       "sku": "CIF-MULTI-004",
       "shipping": {
-        "tr": "1-2 iş gününde kargo. Ücretsiz kargo.",
-        "en": "Ships in 1-2 business days. Free shipping."
+        "tr": "",
+        "en": ""
       }
     },
     {
@@ -271,9 +280,9 @@ var productsData = [
 // ANA KATEGORİLER - admin panelinden otomatik güncelleniyor
 // ============================================
 var mainCategories = [
-  {
-    "slug": "temizlik-urunleri",
-    "headerImage": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80", // temizlik ürünleri için generic görsel
+    {
+      "slug": "temizlik-urunleri",
+      "headerImage": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80",
       "title": {
         "tr": "Temizlik Ürünleri",
         "en": "Cleaning Products"
@@ -281,8 +290,7 @@ var mainCategories = [
       "description": {
         "tr": "Güçlü ve etkili çamaşır suyu. %99.9 bakteri ve virüslere karşı etkili. Evinizin her köşesinde hijyen garantisi.",
         "en": "Powerful and effective bleach. 99.9% effective against bacteria and viruses. Hygiene guaranteed in every corner of your home."
-      },
-      "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=80"
+      }
     }
   ];
 
@@ -684,17 +692,27 @@ function generateProductsHTML(mainCategoryFilter) {
     html += '<div class="product-item text-center animate-box">';
     html += '<div class="product"';
     html += ' data-title="' + escapeHtml(title) + '"';
-    html += ' data-price="' + escapeHtml(product.price) + '"';
     html += ' data-desc="' + escapeHtml(description) + '"';
     html += ' data-specs="' + escapeHtml(specs) + '"';
     html += ' data-sku="' + escapeHtml(product.sku || '') + '"';
+    html += ' data-stock="' + escapeHtml(product.stock || 0) + '"';
     html += ' data-ship="' + escapeHtml(shipping) + '"';
     html += ' data-main-category="' + escapeHtml(mainCategory) + '"';
     html += ' data-category="' + escapeHtml(category) + '"';
-    html += ' data-images="' + escapeHtml(product.image) + '">';
     
-    // resim URL'ini doğru şekilde escape et
-    var imageUrl = escapeHtml(product.image);
+    // çoklu resim desteği - images array varsa onu kullan, yoksa image string'i kullan
+    var imagesForModal = [];
+    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+      imagesForModal = product.images;
+    } else if (product.image) {
+      // geriye uyumluluk - tek resim varsa array'e çevir
+      imagesForModal = [product.image];
+    }
+    // virgülle ayrılmış string olarak data-images'e yaz
+    html += ' data-images="' + escapeHtml(imagesForModal.join(',')) + '">';
+    
+    // resim URL'ini doğru şekilde escape et - ilk resmi göster (product card için)
+    var imageUrl = escapeHtml(imagesForModal.length > 0 ? imagesForModal[0] : product.image || '');
     html += '<div class="product-grid" style="background-image:url(' + imageUrl + ');">';
     html += '<div class="inner">';
     html += '<p><a href="#" class="icon"><i class="icon-eye"></i></a></p>';
@@ -706,7 +724,6 @@ function generateProductsHTML(mainCategoryFilter) {
       html += '<span class="product-category">' + escapeHtml(category) + '</span>';
     }
     html += '<h3><a href="#">' + escapeHtml(title) + '</a></h3>';
-    html += '<span class="price">' + escapeHtml(product.price) + '</span>';
     html += '</div>';
     html += '</div>'; // .product kapanış
     html += '</div>'; // .col-md-4 kapanış

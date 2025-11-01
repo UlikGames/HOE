@@ -2,14 +2,47 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
+const multer = require('multer');
 require('dotenv').config(); // .env dosyasından şifreyi alıyoruz amk
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // Railway otomatik PORT veriyor
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin'; // şifre buradan geliyor, değiştir işte
 
 app.use(express.json());
 app.use(express.static('.')); // static dosyaları falan serve ediyor
+
+// images klasörünü oluştur (yoksa)
+const imagesDir = path.join(__dirname, 'images', 'uploads');
+if (!fs.existsSync(imagesDir)) {
+  fs.mkdirSync(imagesDir, { recursive: true });
+}
+
+// multer konfigürasyonu - dosya yükleme için
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, imagesDir);
+  },
+  filename: function (req, file, cb) {
+    // dosya adını timestamp + orijinal isim yap
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, 'product-' + uniqueSuffix + ext);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // max 5MB
+  fileFilter: function (req, file, cb) {
+    // sadece resim dosyaları
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Sadece resim dosyaları yüklenebilir!'));
+    }
+  }
+});
 
 // frontend şifreyi kontrol etmek için buraya geliyor
 app.post('/api/admin/check-password', (req, res) => {
@@ -148,6 +181,62 @@ app.get('/api/products', (req, res) => {
   } catch (error) {
     console.error('Hata:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// resim yükleme endpoint'i - bilgisayardan resim yüklemek için
+app.post('/api/upload-image', checkAdminAuth, upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Resim dosyası yüklenmedi!' });
+    }
+
+    // yüklenen dosyanın URL'ini döndür
+    const imageUrl = '/images/uploads/' + req.file.filename;
+    
+    res.json({ 
+      success: true, 
+      url: imageUrl,
+      filename: req.file.filename
+    });
+  } catch (error) {
+    console.error('Resim yükleme hatası:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// kategori HTML sayfasını sil - kategori silindiğinde çağrılır
+app.delete('/api/categories/:slug', checkAdminAuth, (req, res) => {
+  try {
+    const slug = req.params.slug;
+    
+    if (!slug) {
+      return res.status(400).json({ error: 'Slug gerekli!' });
+    }
+    
+    // kategori HTML dosyasının yolunu bul
+    const htmlFilePath = path.join(__dirname, slug + '.html');
+    
+    // dosya var mı kontrol et
+    if (fs.existsSync(htmlFilePath)) {
+      // dosyayı sil
+      fs.unlinkSync(htmlFilePath);
+      console.log('✅ Kategori HTML sayfası silindi: ' + slug + '.html');
+      return res.json({ 
+        success: true, 
+        message: 'Kategori HTML sayfası silindi: ' + slug + '.html' 
+      });
+    } else {
+      // dosya yoksa hata verme, sadece bilgi ver
+      console.log('ℹ️ Kategori HTML sayfası bulunamadı: ' + slug + '.html (zaten silinmiş olabilir)');
+      return res.json({ 
+        success: true, 
+        message: 'Kategori HTML sayfası bulunamadı (zaten silinmiş olabilir)' 
+      });
+    }
+  } catch (error) {
+    console.error('Kategori HTML sayfası silinirken hata:', error);
+    return res.status(500).json({ error: error.message });
   }
 });
 

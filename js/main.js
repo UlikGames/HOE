@@ -520,8 +520,8 @@
 
     var $carousel = $overlay.find('.pqv-carousel');
     var $title = $overlay.find('.pqv-title');
-    var $price = $overlay.find('.pqv-price');
     var $sku = $overlay.find('.pqv-sku');
+    var $stock = $overlay.find('.pqv-stock');
     var $desc = $overlay.find('.pqv-desc');
 
     function parseBgUrl(bg) {
@@ -538,8 +538,7 @@
       var bg = $product.find('.product-grid').css('background-image') || '';
       var fallbackImg = parseBgUrl(bg);
       var defaults = {
-        title: $.trim($product.find('.desc h3').text()) || 'Ürün',
-        price: $.trim($product.find('.desc .price').text()) || ''
+        title: $.trim($product.find('.desc h3').text()) || 'Ürün'
       };
 
       // .product üzerindeki opsiyonel data attribute'ları
@@ -558,9 +557,26 @@
       var defaultProduct = (typeof i18n !== 'undefined' && i18n.t) ? i18n.t('product.modal.defaultProduct') : 'Ürün';
       
       $title.text(data.title || defaults.title || defaultProduct);
-      $price.text(data.price || defaults.price);
-      // rating kaldırıldı - artık göstermiyoruz
+      // rating ve price kaldırıldı - artık göstermiyoruz
       if (data.sku) { $sku.text(skuText + ' ' + data.sku).show(); } else { $sku.hide().text(''); }
+      
+      // stok bilgisini göster
+      var stock = parseInt(data.stock) || 0;
+      if (stock !== undefined && stock !== null) {
+        var stockColor = '#10b981'; // yeşil
+        var stockText = stock + ' adet';
+        if (stock === 0) {
+          stockColor = '#ef4444'; // kırmızı
+          stockText = 'Stokta Yok';
+        } else if (stock < 10) {
+          stockColor = '#f59e0b'; // turuncu
+          stockText = stock + ' adet (Az Stok)';
+        }
+        $stock.html(' | <span style="color: ' + stockColor + '; font-weight: 600;">Stok: ' + stockText + '</span>').show();
+      } else {
+        $stock.hide().text('');
+      }
+      
       $desc.text(data.desc || data.description || defaultDesc);
       
       // modal close butonunu çevir
@@ -572,7 +588,11 @@
 
       // modal'ı göster sonra görünür olduktan sonra owl'ı init et
       $('body').addClass('modal-open');
-      $overlay.attr('aria-hidden', 'false').fadeIn(150, function () {
+      $overlay.css({
+        'display': 'flex',
+        'align-items': 'center',
+        'justify-content': 'center'
+      }).attr('aria-hidden', 'false').fadeIn(150, function () {
         pqvInitCarousel($carousel);
       });
     }
@@ -616,6 +636,13 @@
       'transition': 'transform 0.5s ease, background-color 0.5s ease',
       '-webkit-transition': 'transform 0.5s ease, background-color 0.5s ease'
     });
+    
+    // modal kapalı olduğundan emin ol - eğer açık kaldıysa kapat
+    var $modal = $('#productQuickView');
+    if ($modal.length && $modal.is(':visible')) {
+      $modal.hide().attr('aria-hidden', 'true');
+      $('body').removeClass('modal-open');
+    }
     
     // loader'ı göster sonra kaldır (fallback)
     var $loader = $(".fh5co-loader");

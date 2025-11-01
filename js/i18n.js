@@ -498,22 +498,39 @@ var i18n = {
         if ($foundProduct && $foundProduct.length) {
           // Modal'ı kapatmadan içeriği güncelle
           var $title = $modal.find('.pqv-title');
-          var $price = $modal.find('.pqv-price');
           var $desc = $modal.find('.pqv-desc');
           var $specs = $modal.find('.pqv-specs');
           var $ship = $modal.find('.pqv-ship');
           var $sku = $modal.find('.pqv-sku');
+          var $stock = $modal.find('.pqv-stock');
           
           var data = $foundProduct.data() || {};
           var skuText = self.t('product.modal.sku');
           
           $title.text(data.title || self.t('product.modal.defaultProduct'));
-          $price.text(data.price || '');
           if (data.sku) { 
             $sku.text(skuText + ' ' + data.sku).show(); 
           } else { 
             $sku.hide().text(''); 
           }
+          
+          // stok bilgisini göster
+          var stock = parseInt(data.stock) || 0;
+          if (stock !== undefined && stock !== null) {
+            var stockColor = '#10b981'; // yeşil
+            var stockText = stock + ' adet';
+            if (stock === 0) {
+              stockColor = '#ef4444'; // kırmızı
+              stockText = 'Stokta Yok';
+            } else if (stock < 10) {
+              stockColor = '#f59e0b'; // turuncu
+              stockText = stock + ' adet (Az Stok)';
+            }
+            $stock.html(' | <span style="color: ' + stockColor + '; font-weight: 600;">Stok: ' + stockText + '</span>').show();
+          } else {
+            $stock.hide().text('');
+          }
+          
           $desc.text(data.desc || data.description || self.t('product.modal.defaultDesc'));
           
           $specs.empty();
