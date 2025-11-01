@@ -1,0 +1,21 @@
+# Netlify konfigürasyonu
+
+[build]
+  command = "npm run build"
+  publish = "."
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Backend API route'ları - Netlify Functions için
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# Tüm HTML dosyalarını index.html'e yönlendirme (SPA fallback)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
