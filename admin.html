@@ -1,0 +1,897 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Admin Panel - Ürün Yönetimi</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Ürün yönetim paneli" />
+	<meta name="author" content="" />
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/style.css">
+	
+	<style>
+		/* Admin panel özel stilleri */
+		.admin-container {
+			padding: 40px 20px;
+			max-width: 1200px;
+			margin: 0 auto;
+		}
+		.admin-header {
+			background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+			color: #fff;
+			padding: 30px;
+			border-radius: 12px;
+			margin-bottom: 30px;
+			box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+		}
+		.admin-header h1 {
+			margin: 0;
+			font-size: 32px;
+			font-weight: 700;
+		}
+		.admin-card {
+			background: #fff;
+			border-radius: 12px;
+			padding: 30px;
+			margin-bottom: 30px;
+			box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+		}
+		.admin-form-group {
+			margin-bottom: 20px;
+		}
+		.admin-form-group label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 600;
+			color: #1a1a1a;
+			font-size: 14px;
+		}
+		.admin-form-group input,
+		.admin-form-group textarea,
+		.admin-form-group select {
+			width: 100%;
+			padding: 12px 16px;
+			border: 2px solid #e5e7eb;
+			border-radius: 8px;
+			font-size: 14px;
+			font-family: "Montserrat", Arial, sans-serif;
+			transition: border-color 0.3s;
+		}
+		.admin-form-group input:focus,
+		.admin-form-group textarea:focus,
+		.admin-form-group select:focus {
+			outline: none;
+			border-color: #6366f1;
+		}
+		.admin-form-group textarea {
+			min-height: 100px;
+			resize: vertical;
+		}
+		.btn-admin {
+			background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+			color: #fff;
+			padding: 12px 30px;
+			border: none;
+			border-radius: 8px;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s;
+			box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+		}
+		.btn-admin:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+		}
+		.btn-admin-danger {
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+			box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
+		}
+		.btn-admin-danger:hover {
+			box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+		}
+		.btn-admin-secondary {
+			background: #6b7280;
+			box-shadow: 0 2px 10px rgba(107, 114, 128, 0.3);
+		}
+		.products-list {
+			margin-top: 30px;
+		}
+		.product-item-admin {
+			background: #f9fafb;
+			border: 2px solid #e5e7eb;
+			border-radius: 8px;
+			padding: 20px;
+			margin-bottom: 15px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+		.product-item-admin:hover {
+			border-color: #6366f1;
+		}
+		.product-item-info {
+			flex: 1;
+		}
+		.product-item-info h3 {
+			margin: 0 0 8px 0;
+			font-size: 18px;
+			color: #1a1a1a;
+		}
+		.product-item-info p {
+			margin: 4px 0;
+			font-size: 14px;
+			color: #6b7280;
+		}
+		.product-item-actions {
+			display: flex;
+			gap: 10px;
+		}
+		.alert {
+			padding: 15px 20px;
+			border-radius: 8px;
+			margin-bottom: 20px;
+			display: none;
+		}
+		.alert-success {
+			background: #d1fae5;
+			color: #065f46;
+			border: 2px solid #10b981;
+		}
+		.alert-error {
+			background: #fee2e2;
+			color: #991b1b;
+			border: 2px solid #ef4444;
+		}
+		.lang-tabs {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 20px;
+		}
+		.lang-tab {
+			padding: 8px 20px;
+			background: #e5e7eb;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-weight: 600;
+			transition: all 0.3s;
+		}
+		.lang-tab.active {
+			background: #6366f1;
+			color: #fff;
+		}
+		.lang-content {
+			display: none;
+		}
+		.lang-content.active {
+			display: block;
+		}
+	</style>
+</head>
+<body>
+	<!-- Şifre Giriş Ekranı -->
+	<div id="loginScreen" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+		<div style="background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 400px; width: 90%;">
+			<h2 style="margin: 0 0 20px 0; text-align: center; color: #1a1a1a;">🔒 Admin Paneli</h2>
+			<div class="alert alert-error" id="loginError" style="display: none; margin-bottom: 20px;"></div>
+			<div class="admin-form-group">
+				<label>Şifre</label>
+				<input type="password" id="adminPassword" placeholder="Admin şifresini gir..." style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px;">
+			</div>
+			<button onclick="checkPassword()" class="btn-admin" style="width: 100%; margin-top: 15px;">Giriş Yap</button>
+		</div>
+	</div>
+
+	<div class="admin-container" id="adminContent" style="display: none;">
+		<div class="admin-header">
+			<h1>📦 Ürün Yönetim Paneli</h1>
+			<p style="margin: 10px 0 0 0; opacity: 0.9;">Ürün ekle, düzenle ve sil</p>
+			<button onclick="logout()" class="btn-admin btn-admin-danger" style="margin-top: 15px;">🚪 Çıkış Yap</button>
+		</div>
+
+		<div class="alert alert-success" id="successAlert"></div>
+		<div class="alert alert-error" id="errorAlert"></div>
+
+		<!-- Ürün Ekleme Formu -->
+		<div class="admin-card">
+			<h2 style="margin-top: 0; margin-bottom: 25px; font-size: 24px;">Yeni Ürün Ekle</h2>
+			
+			<form id="productForm">
+				<div class="lang-tabs">
+					<button type="button" class="lang-tab active" data-lang="tr">🇹🇷 Türkçe</button>
+					<button type="button" class="lang-tab" data-lang="en">🇬🇧 English</button>
+				</div>
+
+				<!-- Türkçe İçerik -->
+				<div class="lang-content active" data-lang="tr">
+					<div class="admin-form-group">
+						<label>Ana Kategori (TR) *</label>
+						<input type="text" id="mainCategoryTr" required placeholder="Örn: Temizlik Ürünleri">
+					</div>
+					<div class="admin-form-group">
+						<label>Kategori (TR) *</label>
+						<input type="text" id="categoryTr" required placeholder="Örn: Çamaşır Suyu">
+					</div>
+					<div class="admin-form-group">
+						<label>Ürün Adı (TR) *</label>
+						<input type="text" id="titleTr" required placeholder="Örn: Domestos Ultra Çamaşır Suyu 5L">
+					</div>
+					<div class="admin-form-group">
+						<label>Açıklama (TR) *</label>
+						<textarea id="descriptionTr" required placeholder="Ürün açıklaması..."></textarea>
+					</div>
+				</div>
+
+				<!-- English İçerik -->
+				<div class="lang-content" data-lang="en">
+					<div class="admin-form-group">
+						<label>Main Category (EN) *</label>
+						<input type="text" id="mainCategoryEn" required placeholder="E.g: Cleaning Products">
+					</div>
+					<div class="admin-form-group">
+						<label>Category (EN) *</label>
+						<input type="text" id="categoryEn" required placeholder="E.g: Bleach">
+					</div>
+					<div class="admin-form-group">
+						<label>Product Name (EN) *</label>
+						<input type="text" id="titleEn" required placeholder="E.g: Domestos Ultra Bleach 5L">
+					</div>
+					<div class="admin-form-group">
+						<label>Description (EN) *</label>
+						<textarea id="descriptionEn" required placeholder="Product description..."></textarea>
+					</div>
+				</div>
+
+				<!-- Ortak Alanlar -->
+				<div class="admin-form-group">
+					<label>Resim URL *</label>
+					<input type="text" id="imageUrl" required placeholder="https://images.unsplash.com/...">
+				</div>
+				<div class="admin-form-group">
+					<label>Fiyat *</label>
+					<input type="text" id="price" required placeholder="₺49.90">
+				</div>
+				<div class="admin-form-group">
+					<label>SKU (Ürün Kodu)</label>
+					<input type="text" id="sku" placeholder="DOM-ULTRA-001">
+				</div>
+
+						<div style="display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap;">
+					<button type="submit" class="btn-admin">➕ Ürün Ekle</button>
+					<button type="button" class="btn-admin btn-admin-secondary" onclick="resetForm()">🔄 Formu Temizle</button>
+					<button type="button" class="btn-admin" onclick="saveToServer()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">💾 Sunucuya Kaydet & Kategoriler Oluştur</button>
+				</div>
+			</form>
+		</div>
+
+		<!-- Kategori Ayarları -->
+		<div class="admin-card">
+			<h2 style="margin-top: 0; margin-bottom: 25px; font-size: 24px;">📂 Kategori Ayarları</h2>
+			<p style="margin-bottom: 20px; color: #6b7280; font-size: 14px;">Kategorilerin header görsellerini buradan ayarlayabilirsin. Kategoriler ürünlerden otomatik tespit edilir.</p>
+			<div id="categorySettings">
+				<!-- Kategoriler buraya eklenecek -->
+			</div>
+		</div>
+
+		<!-- Ürün Listesi -->
+		<div class="admin-card">
+			<h2 style="margin-top: 0; margin-bottom: 25px; font-size: 24px;">Mevcut Ürünler (<span id="productCount">0</span>)</h2>
+			<div class="products-list" id="productsList">
+				<!-- Ürünler buraya eklenecek -->
+			</div>
+		</div>
+	</div>
+
+	<script src="js/jquery.min.js"></script>
+	<script src="js/data-products.js"></script>
+	<script>
+		// session key'i burada tutuyoruz - kullanıcı giriş yaptı mı kontrol etmek için
+		var SESSION_KEY = 'adminLoggedIn';
+		var SESSION_TIMESTAMP_KEY = 'adminLoggedInTimestamp';
+		var SESSION_TIMEOUT = 30 * 60 * 1000; // 30 dakika - milisaniye cinsinden
+		
+		// yanlış şifre deneme limiti - bruteforce'a karşı koruma
+		var MAX_LOGIN_ATTEMPTS = 5; // maksimum deneme hakkı
+		var LOGIN_ATTEMPTS_KEY = 'adminLoginAttempts';
+		var LOCKOUT_TIME_KEY = 'adminLockoutUntil';
+		var LOCKOUT_DURATION = 15 * 60 * 1000; // 15 dakika kilitleme süresi
+
+		// sayfa yüklendiğinde giriş yapmış mı kontrol et - timeout var mı bak
+		function checkLogin() {
+			// kilitleme kontrolü
+			checkLockout();
+			
+			var loggedIn = sessionStorage.getItem(SESSION_KEY) === 'true';
+			var timestamp = sessionStorage.getItem(SESSION_TIMESTAMP_KEY);
+			
+			if (!loggedIn || !timestamp) {
+				$('#loginScreen').show();
+				$('#adminContent').hide();
+				return;
+			}
+			
+			// timeout kontrolü - 30 dakika geçmiş mi?
+			var now = Date.now();
+			var loginTime = parseInt(timestamp);
+			var elapsed = now - loginTime;
+			
+			if (elapsed > SESSION_TIMEOUT) {
+				// timeout oldu - çıkış yap
+				sessionStorage.removeItem(SESSION_KEY);
+				sessionStorage.removeItem(SESSION_TIMESTAMP_KEY);
+				sessionStorage.removeItem('adminPassword');
+				$('#loginScreen').show();
+				$('#adminContent').hide();
+				alert('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+			} else {
+				$('#loginScreen').hide();
+				$('#adminContent').show();
+			}
+		}
+
+		// kilitleme kontrolü - hala kilitli mi?
+		function checkLockout() {
+			var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+			if (lockoutUntil) {
+				var now = Date.now();
+				var unlockTime = parseInt(lockoutUntil);
+				
+				if (now < unlockTime) {
+					// hala kilitli
+					var remainingMinutes = Math.ceil((unlockTime - now) / (60 * 1000));
+					$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Lütfen ' + remainingMinutes + ' dakika sonra tekrar deneyin.').fadeIn(300);
+					$('#adminPassword').prop('disabled', true);
+					$('button[onclick="checkPassword()"]').prop('disabled', true);
+					return true;
+				} else {
+					// kilitleme süresi doldu - reset et
+					localStorage.removeItem(LOCKOUT_TIME_KEY);
+					localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+				}
+			}
+			return false;
+		}
+		
+		// şifreyi backend'e gönder ve doğrula - amk şifresiz giremesinler diye
+		function checkPassword() {
+			// kilitleme kontrolü
+			if (checkLockout()) {
+				return;
+			}
+			
+			var password = $('#adminPassword').val();
+			
+			if (!password) {
+				$('#loginError').text('⚠️ Şifre gerekli!').fadeIn(300);
+				return;
+			}
+			
+			// backend'e istek at
+			$.ajax({
+				url: '/api/admin/check-password',
+				method: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify({ password: password }),
+				success: function(response) {
+					if (response.success) {
+						// başarılı giriş - deneme sayısını resetle
+						localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+						localStorage.removeItem(LOCKOUT_TIME_KEY);
+						
+						sessionStorage.setItem(SESSION_KEY, 'true');
+						sessionStorage.setItem(SESSION_TIMESTAMP_KEY, Date.now().toString());
+						sessionStorage.setItem('adminPassword', password);
+						$('#loginScreen').fadeOut(300);
+						$('#adminContent').fadeIn(300);
+						$('#loginError').hide();
+						$('#adminPassword').val('');
+						$('#adminPassword').prop('disabled', false);
+						$('button[onclick="checkPassword()"]').prop('disabled', false);
+					}
+				},
+				error: function(xhr) {
+					// yanlış şifre - deneme sayısını artır
+					var attempts = parseInt(localStorage.getItem(LOGIN_ATTEMPTS_KEY) || '0');
+					attempts++;
+					localStorage.setItem(LOGIN_ATTEMPTS_KEY, attempts.toString());
+					
+					var remainingAttempts = MAX_LOGIN_ATTEMPTS - attempts;
+					
+					if (attempts >= MAX_LOGIN_ATTEMPTS) {
+						// limit aşıldı - kilitle
+						var lockoutUntil = Date.now() + LOCKOUT_DURATION;
+						localStorage.setItem(LOCKOUT_TIME_KEY, lockoutUntil.toString());
+						
+						$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Hesap 15 dakika süreyle kilitlendi.').fadeIn(300);
+						$('#adminPassword').prop('disabled', true);
+						$('button[onclick="checkPassword()"]').prop('disabled', true);
+						
+						// 15 dakika sonra otomatik açılsın
+						setTimeout(function() {
+							localStorage.removeItem(LOCKOUT_TIME_KEY);
+							localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+							$('#loginError').hide();
+							$('#adminPassword').prop('disabled', false);
+							$('button[onclick="checkPassword()"]').prop('disabled', false);
+							$('#adminPassword').val('').focus();
+						}, LOCKOUT_DURATION);
+					} else {
+						var errorMsg = '❌ Yanlış şifre!';
+						if (xhr.responseJSON && xhr.responseJSON.error) {
+							errorMsg = '❌ ' + xhr.responseJSON.error;
+						}
+						errorMsg += '<br>Kalan deneme hakkı: ' + remainingAttempts;
+						$('#loginError').html(errorMsg).fadeIn(300);
+					}
+					
+					$('#adminPassword').val('').focus();
+				}
+			});
+		}
+
+		// enter tuşuna basınca da giriş yapsın - kullanıcı dostu olsun
+		$(document).on('keypress', '#adminPassword', function(e) {
+			if (e.which === 13) {
+				checkPassword();
+			}
+		});
+
+		// çıkış yap - session'ı temizle
+		function logout() {
+			if (confirm('Çıkış yapmak istediğinize emin misiniz?')) {
+				sessionStorage.removeItem(SESSION_KEY);
+				sessionStorage.removeItem(SESSION_TIMESTAMP_KEY);
+				sessionStorage.removeItem('adminPassword');
+				$('#adminContent').fadeOut(300);
+				$('#loginScreen').fadeIn(300);
+				$('#adminPassword').val('').focus();
+			}
+		}
+		
+		// her dakika timeout kontrolü yap - sayfa açıkken de kontrol etsin
+		setInterval(function() {
+			// kilitleme kontrolü - kalan süreyi güncelle
+			var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+			if (lockoutUntil) {
+				var now = Date.now();
+				var unlockTime = parseInt(lockoutUntil);
+				
+				if (now < unlockTime) {
+					var remainingMinutes = Math.ceil((unlockTime - now) / (60 * 1000));
+					$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Lütfen ' + remainingMinutes + ' dakika sonra tekrar deneyin.');
+				} else {
+					// kilitleme süresi doldu
+					localStorage.removeItem(LOCKOUT_TIME_KEY);
+					localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+					$('#loginError').hide();
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+				}
+			}
+			
+			// session timeout kontrolü
+			var timestamp = sessionStorage.getItem(SESSION_TIMESTAMP_KEY);
+			if (timestamp) {
+				var now = Date.now();
+				var loginTime = parseInt(timestamp);
+				var elapsed = now - loginTime;
+				
+				if (elapsed > SESSION_TIMEOUT) {
+					// timeout oldu
+					sessionStorage.removeItem(SESSION_KEY);
+					sessionStorage.removeItem(SESSION_TIMESTAMP_KEY);
+					sessionStorage.removeItem('adminPassword');
+					$('#adminContent').fadeOut(300);
+					$('#loginScreen').fadeIn(300);
+					alert('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+				}
+			}
+		}, 60000); // her 1 dakikada bir kontrol et
+
+		checkLogin();
+		
+		// dil sekmeleri - tr/en arasında geçiş yapmak için
+		$('.lang-tab').on('click', function() {
+			var lang = $(this).data('lang');
+			$('.lang-tab').removeClass('active');
+			$(this).addClass('active');
+			$('.lang-content').removeClass('active');
+			$('.lang-content[data-lang="' + lang + '"]').addClass('active');
+			
+			// gizli input'lardan required kaldır, aktif olanlara ekle
+			$('.lang-content:not(.active) [required]').prop('required', false);
+			$('.lang-content.active [id$="Tr"], .lang-content.active [id$="En"]').each(function() {
+				if ($(this).is('input[type="text"]') || $(this).is('textarea')) {
+					$(this).prop('required', true);
+				}
+			});
+			
+			// kategori listesini de güncelle (dil değiştiğinde)
+			renderCategorySettings();
+		});
+
+		// localStorage'dan ürünleri yükle - sayfa yenilenince kaybolmasın diye
+		function loadProducts() {
+			var stored = localStorage.getItem('adminProducts');
+			if (stored) {
+				var parsed = JSON.parse(stored);
+				if (Array.isArray(parsed) && parsed.length > 0) {
+					productsData = parsed;
+				}
+			}
+			renderProducts();
+			renderCategorySettings(); // kategorileri de render et
+		}
+
+		// localStorage'a kaydet - geçici olarak burada tutuyoruz
+		function saveProducts() {
+			localStorage.setItem('adminProducts', JSON.stringify(productsData));
+		}
+
+		// kategorileri listele - header görseli ayarlamak için
+		function renderCategorySettings() {
+			var $container = $('#categorySettings');
+			if (!$container.length) return;
+			
+			// mainCategories'ı tespit et (ürünlerden)
+			var detectedCategories = {};
+			productsData.forEach(function(product) {
+				var mainCat = product.mainCategory;
+				if (mainCat) {
+					var key = typeof mainCat === 'object' ? mainCat.tr || mainCat.en : mainCat;
+					if (key && !detectedCategories[key]) {
+						var slug = key.toLowerCase()
+							.replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u')
+							.replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/ı/g, 'i')
+							.replace(/[^a-z0-9]+/g, '-')
+							.replace(/^-|-$/g, '');
+						
+						var enTitle = typeof mainCat === 'object' ? mainCat.en || mainCat.tr : mainCat;
+						var trTitle = typeof mainCat === 'object' ? mainCat.tr || mainCat.en : mainCat;
+						
+						// mevcut mainCategories'dan headerImage'i al (varsa)
+						var existingCategory = null;
+						if (typeof mainCategories !== 'undefined' && mainCategories.length > 0) {
+							existingCategory = mainCategories.find(function(cat) {
+								return cat.slug === slug;
+							});
+						}
+						
+						detectedCategories[key] = {
+							slug: slug,
+							title: { tr: trTitle, en: enTitle },
+							headerImage: existingCategory ? (existingCategory.headerImage || '') : ''
+						};
+					}
+				}
+			});
+			
+			var categories = Object.values(detectedCategories);
+			
+			if (categories.length === 0) {
+				$container.html('<p style="color: #6b7280; text-align: center; padding: 20px;">Henüz kategori yok. Ürün eklediğinde kategoriler otomatik oluşacak.</p>');
+				return;
+			}
+			
+			var html = '';
+			var currentLang = $('.lang-tab.active').data('lang') || 'tr';
+			
+			categories.forEach(function(cat) {
+				var title = cat.title[currentLang] || cat.title.tr || cat.title.en;
+				
+				html += '<div class="category-setting-item" style="margin-bottom: 25px; padding: 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: #fafafa;">';
+				html += '<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">';
+				html += '<div style="flex: 1; min-width: 200px;">';
+				html += '<strong style="display: block; margin-bottom: 5px; font-size: 16px; color: #1a1a1a;">' + escapeHtml(title) + '</strong>';
+				html += '<span style="font-size: 12px; color: #6b7280;">Slug: <code style="background: #e5e7eb; padding: 2px 6px; border-radius: 4px;">' + escapeHtml(cat.slug) + '.html</code></span>';
+				html += '</div>';
+				html += '</div>';
+				html += '<div class="admin-form-group">';
+				html += '<label>Header Görsel URL (1920px genişlik önerilir)</label>';
+				html += '<input type="text" class="category-header-image" data-slug="' + escapeHtml(cat.slug) + '" placeholder="https://images.unsplash.com/..." value="' + escapeHtml(cat.headerImage || '') + '" style="width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 14px;">';
+				html += '<small style="display: block; margin-top: 5px; color: #6b7280; font-size: 12px;">Boş bırakırsan otomatik generic görsel kullanılır</small>';
+				html += '</div>';
+				html += '</div>';
+			});
+			
+			$container.html(html);
+		}
+
+		// ürünleri listele - DOM'a yazıyoruz
+		function renderProducts() {
+			var html = '';
+			if (productsData.length === 0) {
+				html = '<p style="color: #6b7280; text-align: center; padding: 40px;">Henüz ürün eklenmemiş.</p>';
+			} else {
+				productsData.forEach(function(product, index) {
+					var currentLang = 'tr';
+					var title = typeof product.title === 'object' ? product.title[currentLang] || product.title.tr || product.title.en : product.title;
+					var category = typeof product.category === 'object' ? product.category[currentLang] || product.category.tr || product.category.en : product.category;
+					var price = product.price || 'Fiyat belirtilmemiş';
+					
+					html += '<div class="product-item-admin">';
+					html += '<div class="product-item-info">';
+					html += '<h3>' + escapeHtml(title) + '</h3>';
+					html += '<p><strong>Kategori:</strong> ' + escapeHtml(category) + '</p>';
+					html += '<p><strong>Fiyat:</strong> ' + escapeHtml(price) + '</p>';
+					html += '<p><strong>SKU:</strong> ' + escapeHtml(product.sku || '-') + '</p>';
+					html += '</div>';
+					html += '<div class="product-item-actions">';
+					html += '<button class="btn-admin btn-admin-secondary" onclick="editProduct(' + index + ')">✏️ Düzenle</button>';
+					html += '<button class="btn-admin btn-admin-danger" onclick="deleteProduct(' + index + ')">🗑️ Sil</button>';
+					html += '</div>';
+					html += '</div>';
+				});
+			}
+			$('#productsList').html(html);
+			$('#productCount').text(productsData.length);
+		}
+
+		// ürünü sil - dikkatli ol amk
+		function deleteProduct(index) {
+			if (confirm('Bu ürünü silmek istediğinize emin misiniz?')) {
+				productsData.splice(index, 1);
+				saveProducts();
+				renderProducts();
+				renderCategorySettings(); // kategorileri de güncelle
+				showAlert('success', 'Ürün silindi!');
+			}
+		}
+
+		// düzenleme modu için index tutuyoruz
+		var editingIndex = -1;
+		// ürünü düzenle - formu doldur
+		function editProduct(index) {
+			var product = productsData[index];
+			editingIndex = index;
+
+			$('#imageUrl').val(product.image);
+			$('#mainCategoryTr').val(product.mainCategory.tr || '');
+			$('#mainCategoryEn').val(product.mainCategory.en || '');
+			$('#categoryTr').val(product.category.tr || '');
+			$('#categoryEn').val(product.category.en || '');
+			$('#titleTr').val(product.title.tr || '');
+			$('#titleEn').val(product.title.en || '');
+			$('#descriptionTr').val(product.description.tr || '');
+			$('#descriptionEn').val(product.description.en || '');
+			$('#price').val(product.price || '');
+			$('#sku').val(product.sku || '');
+
+			$('#productForm button[type="submit"]').text('💾 Değişiklikleri Kaydet').data('editing', true);
+			$('html, body').animate({ scrollTop: $('#productForm').offset().top - 50 }, 500);
+		}
+
+		// form submit - hem yeni ekleme hem düzenleme burada
+		$('#productForm').off('submit').on('submit', function(e) {
+			e.preventDefault();
+			
+			// gizli input'lardan required attribute'unu kaldır - HTML5 validation hatası vermesin diye
+			$('.lang-content:not(.active) [required]').prop('required', false);
+			
+			var product = {
+				image: $('#imageUrl').val().trim(),
+				mainCategory: {
+					tr: $('#mainCategoryTr').val().trim(),
+					en: $('#mainCategoryEn').val().trim()
+				},
+				category: {
+					tr: $('#categoryTr').val().trim(),
+					en: $('#categoryEn').val().trim()
+				},
+				title: {
+					tr: $('#titleTr').val().trim(),
+					en: $('#titleEn').val().trim()
+				},
+				price: $('#price').val().trim(),
+				description: {
+					tr: $('#descriptionTr').val().trim(),
+					en: $('#descriptionEn').val().trim()
+				},
+				specs: {
+					tr: '',
+					en: ''
+				},
+				sku: $('#sku').val().trim() || '',
+				shipping: {
+					tr: '',
+					en: ''
+				}
+			};
+
+			if (editingIndex >= 0) {
+				productsData[editingIndex] = product;
+				editingIndex = -1;
+				$('#productForm button[type="submit"]').text('➕ Ürün Ekle').data('editing', false);
+				showAlert('success', 'Ürün güncellendi!');
+			} else {
+				productsData.push(product);
+				showAlert('success', 'Ürün başarıyla eklendi!');
+			}
+
+			// required attribute'larını geri ekle
+			$('.lang-content [id$="Tr"], .lang-content [id$="En"]').each(function() {
+				if ($(this).is('input[type="text"]') || $(this).is('textarea')) {
+					$(this).prop('required', true);
+				}
+			});
+			
+			saveProducts();
+			renderProducts();
+			renderCategorySettings(); // kategorileri de güncelle
+			resetForm();
+		});
+
+		function resetForm() {
+			$('#productForm')[0].reset();
+			editingIndex = -1;
+			$('#productForm button[type="submit"]').text('➕ Ürün Ekle').data('editing', false);
+			$('.lang-tab[data-lang="tr"]').click();
+		}
+
+		// Alert göster
+		function showAlert(type, message) {
+			var $alert = type === 'success' ? $('#successAlert') : $('#errorAlert');
+			$alert.text(message).fadeIn(300);
+			setTimeout(function() {
+				$alert.fadeOut(300);
+			}, 3000);
+		}
+
+		// HTML escape - XSS'den korunmak için lazım bu
+		function escapeHtml(text) {
+			if (!text) return '';
+			var map = {
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#039;'
+			};
+			return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+		}
+
+		// backend'e kaydet - asıl iş burada oluyor amk
+		function saveToServer() {
+			// mainCategories'ı otomatik tespit et - ürünlerden çıkarıyoruz
+			var detectedCategories = {};
+			
+			productsData.forEach(function(product) {
+				var mainCat = product.mainCategory;
+				if (mainCat) {
+					var key = typeof mainCat === 'object' ? mainCat.tr || mainCat.en : mainCat;
+					if (key && !detectedCategories[key]) {
+						// slug oluştur - türkçe karakterleri temizle
+						var slug = key.toLowerCase()
+							.replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u')
+							.replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/ı/g, 'i')
+							.replace(/[^a-z0-9]+/g, '-')
+							.replace(/^-|-$/g, '');
+						
+						// tr/en title'ları al
+						var enTitle = typeof mainCat === 'object' ? mainCat.en || mainCat.tr : mainCat;
+						var trTitle = typeof mainCat === 'object' ? mainCat.tr || mainCat.en : mainCat;
+						
+						// açıklama için ilk üründen al - lazy approach
+						var firstProduct = productsData.find(function(p) {
+							var pMainCat = p.mainCategory;
+							var pKey = typeof pMainCat === 'object' ? pMainCat.tr || pMainCat.en : pMainCat;
+							return pKey === key;
+						});
+						
+						// header görseli - önce admin panelden ayarlanan varsa onu al, yoksa generic kullan
+						var headerImageInput = $('.category-header-image[data-slug="' + slug + '"]');
+						var headerImage = '';
+						
+						if (headerImageInput.length && headerImageInput.val().trim()) {
+							// admin panelden ayarlanan görsel
+							headerImage = headerImageInput.val().trim();
+						} else {
+							// generic görsel - kategoriye göre özel
+							headerImage = 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80';
+							
+							// kategoriye göre özel header görseli
+							if (key.toLowerCase().indexOf('temizlik') !== -1 || key.toLowerCase().indexOf('cleaning') !== -1) {
+								headerImage = 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80';
+							}
+						}
+						
+						detectedCategories[key] = {
+							slug: slug,
+							headerImage: headerImage,
+							title: {
+								tr: trTitle,
+								en: enTitle
+							},
+							description: {
+								tr: firstProduct ? (typeof firstProduct.description === 'object' ? firstProduct.description.tr : firstProduct.description) : '',
+								en: firstProduct ? (typeof firstProduct.description === 'object' ? firstProduct.description.en : firstProduct.description) : ''
+							},
+							image: firstProduct ? firstProduct.image : 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1920&q=80'
+						};
+					}
+				}
+			});
+			
+			// array'e çevir
+			var mainCategories = Object.values(detectedCategories);
+			
+			// loading göster - butonu disable et
+			var $btn = $('button[onclick="saveToServer()"]');
+			var originalText = $btn.text();
+			$btn.prop('disabled', true).text('⏳ Kaydediliyor...');
+			
+			// şifreyi session'dan al - API isteği için lazım
+			var adminPassword = sessionStorage.getItem('adminPassword');
+			if (!adminPassword) {
+				showAlert('error', '❌ Oturum süresi dolmuş! Lütfen tekrar giriş yapın.');
+				logout();
+				return;
+			}
+			
+			// backend'e gönder - şifreyi header'a koy
+			$.ajax({
+				url: '/api/products/save',
+				method: 'POST',
+				contentType: 'application/json',
+				headers: {
+					'X-Admin-Password': adminPassword
+				},
+				data: JSON.stringify({
+					products: productsData,
+					mainCategories: mainCategories
+				}),
+				success: function(response) {
+					$btn.prop('disabled', false).text(originalText);
+					showAlert('success', '✅ Başarılı! ' + response.productsCount + ' ürün kaydedildi, ' + response.categoriesCount + ' kategori oluşturuldu ve sayfalar hazırlandı!');
+					console.log('Backend response:', response);
+				},
+				error: function(xhr, status, error) {
+					$btn.prop('disabled', false).text(originalText);
+					var errorMsg = 'Hata: ';
+					if (xhr.responseJSON && xhr.responseJSON.error) {
+						errorMsg += xhr.responseJSON.error;
+					} else {
+						errorMsg += error || 'Sunucuya bağlanılamadı!';
+					}
+					showAlert('error', errorMsg);
+					console.error('Backend error:', xhr.responseJSON || error);
+				}
+			});
+		}
+
+		// sayfa yüklendiğinde - backend'den ürünleri çek
+		$(document).ready(function() {
+			$.ajax({
+				url: '/api/products',
+				method: 'GET',
+				success: function(data) {
+					if (data.products && data.products.length > 0) {
+						productsData = data.products;
+						localStorage.setItem('adminProducts', JSON.stringify(productsData));
+						
+						// mainCategories'ı da yükle (eğer varsa)
+						if (data.mainCategories && data.mainCategories.length > 0) {
+							mainCategories = data.mainCategories;
+						}
+						
+						renderProducts();
+						renderCategorySettings(); // kategorileri de render et
+						showAlert('success', 'Backend\'den ' + data.products.length + ' ürün yüklendi!');
+					} else {
+						loadProducts(); // backend'de yoksa localStorage'dan yükle
+					}
+				},
+				error: function() {
+					loadProducts(); // hata varsa localStorage'dan yükle
+				}
+			});
+		});
+	</script>
+</body>
+</html>
