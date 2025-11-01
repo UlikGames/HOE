@@ -21,7 +21,8 @@
 
   var offcanvasMenu = function () {
     $('#page').prepend('<div id="fh5co-offcanvas"></div>');
-    $('#page').prepend('<a href="#" class="js-fh5co-nav-toggle fh5co-nav-toggle fh5co-nav-white"><i></i></a>');
+    // menu butonunu navigation bar'a direkt ekle - en sağa konumlandır
+    $('.fh5co-nav').append('<a href="#" class="js-fh5co-nav-toggle fh5co-nav-toggle fh5co-nav-white"><i></i></a>');
 
     var clone1 = $('.menu-1 > ul').clone();
     $('#fh5co-offcanvas').append(clone1);
@@ -31,14 +32,36 @@
     $('#fh5co-offcanvas .has-dropdown').addClass('offcanvas-has-dropdown');
     $('#fh5co-offcanvas').find('li').removeClass('has-dropdown');
 
-    // mobilde hover olunca dropdown açılıyor
-    $('.offcanvas-has-dropdown').mouseenter(function(){
-      var $this = $(this);
-      $this.addClass('active').find('ul').stop(true,true).slideDown(300, 'easeOutExpo');
-    }).mouseleave(function(){
-      var $this = $(this);
-      $this.removeClass('active').find('ul').stop(true,true).slideUp(300, 'easeOutExpo');
+    // mobilde dropdown açma/kapama - tıklayınca aç ama dropdown içindeki linklere tıklayınca normal çalışsın
+    // dropdown içinde artık "Tümü" linki var, o product.html'e götürür
+    $(document).on('click', '.offcanvas-has-dropdown > a', function(e) {
+      var $link = $(this);
+      var $parent = $link.parent('.offcanvas-has-dropdown');
+      var $dropdown = $parent.find('ul');
+      
+      // dropdown yoksa normal link gibi çalışsın
+      if (!$dropdown.length || $dropdown.children().length === 0) {
+        return; // normal link gibi çalışsın
+      }
+      
+      // dropdown varsa aç/kapat ama link'e gitme (çünkü dropdown içinde "Tümü" linki var)
+      e.preventDefault();
+      
+      // diğer açık dropdown'ları kapat
+      $('.offcanvas-has-dropdown').not($parent).removeClass('active').find('ul').slideUp(300);
+      
+      // bu dropdown'ı aç/kapat
+      if ($parent.hasClass('active')) {
+        $parent.removeClass('active');
+        $dropdown.slideUp(300);
+      } else {
+        $parent.addClass('active');
+        $dropdown.slideDown(300);
+      }
     });
+    
+    // dropdown içindeki linklere tıklayınca normal çalışsın (product.html, mobilya.html, peynir.html)
+    // bu zaten normal çalışır, ekstra bir şey yapmaya gerek yok
 
     $(window).on('resize', function () {
       if ($('body').hasClass('offcanvas')) {
@@ -498,11 +521,8 @@
     var $carousel = $overlay.find('.pqv-carousel');
     var $title = $overlay.find('.pqv-title');
     var $price = $overlay.find('.pqv-price');
-    var $rating = $overlay.find('.pqv-rating');
     var $sku = $overlay.find('.pqv-sku');
     var $desc = $overlay.find('.pqv-desc');
-    var $specs = $overlay.find('.pqv-specs');
-    var $ship = $overlay.find('.pqv-ship');
 
     function parseBgUrl(bg) {
       var imgUrl = '';
@@ -511,21 +531,6 @@
         if (m) imgUrl = m[1];
       }
       return imgUrl;
-    }
-
-    function buildStars(n) {
-      n = parseFloat(n);
-      if (isNaN(n)) return '';
-      var full = Math.max(0, Math.min(5, Math.round(n)));
-      var s = '';
-      for (var i = 0; i < 5; i++) {
-        if (i < full) {
-          s += '<span style="color: #d1c286;">★</span>';
-        } else {
-          s += '<span style="color: #ccc;">☆</span>';
-        }
-      }
-      return s + ' (' + n + '/5)';
     }
 
     function openFrom($product) {
@@ -550,24 +555,13 @@
       // alanları doldur - çevirileri de uygula
       var skuText = (typeof i18n !== 'undefined' && i18n.t) ? i18n.t('product.modal.sku') : 'SKU:';
       var defaultDesc = (typeof i18n !== 'undefined' && i18n.t) ? i18n.t('product.modal.defaultDesc') : 'Açıklama yok.';
-      var defaultShipping = (typeof i18n !== 'undefined' && i18n.t) ? i18n.t('product.modal.defaultShipping') : '2-4 iş gününde kargo. 30 gün ücretsiz iade.';
       var defaultProduct = (typeof i18n !== 'undefined' && i18n.t) ? i18n.t('product.modal.defaultProduct') : 'Ürün';
       
       $title.text(data.title || defaults.title || defaultProduct);
       $price.text(data.price || defaults.price);
-      $rating.html(buildStars(data.rating));
+      // rating kaldırıldı - artık göstermiyoruz
       if (data.sku) { $sku.text(skuText + ' ' + data.sku).show(); } else { $sku.hide().text(''); }
       $desc.text(data.desc || data.description || defaultDesc);
-
-      $specs.empty();
-      if (data.specs) {
-        (String(data.specs).includes('|') ? String(data.specs).split('|') : String(data.specs).split(','))
-          .map(function (s) { return $.trim(s); })
-          .filter(Boolean)
-          .forEach(function (item) { $specs.append($('<li>').text(item)); });
-      }
-
-      $ship.text(data.shipping || data.ship || defaultShipping);
       
       // modal close butonunu çevir
       var closeText = (typeof i18n !== 'undefined' && i18n.t) ? i18n.t('product.modal.close') : 'Close';
@@ -580,7 +574,6 @@
       $('body').addClass('modal-open');
       $overlay.attr('aria-hidden', 'false').fadeIn(150, function () {
         pqvInitCarousel($carousel);
-        autoHeight(); // modal içinde tab wrapper yüksekliğinin mantıklı olmasını sağla
       });
     }
 
@@ -658,14 +651,40 @@
     tabs();
     goToTop();
     
+    // menü dropdown'ını dinamik oluştur (mainCategories array'inden)
+    if (typeof generateMenuDropdown === 'function') {
+      generateMenuDropdown();
+    }
+    
     // ürünleri data'dan oluştur (product sayfasındaysa ve fonksiyon varsa)
-    if (typeof generateProductsHTML === 'function' && $('#products-container').length) {
-      generateProductsHTML();
-      // not: generateProductsHTML ürünleri oluşturduktan sonra waypoint'leri tekrar başlatır
+    // eğer products-container yoksa ama main-categories varsa, ana kategori kartlarını göster
+    if (typeof generateProductsHTML === 'function') {
+      if ($('#products-container').length && $('#main-categories').length === 0) {
+        // alt kategori sayfası (mobilya.html, peynir.html gibi)
+        // loadCategoryPage() fonksiyonu script tag'i içinde çağrılacak, burada bir şey yapma
+      } else if ($('#main-categories').length) {
+        // ana products.html sayfası - kategori kartlarını göster
+        generateProductsHTML(); // içinde generateMainCategoryCards() çağrılacak
+      }
     }
     
     // hero slider'ı başlat - loader zaten kaldırıldı
     heroFlexslider();
+    
+    // navigation bar scroll kontrolü - scroll edildiğinde fixed yap
+    var navScrollHandler = function() {
+      var $nav = $('.fh5co-nav');
+      if ($(window).scrollTop() > 50) {
+        $nav.addClass('scrolled');
+      } else {
+        $nav.removeClass('scrolled');
+      }
+    };
+    
+    // scroll event'i ekle
+    $(window).on('scroll', navScrollHandler);
+    // sayfa yüklendiğinde de kontrol et
+    navScrollHandler();
     
     // diğer slider'ları başlat
     sliderMain();

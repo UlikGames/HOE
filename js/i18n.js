@@ -12,7 +12,9 @@ var translationsData = {
       "products": "Ürünler",
       "about": "Hakkımızda",
       "services": "Hizmetler",
-      "contact": "İletişim"
+      "contact": "İletişim",
+      "cleaningProducts": "Temizlik Ürünleri",
+      "allProducts": "Tümü"
     },
     "index": {
       "services": {
@@ -153,7 +155,9 @@ var translationsData = {
       "products": "Products",
       "about": "About",
       "services": "Services",
-      "contact": "Contact"
+      "contact": "Contact",
+      "cleaningProducts": "Cleaning Products",
+      "allProducts": "All"
     },
     "index": {
       "services": {
@@ -435,8 +439,28 @@ var i18n = {
         }, 150);
       }
       
+      // menü dropdown'ını güncelle
+      if (typeof generateMenuDropdown === 'function') {
+        generateMenuDropdown();
+      }
+      
+      // ana kategori kartlarını güncelle
+      if (typeof generateMainCategoryCards === 'function' && $('#main-categories').length) {
+        generateMainCategoryCards();
+      }
+      
+      // kategori sayfası header'ını güncelle (eğer kategori sayfasındaysak)
+      if (typeof fillCategoryPageHeader === 'function' && $('#products-container').length && $('#main-categories').length === 0) {
+        fillCategoryPageHeader();
+      }
+      
       // ürünleri yeniden generate et - dil değiştiğinde ürünler de güncellenecek
-      if (typeof generateProductsHTML === 'function' && $('#products-container').length) {
+      // generateProductsHTML içinde generateCategoryFilters() de çağrılıyor, kategoriler de güncellenecek
+      if (typeof loadCategoryPage === 'function' && $('#products-container').length && $('#main-categories').length === 0) {
+        // kategori sayfasındaysak loadCategoryPage kullan (hem header hem ürünler güncellenecek)
+        loadCategoryPage();
+      } else if (typeof generateProductsHTML === 'function' && $('#products-container').length) {
+        // fallback - normal ürün sayfası
         generateProductsHTML();
       }
       

@@ -32,54 +32,54 @@
 
 var sliderData = [
   {
-    image: 'images/img_bg_1.jpg',
-    price: '$800',
+    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1920&q=80',
+    price: '₺49.90',
     title: {
-      tr: 'Alato Dolap',
-      en: 'Alato Cabinet'
+      tr: 'Premium Çamaşır Suyu Koleksiyonu',
+      en: 'Premium Bleach Collection'
     },
     description: {
-      tr: 'Uzak ülkelerde, kelime dağlarının ardında, Vokalia ve Consonantia ülkelerinden çok uzakta, kör metinler yaşıyor. Ayrılmış olarak Bookmarksgrove\'da yaşıyorlar.',
-      en: 'Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove.'
+      tr: 'Güçlü ve etkili temizlik için profesyonel kalitede çamaşır suyu. Evinizin her köşesinde hijyen garantisi.',
+      en: 'Professional quality bleach for powerful and effective cleaning. Hygiene guaranteed in every corner of your home.'
     },
     hasOverlay: true
   },
   {
-    image: 'images/img_bg_2.jpg',
-    price: '$530',
+    image: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=1920&q=80',
+    price: '₺89.90',
     title: {
-      tr: 'The Haluz Sallanan Koltuk',
-      en: 'The Haluz Rocking Chair'
+      tr: 'Ultra Deterjan Serisi',
+      en: 'Ultra Detergent Series'
     },
     description: {
-      tr: 'Uzak ülkelerde, kelime dağlarının ardında, Vokalia ve Consonantia ülkelerinden çok uzakta, kör metinler yaşıyor. Ayrılmış olarak Bookmarksgrove\'da yaşıyorlar.',
-      en: 'Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove.'
+      tr: 'Çamaşırlarınızı tertemiz yapan, leke çıkarma gücü yüksek deterjan serisi. Hassas ciltler için de uygun.',
+      en: 'High-performance detergent series that leaves your clothes spotless. Suitable for sensitive skin too.'
     },
     hasOverlay: false
   },
   {
-    image: 'images/img_bg_3.jpg',
-    price: '$750',
+    image: 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=1920&q=80',
+    price: '₺34.90',
     title: {
-      tr: 'Alato Dolap',
-      en: 'Alato Cabinet'
+      tr: 'Bulaşık Deterjanı Seti',
+      en: 'Dishwashing Detergent Set'
     },
     description: {
-      tr: 'Uzak ülkelerde, kelime dağlarının ardında, Vokalia ve Consonantia ülkelerinden çok uzakta, kör metinler yaşıyor. Ayrılmış olarak Bookmarksgrove\'da yaşıyorlar.',
-      en: 'Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove.'
+      tr: 'Yağlı bulaşıkları anında temizleyen, el dostu formül. Bulaşıklarınız parlak ve hijyenik kalacak.',
+      en: 'Hand-friendly formula that instantly cleans greasy dishes. Your dishes will stay shiny and hygienic.'
     },
     hasOverlay: false
   },
   {
-    image: 'images/img_bg_4.jpg',
-    price: '$620',
+    image: 'https://images.unsplash.com/photo-1563453392212-326f5e854473?w=1920&q=80',
+    price: '₺59.90',
     title: {
-      tr: 'WW Koltuğu',
-      en: 'The WW Chair'
+      tr: 'Çok Amaçlı Temizlik Ürünleri',
+      en: 'Multi-Purpose Cleaning Products'
     },
     description: {
-      tr: 'Uzak ülkelerde, kelime dağlarının ardında, Vokalia ve Consonantia ülkelerinden çok uzakta, kör metinler yaşıyor. Ayrılmış olarak Bookmarksgrove\'da yaşıyorlar.',
-      en: 'Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove.'
+      tr: 'Mutfaktan banyoya, her yüzey için güvenli ve etkili temizlik. Profesyonel temizlik sonuçları evinizde.',
+      en: 'Safe and effective cleaning for every surface, from kitchen to bathroom. Professional cleaning results at home.'
     },
     hasOverlay: false
   }
@@ -117,6 +117,11 @@ function generateSliderHTML() {
     html += '<p>' + escapeHtml(description) + '</p>';
     html += '</div>';
     html += '</div>';
+    html += '</div>';
+    html += '</div>';
+    html += '<div class="hero-contact-info">';
+    html += '<div class="hero-contact-box">';
+    html += '<i class="icon-phone"></i><span class="contact-text">+90 XXX XXX XX XX</span>';
     html += '</div>';
     html += '</div>';
     html += '</div>';

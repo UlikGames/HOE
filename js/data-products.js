@@ -1,346 +1,741 @@
 // ============================================
-// ürün datası - yeni ürün eklemek süper kolay
-// buraya ürün ekleyip çıkarabiliyorsun html'e dokunmuyorsun
+// ürün datası - admin panelinden otomatik güncelleniyor
+// manuel düzenleme yapma, admin.html kullan!
 // ============================================
-// 
-// nasıl yeni ürün eklersin:
-// 1. aşağıdaki objelerden birini kopyala (şu { } içindeki şeyler)
-// 2. değerleri değiştir:
-//    - image: ürün resminin yolu (örn: 'images/urunum.jpg')
-//    - title: ürün adı
-//    - price: fiyat (örn: '$999' ya da 'fiyat için iletişime geç')
-//    - description: ürün açıklaması
-//    - specs: ürün özellikleri (| ya da virgülle ayır)
-//    - sku: ürün kodu
-//    - rating: 1-5 arası değerlendirme (örn: 4.5)
-//    - shipping: kargo bilgisi
-// 3. önceki itemdan sonra virgül koy
-// 4. kaydet ve sayfayı yenile! işte bu kadar basit
-//
-// örnek (çift dil desteği):
-// {
-//   image: 'images/yeni-urunum.jpg',
-//   title: {
-//     tr: 'Süper Ürünüm',
-//     en: 'Super Product'
-//   },
-//   price: '$1,299',
-//   description: {
-//     tr: 'Bu ürün harika şeyler yapıyor işte',
-//     en: 'This product does amazing things'
-//   },
-//   specs: {
-//     tr: 'Özellik 1 | Özellik 2 | Özellik 3',
-//     en: 'Feature 1 | Feature 2 | Feature 3'
-//   },
-//   sku: 'PROD-001',
-//   rating: 4.5,
-//   shipping: {
-//     tr: '2-4 iş gününde kargo. Ücretsiz kargo!',
-//     en: 'Ships in 2-4 business days. Free shipping!'
-//   }
-// }
 
 var productsData = [
-  {
-    image: 'images/product-1.jpg',
-    title: {
-      tr: 'Hauteville Beton Sallanan Koltuk',
-      en: 'Hauteville Concrete Rocking Chair'
+    {
+      "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=80",
+      "mainCategory": {
+        "tr": "Temizlik Ürünleri",
+        "en": "Cleaning Products"
+      },
+      "category": {
+        "tr": "Çamaşır Suyu",
+        "en": "Bleach"
+      },
+      "title": {
+        "tr": "Domestos Ultra Çamaşır Suyu 5L",
+        "en": "Domestos Ultra Bleach 5L"
+      },
+      "price": "₺49.90",
+      "description": {
+        "tr": "Güçlü ve etkili çamaşır suyu. %99.9 bakteri ve virüslere karşı etkili. Evinizin her köşesinde hijyen garantisi.",
+        "en": "Powerful and effective bleach. 99.9% effective against bacteria and viruses. Hygiene guaranteed in every corner of your home."
+      },
+      "specs": {
+        "tr": "5 Litre | %99.9 bakteri öldürücü | Konsantre formül | Tüm yüzeyler için uygun",
+        "en": "5 Liters | 99.9% bacteria killer | Concentrated formula | Suitable for all surfaces"
+      },
+      "sku": "DOM-ULTRA-001",
+      "shipping": {
+        "tr": "1-2 iş gününde kargo. ₺150 üzeri ücretsiz kargo.",
+        "en": "Ships in 1-2 business days. Free shipping on orders over ₺150."
+      }
     },
-    price: '$350',
-    description: {
-      tr: 'Meşe ayaklı el döküm beton oturma yeri. Minimal, sağlam ve rahat.',
-      en: 'Hand-cast concrete seat with oak runners. Minimal, sturdy, and comfy.'
+    {
+      "image": "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=800&q=80",
+      "mainCategory": {
+        "tr": "Temizlik Ürünleri",
+        "en": "Cleaning Products"
+      },
+      "category": {
+        "tr": "Deterjan",
+        "en": "Detergent"
+      },
+      "title": {
+        "tr": "Ariel Ultra Konsantre Deterjan 4kg",
+        "en": "Ariel Ultra Concentrated Detergent 4kg"
+      },
+      "price": "₺89.90",
+      "description": {
+        "tr": "Leke çıkarma gücü yüksek, konsantre formül. Çamaşırlarınızı tertemiz yapar, renkleri korur. Hassas ciltler için uygun.",
+        "en": "High stain removal power, concentrated formula. Makes your clothes spotless, preserves colors. Suitable for sensitive skin."
+      },
+      "specs": {
+        "tr": "4 kg | 30 yıkamaya kadar | Leke çıkarıcı enzimler | Renk koruyucu",
+        "en": "4 kg | Up to 30 washes | Stain-removing enzymes | Color protectant"
+      },
+      "sku": "ARI-ULTRA-002",
+      "shipping": {
+        "tr": "1-2 iş gününde kargo. Ücretsiz kargo.",
+        "en": "Ships in 1-2 business days. Free shipping."
+      }
     },
-    specs: {
-      tr: 'Beton kabuk | Meşe ayaklar | El döküm | İç mekan kullanımı',
-      en: 'Concrete shell | Oak runners | Hand-cast | Indoor use'
+    {
+      "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=80",
+      "mainCategory": {
+        "tr": "Temizlik Ürünleri",
+        "en": "Cleaning Products"
+      },
+      "category": {
+        "tr": "Bulaşık Deterjanı",
+        "en": "Dish Soap"
+      },
+      "title": {
+        "tr": "Fairy Bulaşık Deterjanı 750ml x 3",
+        "en": "Fairy Dish Soap 750ml x 3"
+      },
+      "price": "₺34.90",
+      "description": {
+        "tr": "Yağlı bulaşıkları anında temizleyen, el dostu formül. Bulaşıklarınız parlak ve hijyenik kalacak. 3'lü paket.",
+        "en": "Hand-friendly formula that instantly cleans greasy dishes. Your dishes will stay shiny and hygienic. 3-pack."
+      },
+      "specs": {
+        "tr": "750ml x 3 adet | Yağ çözücü formül | El dostu | Bakteri öldürücü",
+        "en": "750ml x 3 units | Grease-cutting formula | Hand-friendly | Antibacterial"
+      },
+      "sku": "FAI-750-003",
+      "shipping": {
+        "tr": "1-2 iş gününde kargo. Ücretsiz kargo.",
+        "en": "Ships in 1-2 business days. Free shipping."
+      }
     },
-    sku: 'HV-RC-001',
-    rating: 4,
-    shipping: {
-      tr: '2–4 iş gününde kargo. 30 gün ücretsiz iade.',
-      en: 'Ships in 2–4 business days. Free 30-day returns.'
+    {
+      "image": "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=800&q=80",
+      "mainCategory": {
+        "tr": "Temizlik Ürünleri",
+        "en": "Cleaning Products"
+      },
+      "category": {
+        "tr": "Çok Amaçlı Temizleyici",
+        "en": "Multi-Purpose Cleaner"
+      },
+      "title": {
+        "tr": "Cif Çok Amaçlı Temizleyici 1L",
+        "en": "Cif Multi-Purpose Cleaner 1L"
+      },
+      "price": "₺59.90",
+      "description": {
+        "tr": "Mutfaktan banyoya, her yüzey için güvenli ve etkili temizlik. Profesyonel temizlik sonuçları evinizde.",
+        "en": "Safe and effective cleaning for every surface, from kitchen to bathroom. Professional cleaning results at home."
+      },
+      "specs": {
+        "tr": "1 Litre | Çok amaçlı | Yüzey koruyucu | Leke çıkarıcı",
+        "en": "1 Liter | Multi-purpose | Surface protector | Stain remover"
+      },
+      "sku": "CIF-MULTI-004",
+      "shipping": {
+        "tr": "1-2 iş gününde kargo. Ücretsiz kargo.",
+        "en": "Ships in 1-2 business days. Free shipping."
+      }
+    },
+    {
+      "image": "https://images.unsplash.com/photo-1628771065518-0d82f1938462?w=800&q=80",
+      "mainCategory": {
+        "tr": "Temizlik Ürünleri",
+        "en": "Cleaning Products"
+      },
+      "category": {
+        "tr": "Çamaşır Suyu",
+        "en": "Bleach"
+      },
+      "title": {
+        "tr": "Domestos Toz Çamaşır Suyu 1kg",
+        "en": "Domestos Powder Bleach 1kg"
+      },
+      "price": "₺24.90",
+      "description": {
+        "tr": "Toz formda pratik çamaşır suyu. Daha kolay kullanım ve saklama. Güçlü dezenfektan etkisi.",
+        "en": "Practical bleach in powder form. Easier to use and store. Strong disinfectant effect."
+      },
+      "specs": {
+        "tr": "1 kg | Toz form | Uzun raf ömrü | Güçlü dezenfektan",
+        "en": "1 kg | Powder form | Long shelf life | Strong disinfectant"
+      },
+      "sku": "DOM-POW-005",
+      "shipping": {
+        "tr": "1-2 iş gününde kargo. Ücretsiz kargo.",
+        "en": "Ships in 1-2 business days. Free shipping."
+      }
+    },
+    {
+      "image": "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=800&q=80",
+      "mainCategory": {
+        "tr": "Temizlik Ürünleri",
+        "en": "Cleaning Products"
+      },
+      "category": {
+        "tr": "Yüzey Temizleyici",
+        "en": "Surface Cleaner"
+      },
+      "title": {
+        "tr": "Pine Sol Yüzey Temizleyici 946ml",
+        "en": "Pine Sol Surface Cleaner 946ml"
+      },
+      "price": "₺42.90",
+      "description": {
+        "tr": "Çam kokulu güçlü yüzey temizleyici. Mutfak, banyo ve zeminlerde etkili. Hoş koku bırakır.",
+        "en": "Pine-scented powerful surface cleaner. Effective on kitchen, bathroom and floors. Leaves pleasant scent."
+      },
+      "specs": {
+        "tr": "946ml | Çam kokulu | Dezenfektan | Çok amaçlı",
+        "en": "946ml | Pine-scented | Disinfectant | Multi-purpose"
+      },
+      "sku": "PIN-946-006",
+      "shipping": {
+        "tr": "1-2 iş gününde kargo. Ücretsiz kargo.",
+        "en": "Ships in 1-2 business days. Free shipping."
+      }
+    },
+    {
+      "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=80",
+      "mainCategory": {
+        "tr": "Temizlik Ürünleri",
+        "en": "Cleaning Products"
+      },
+      "category": {
+        "tr": "Bulaşık Deterjanı",
+        "en": "Dish Soap"
+      },
+      "title": {
+        "tr": "Dawn Ultra Bulaşık Deterjanı 709ml",
+        "en": "Dawn Ultra Dish Soap 709ml"
+      },
+      "price": "₺28.90",
+      "description": {
+        "tr": "Ultra konsantre formül. Az miktarla çok bulaşık yıkar. Yağları anında çözer.",
+        "en": "Ultra concentrated formula. Washes many dishes with small amount. Instantly dissolves grease."
+      },
+      "specs": {
+        "tr": "709ml | Ultra konsantre | Yağ çözücü | El dostu",
+        "en": "709ml | Ultra concentrated | Grease-cutting | Hand-friendly"
+      },
+      "sku": "DAW-709-007",
+      "shipping": {
+        "tr": "1-2 iş gününde kargo. Ücretsiz kargo.",
+        "en": "Ships in 1-2 business days. Free shipping."
+      }
+    },
+    {
+      "image": "https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=800&q=80",
+      "mainCategory": {
+        "tr": "Temizlik Ürünleri",
+        "en": "Cleaning Products"
+      },
+      "category": {
+        "tr": "Çamaşır Yumuşatıcısı",
+        "en": "Fabric Softener"
+      },
+      "title": {
+        "tr": "Comfort Çamaşır Yumuşatıcısı 2.4L",
+        "en": "Comfort Fabric Softener 2.4L"
+      },
+      "price": "₺69.90",
+      "description": {
+        "tr": "Çamaşırlarınızı yumuşacık yapan, uzun süreli hoş koku veren yumuşatıcı. Tüm çamaşır türleri için uygundur.",
+        "en": "Fabric softener that makes your clothes soft and gives long-lasting pleasant scent. Suitable for all fabric types."
+      },
+      "specs": {
+        "tr": "2.4 Litre | Uzun süreli koku | Yumuşak dokunuş | Tüm çamaşır türleri",
+        "en": "2.4 Liters | Long-lasting scent | Soft touch | All fabric types"
+      },
+      "sku": "COM-FAB-008",
+      "shipping": {
+        "tr": "1-2 iş gününde kargo. Ücretsiz kargo.",
+        "en": "Ships in 1-2 business days. Free shipping."
+      }
+    },
+    {
+      "image": "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=800&q=80",
+      "mainCategory": {
+        "tr": "Temizlik Ürünleri",
+        "en": "Cleaning Products"
+      },
+      "category": {
+        "tr": "Cam Temizleyici",
+        "en": "Glass Cleaner"
+      },
+      "title": {
+        "tr": "Mr. Muscle Cam Temizleyici 750ml",
+        "en": "Mr. Muscle Glass Cleaner 750ml"
+      },
+      "price": "₺32.90",
+      "description": {
+        "tr": "Camları ve aynaları lekesiz, parlak yapan profesyonel formül. İz bırakmaz, hızlı kurur.",
+        "en": "Professional formula that makes windows and mirrors spotless and shiny. Leaves no streaks, dries quickly."
+      },
+      "specs": {
+        "tr": "750ml | İz bırakmaz | Hızlı kurur | Cam ve ayna için",
+        "en": "750ml | Streak-free | Quick-drying | For glass and mirrors"
+      },
+      "sku": "MRM-GLASS-009",
+      "shipping": {
+        "tr": "1-2 iş gününde kargo. Ücretsiz kargo.",
+        "en": "Ships in 1-2 business days. Free shipping."
+      }
     }
-  },
-  {
-    image: 'images/product-2.jpg',
-    title: {
-      tr: 'Pavilion Hoparlör',
-      en: 'Pavilion Speaker'
-    },
-    price: '$600',
-    description: {
-      tr: '360° ses ile premium kablosuz hoparlör. Zarif tasarım, güçlü ses performansı.',
-      en: 'Premium wireless speaker with 360° sound. Elegant design meets powerful audio performance.'
-    },
-    specs: {
-      tr: '360° ses | Kablosuz bağlantı | 12 saat pil | Premium sürücüler',
-      en: '360° sound | Wireless connectivity | 12-hour battery | Premium drivers'
-    },
-    sku: 'PV-SP-002',
-    rating: 4.5,
-    shipping: {
-      tr: '1–3 iş gününde kargo. $500 üzeri siparişlerde ücretsiz kargo.',
-      en: 'Ships in 1–3 business days. Free shipping on orders over $500.'
-    }
-  },
-  {
-    image: 'images/product-3.jpg',
-    title: {
-      tr: 'Ligomancer',
-      en: 'Ligomancer'
-    },
-    price: '$780',
-    description: {
-      tr: 'Ayarlanabilir kollu heykelsi aydınlatma armatürü. Fonksiyonel sanat olarak da kullanılabilen modern tasarım.',
-      en: 'Sculptural lighting fixture with adjustable arms. Modern design that doubles as functional art.'
-    },
-    specs: {
-      tr: 'Ayarlanabilir kollar | LED ampul dahil | Pirinç kaplama | Duvar veya tavan montajı',
-      en: 'Adjustable arms | LED bulbs included | Brass finish | Wall or ceiling mount'
-    },
-    sku: 'LG-LT-003',
-    rating: 5,
-    shipping: {
-      tr: '3–5 iş gününde kargo. Profesyonel montaj önerilir.',
-      en: 'Ships in 3–5 business days. Professional installation recommended.'
-    }
-  },
-  {
-    image: 'images/product-4.jpg',
-    title: {
-      tr: 'Alato Dolap',
-      en: 'Alato Cabinet'
-    },
-    price: '$800',
-    description: {
-      tr: 'Ceviz kaplamalı orta yüzyıl modern depolama dolabı. Ayarlanabilir raflı geniş iç mekan.',
-      en: 'Mid-century modern storage cabinet with walnut veneer. Spacious interior with adjustable shelving.'
-    },
-    specs: {
-      tr: 'Ceviz kaplama | Ayarlanabilir raflar | Yumuşak kapanış kapıları | Masif ahşap ayaklar',
-      en: 'Walnut veneer | Adjustable shelves | Soft-close doors | Solid wood legs'
-    },
-    sku: 'AL-CB-004',
-    rating: 4.5,
-    shipping: {
-      tr: '2–4 iş gününde kargo. Profesyonel teslimat mevcut.',
-      en: 'Ships in 2–4 business days. White glove delivery available.'
-    }
-  },
-  {
-    image: 'images/product-5.jpg',
-    title: {
-      tr: 'Earing Kablosuz',
-      en: 'Earing Wireless'
-    },
-    price: '$100',
-    description: {
-      tr: 'Aktif gürültü önleme özellikli gerçek kablosuz kulaklık. Kompakt tasarımda kristal netliğinde ses.',
-      en: 'True wireless earbuds with active noise cancellation. Crystal clear audio in a compact design.'
-    },
-    specs: {
-      tr: 'Aktif gürültü önleme | 6 saat pil | USB-C şarj | IPX4 suya dayanıklı',
-      en: 'Active noise cancellation | 6-hour battery | USB-C charging | IPX4 water resistant'
-    },
-    sku: 'ER-WL-005',
-    rating: 4,
-    shipping: {
-      tr: '1–2 iş gününde kargo. 30 gün içinde ücretsiz iade.',
-      en: 'Ships in 1–2 business days. Free returns within 30 days.'
-    }
-  },
-  {
-    image: 'images/product-6.jpg',
-    title: {
-      tr: 'Heykelsi Kahve Masası',
-      en: 'Sculptural Coffee Table'
-    },
-    price: '$960',
-    description: {
-      tr: 'Mermer üstlü organik formlu kahve masası. Her yaşam alanını bağlayan öne çıkan parça.',
-      en: 'Organic form coffee table with marble top. Statement piece that anchors any living space.'
-    },
-    specs: {
-      tr: 'Carrara mermer üst | Masif meşe taban | El yapımı | Hava koşullarına dayanıklı kaplama',
-      en: 'Carrara marble top | Solid oak base | Handcrafted | Weather-sealed finish'
-    },
-    sku: 'SC-CT-006',
-    rating: 5,
-    shipping: {
-      tr: '4–6 iş gününde kargo. Profesyonel montaj dahil.',
-      en: 'Ships in 4–6 business days. Professional assembly included.'
-    }
-  },
-  {
-    image: 'images/product-7.jpg',
-    title: {
-      tr: 'WW Koltuğu',
-      en: 'The WW Chair'
-    },
-    price: '$540',
-    description: {
-      tr: 'Halat koltuklu klasik Hans Wegner ilhamlı sandalye. Zamansız İskandinav tasarımı ile rahatlığın buluşması.',
-      en: 'Classic Hans Wegner-inspired chair with rope seat. Timeless Scandinavian design meets comfort.'
-    },
-    specs: {
-      tr: 'Halat dokulu koltuk | Masif meşe iskelet | Danimarka tasarımı | Doğal yağ kaplama',
-      en: 'Rope woven seat | Solid oak frame | Danish design | Natural oil finish'
-    },
-    sku: 'WW-CH-007',
-    rating: 4.5,
-    shipping: {
-      tr: '2–3 iş gününde kargo. 30 gün ücretsiz iade.',
-      en: 'Ships in 2–3 business days. Free 30-day returns.'
-    }
-  },
-  {
-    image: 'images/product-8.jpg',
-    title: {
-      tr: 'Himitsu Para Kutusu',
-      en: 'Himitsu Money Box'
-    },
-    price: '$55',
-    description: {
-      tr: 'Gizli açıklıklı minimalist seramik para kutusu. Bilinçli tasarruf için Japon ilhamlı tasarım.',
-      en: 'Minimalist ceramic money box with hidden opening. Japanese-inspired design for mindful saving.'
-    },
-    specs: {
-      tr: 'Seramik yapı | Mat kaplama | Gizli madeni para yuvası | Kırma ile açılma tasarımı',
-      en: 'Ceramic construction | Matte finish | Hidden coin slot | Break to open design'
-    },
-    sku: 'HM-MB-008',
-    rating: 4,
-    shipping: {
-      tr: '1–2 iş gününde kargo. Ücretsiz standart kargo.',
-      en: 'Ships in 1–2 business days. Free standard shipping.'
-    }
-  },
-  {
-    image: 'images/product-9.jpg',
-    title: {
-      tr: 'Ariane Prin',
-      en: 'Ariane Prin'
-    },
-    price: '$99',
-    description: {
-      tr: 'Pirinç aksanlı zarif cam asılı lamba. Her alana sıcaklık ve sofistike bir görünüm katar.',
-      en: 'Delicate glass pendant lamp with brass accents. Adds warmth and sophistication to any space.'
-    },
-    specs: {
-      tr: 'El yapımı cam | Pirinç donanım | E26 ampul yuvası | 8 fit kablo uzunluğu',
-      en: 'Hand-blown glass | Brass hardware | E26 bulb socket | 8ft cord length'
-    },
-    sku: 'AP-PL-009',
-    rating: 4.5,
-    shipping: {
-      tr: '1–3 iş gününde kargo. Ampul dahil değildir.',
-      en: 'Ships in 1–3 business days. Bulb not included.'
-    }
-  }
-  // buradan sonra yeni ürünler ekle - yukarıdaki formatı kopyala yapıştır işte
-];
+  ];
 
 // ============================================
-// ürünleri html'e çeviren fonksiyon
+// ANA KATEGORİLER - admin panelinden otomatik güncelleniyor
 // ============================================
-function generateProductsHTML() {
-  var $productsContainer = $('#products-container');
+var mainCategories = [
+  {
+    "slug": "temizlik-urunleri",
+    "headerImage": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80", // temizlik ürünleri için generic görsel
+      "title": {
+        "tr": "Temizlik Ürünleri",
+        "en": "Cleaning Products"
+      },
+      "description": {
+        "tr": "Güçlü ve etkili çamaşır suyu. %99.9 bakteri ve virüslere karşı etkili. Evinizin her köşesinde hijyen garantisi.",
+        "en": "Powerful and effective bleach. 99.9% effective against bacteria and viruses. Hygiene guaranteed in every corner of your home."
+      },
+      "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=800&q=80"
+    }
+  ];
+
+// ============================================
+// URL'den kategori slug'ını alan fonksiyon
+// peynir.html -> "peynir", mobilya.html -> "mobilya"
+// ============================================
+function getCategorySlugFromURL() {
+  var path = window.location.pathname;
+  var filename = path.split('/').pop() || path.split('\\').pop();
+  var slug = filename.replace('.html', '');
+  return slug;
+}
+
+// ============================================
+// slug'dan kategori bilgisini bulan fonksiyon
+// ============================================
+function getCategoryBySlug(slug) {
+  if (!slug || typeof mainCategories === 'undefined') return null;
   
-  if (!$productsContainer.length) {
-    return; // container yoksa çık
+  for (var i = 0; i < mainCategories.length; i++) {
+    if (mainCategories[i].slug === slug) {
+      return mainCategories[i];
+    }
+  }
+  return null;
+}
+
+// ============================================
+// kategori sayfası header'ını dinamik dolduran fonksiyon
+// ============================================
+function fillCategoryPageHeader() {
+  var slug = getCategorySlugFromURL();
+  if (!slug) return;
+  
+  var category = getCategoryBySlug(slug);
+  if (!category) return;
+  
+  var currentLang = (typeof i18n !== 'undefined' && i18n.currentLang) ? i18n.currentLang : 'tr';
+  var title = category.title[currentLang] || category.title.tr || category.title.en;
+  var description = category.description[currentLang] || category.description.tr || category.description.en;
+  
+  // header image - önce headerImage var mı kontrol et, yoksa generic görsel kullan
+  // ürün resmi çok detaylı olduğu için header için uygun değil, generic görsel daha iyi
+  var headerImage = category.headerImage || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80';
+  
+  // header background image
+  var $header = $('#fh5co-header');
+  if ($header.length) {
+    $header.css('background-image', 'url(' + headerImage + ')');
+    
+    // header içindeki title ve description'ı güncelle
+    var $h1 = $header.find('h1');
+    var $h2 = $header.find('h2 span, h2');
+    
+    if ($h1.length) $h1.text(title);
+    if ($h2.length) {
+      if ($h2.find('span').length) {
+        $h2.find('span').text(description);
+      } else {
+        $h2.text(description);
+      }
+    }
   }
   
-  // mevcut dili al - i18n varsa onu kullan yoksa 'tr' varsayılan
+  // products section başlığı
+  var $productSection = $('#fh5co-product');
+  if ($productSection.length) {
+    var $heading = $productSection.find('.fh5co-heading');
+    if ($heading.length) {
+      var $span = $heading.find('span');
+      var $h2 = $heading.find('h2');
+      var $p = $heading.find('p');
+      
+      if ($span.length) $span.text(title);
+      if ($h2.length) {
+        // "Mobilya Koleksiyonu" yerine sadece kategori adı veya "Koleksiyonu" ekle
+        var collectionText = (currentLang === 'tr') ? ' Koleksiyonu' : ' Collection';
+        $h2.text(title + collectionText);
+      }
+      if ($p.length) $p.text(description);
+    }
+  }
+}
+
+// ============================================
+// kategori sayfasını otomatik yükleyen fonksiyon
+// URL'den slug'ı okuyup o kategoriye ait ürünleri yükler
+// ============================================
+function loadCategoryPage() {
+  var slug = getCategorySlugFromURL();
+  if (!slug) return;
+  
+  var category = getCategoryBySlug(slug);
+  if (!category) return;
+  
   var currentLang = (typeof i18n !== 'undefined' && i18n.currentLang) ? i18n.currentLang : 'tr';
+  var mainCategory = category.title[currentLang] || category.title.tr || category.title.en;
+  
+  // header'ı doldur
+  fillCategoryPageHeader();
+  
+  // ürünleri yükle
+  if (typeof generateProductsHTML === 'function' && $('#products-container').length) {
+    generateProductsHTML(mainCategory);
+  }
+}
+
+// ============================================
+// ana kategori kartlarını oluşturan fonksiyon (products.html için)
+// dinamik olarak mainCategories array'inden okuyor
+// ============================================
+function generateMainCategoryCards() {
+  var $container = $('#main-categories');
+  if (!$container.length) return;
+  
+  var currentLang = (typeof i18n !== 'undefined' && i18n.currentLang) ? i18n.currentLang : 'tr';
+  
+  var html = '';
+  
+  // her kategori için kart oluştur
+  mainCategories.forEach(function(cat, index) {
+    var title = cat.title[currentLang] || cat.title.tr || cat.title.en;
+    var description = cat.description[currentLang] || cat.description.tr || cat.description.en;
+    var slug = cat.slug;
+    
+    // kart görseli olarak headerImage kullan - kategori sayfası header'ıyla aynı olsun
+    // eğer headerImage yoksa, fallback olarak image kullan
+    var image = cat.headerImage || cat.image || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80';
+    
+    // col-md-6 yerine dinamik genişlik hesapla
+    // 1 kategori varsa tam genişlik, 2 kategori varsa yarım genişlik, 3+ varsa grid
+    var colClass;
+    if (mainCategories.length === 1) {
+      colClass = 'col-md-12';
+    } else if (mainCategories.length === 2) {
+      colClass = 'col-md-6 col-sm-6';
+    } else {
+      colClass = 'col-md-4 col-sm-6';
+    }
+    
+    html += '<div class="' + colClass + ' animate-box">';
+    html += '<a href="' + slug + '.html" class="main-category-card">';
+    html += '<div class="main-category-image" style="background-image: url(' + image + ');"></div>';
+    html += '<div class="main-category-overlay"></div>';
+    html += '<div class="main-category-content">';
+    html += '<h2>' + escapeHtml(title) + '</h2>';
+    html += '<p>' + escapeHtml(description) + '</p>';
+    html += '<span class="main-category-arrow">→</span>';
+    html += '</div>';
+    html += '</a>';
+    html += '</div>';
+  });
+  
+  $container.html(html);
+  
+  // product.html header'ı sabit kalacak, sadece kategori kartları (child) görselleri değişiyor
+  // header güncellemesi yapmıyoruz - bu sadece kategori kartları için
+  
+  // animasyonları başlat
+  setTimeout(function() {
+    $container.find('.animate-box').each(function(index) {
+      var $el = $(this);
+      setTimeout(function() {
+        $el[0].offsetHeight;
+        $el.addClass('fadeInUp animated-fast');
+      }, index * 100);
+    });
+  }, 50);
+}
+
+// ============================================
+// menü dropdown'ını dinamik oluşturan fonksiyon
+// mainCategories array'inden okuyor
+// ============================================
+function generateMenuDropdown() {
+  var $dropdowns = $('.has-dropdown .dropdown');
+  if (!$dropdowns.length) return;
+  
+  // mainCategories tanımlı mı kontrol et
+  if (typeof mainCategories === 'undefined' || !mainCategories || mainCategories.length === 0) {
+    console.warn('⚠️ mainCategories array tanımlı değil veya boş!');
+    return;
+  }
+  
+  var currentLang = (typeof i18n !== 'undefined' && i18n.currentLang) ? i18n.currentLang : 'tr';
+  
+  // her dropdown için (desktop ve mobile menü)
+  $dropdowns.each(function() {
+    var $dropdown = $(this);
+    var html = '';
+    
+    // "Tümü" linki
+    var allText = (currentLang === 'tr') ? 'Tümü' : 'All';
+    html += '<li><a href="product.html" data-i18n="nav.allProducts">' + escapeHtml(allText) + '</a></li>';
+    
+    // her kategori için link oluştur
+    mainCategories.forEach(function(cat) {
+      var title = cat.title[currentLang] || cat.title.tr || cat.title.en;
+      var slug = cat.slug;
+      
+      html += '<li><a href="' + slug + '.html">' + escapeHtml(title) + '</a></li>';
+    });
+    
+    $dropdown.html(html);
+    
+    // debug için - dropdown içeriği dolu mu kontrol et
+    if ($dropdown.children().length === 0) {
+      console.warn('⚠️ Dropdown içeriği boş!', $dropdown);
+    }
+  });
+}
+
+// ============================================
+// kategori filtrelerini oluşturan fonksiyon (alt kategoriler için)
+// ============================================
+function generateCategoryFilters(mainCategoryFilter) {
+  var $filtersContainer = $('#category-filters');
+  if (!$filtersContainer.length) return;
+  
+  // mevcut dili al
+  var currentLang = (typeof i18n !== 'undefined' && i18n.currentLang) ? i18n.currentLang : 'tr';
+  
+  // tüm kategorileri topla (tekrar edenleri kaldır) - sadece mainCategoryFilter'a ait olanları
+  var categories = [];
+  var categoryMap = {};
+  
+  productsData.forEach(function(product) {
+    // mainCategory filtresi varsa kontrol et
+    if (mainCategoryFilter) {
+      var productMainCategory = (typeof product.mainCategory === 'object') 
+        ? product.mainCategory[currentLang] || product.mainCategory.tr || product.mainCategory.en 
+        : (product.mainCategory || '');
+      
+      if (productMainCategory !== mainCategoryFilter) {
+        return; // bu ürün bu ana kategoriye ait değil, atla
+      }
+    }
+    
+    var category = (typeof product.category === 'object') 
+      ? product.category[currentLang] || product.category.tr || product.category.en 
+      : (product.category || '');
+    
+    if (category && !categoryMap[category]) {
+      categoryMap[category] = true;
+      categories.push(category);
+    }
+  });
+  
+  // kategorileri alfabetik sırala
+  categories.sort();
+  
+  // filtre butonlarını oluştur
+  var html = '<button class="category-filter-btn active" data-category="all">';
+  var allText = (currentLang === 'tr') ? 'Tümü' : 'All';
+  html += escapeHtml(allText);
+  html += '</button>';
+  
+  categories.forEach(function(cat) {
+    html += '<button class="category-filter-btn" data-category="' + escapeHtml(cat) + '">';
+    html += escapeHtml(cat);
+    html += '</button>';
+  });
+  
+  $filtersContainer.html(html);
+  
+  // filtre butonlarına click event ekle - önceki event'leri temizle
+  $filtersContainer.off('click', '.category-filter-btn').on('click', '.category-filter-btn', function() {
+    var $btn = $(this);
+    var category = $btn.data('category');
+    
+    // aktif class'ı güncelle
+    $filtersContainer.find('.category-filter-btn').removeClass('active');
+    $btn.addClass('active');
+    
+    // ürünleri filtrele - mainCategoryFilter'ı da geç
+    filterProductsByCategory(category, mainCategoryFilter);
+  });
+}
+
+// ============================================
+// ürünleri kategoriye göre filtreleyen fonksiyon - GRID UYUMLU
+// ============================================
+function filterProductsByCategory(category, mainCategoryFilter) {
+  var $products = $('#products-container .product-item');
+  
+  $products.each(function() {
+    var $item = $(this);
+    var $product = $item.find('.product');
+    var productCategory = $product.data('category') || '';
+    var productMainCategory = $product.data('main-category') || '';
+    
+    var shouldShow = false;
+    
+    // kategori kontrolü
+    if (category === 'all') {
+      shouldShow = true;
+    } else {
+      shouldShow = (productCategory === category);
+    }
+    
+    // mainCategory filtresi kontrolü
+    if (mainCategoryFilter && productMainCategory !== mainCategoryFilter) {
+      shouldShow = false;
+    }
+    
+    // görünürlüğü ayarla - Flexbox grid
+    if (shouldShow) {
+      $item.css({
+        'display': 'block',
+        'visibility': 'visible',
+        'opacity': '1'
+      }).fadeIn(300);
+    } else {
+      $item.hide();
+    }
+  });
+  
+  // animasyonları tekrar başlat
+  setTimeout(function() {
+    $products.filter(':visible').each(function(index) {
+      var $el = $(this);
+      setTimeout(function() {
+        $el[0].offsetHeight; // reflow
+        $el.addClass('fadeInUp animated-fast');
+      }, index * 30);
+    });
+  }, 100);
+}
+
+// ============================================
+// ürünleri html'e çeviren fonksiyon - TEMİZ VERSİYON
+// ============================================
+function generateProductsHTML(mainCategoryFilter) {
+  var $productsContainer = $('#products-container');
+  
+  // eğer products-container yoksa ama main-categories varsa, ana kategori kartlarını göster
+  if (!$productsContainer.length && $('#main-categories').length) {
+    generateMainCategoryCards();
+    return;
+  }
+  
+  if (!$productsContainer.length) {
+    return;
+  }
+  
+  var currentLang = (typeof i18n !== 'undefined' && i18n.currentLang) ? i18n.currentLang : 'tr';
+  
+  // kategori filtrelerini oluştur
+  generateCategoryFilters(mainCategoryFilter);
   
   // eski ürünleri temizle
   $productsContainer.empty();
   
   var html = '';
+  var filteredProducts = [];
   
+  // önce ürünleri filtrele
   productsData.forEach(function(product) {
-    // çift dil desteği - eğer title bir obje ise (çift dil) değilse string (eski format)
-    var title = (typeof product.title === 'object') ? product.title[currentLang] || product.title.tr || product.title.en : product.title;
-    var description = (typeof product.description === 'object') ? product.description[currentLang] || product.description.tr || product.description.en : product.description;
-    var specs = (typeof product.specs === 'object') ? product.specs[currentLang] || product.specs.tr || product.specs.en : product.specs;
-    var shipping = (typeof product.shipping === 'object') ? product.shipping[currentLang] || product.shipping.tr || product.shipping.en : product.shipping;
+    // mainCategory filtresi varsa kontrol et
+    if (mainCategoryFilter) {
+      var productMainCategory = (typeof product.mainCategory === 'object') 
+        ? product.mainCategory[currentLang] || product.mainCategory.tr || product.mainCategory.en 
+        : (product.mainCategory || '');
+      
+      if (productMainCategory !== mainCategoryFilter) {
+        return;
+      }
+    }
     
-    html += '<div class="col-md-4 text-center animate-box">';
+    filteredProducts.push(product);
+  });
+  
+  // products-container flexbox grid olacak (CSS'de tanımlı)
+  $productsContainer.removeClass('row');
+  
+  // filtrelenmiş ürünleri HTML'e çevir - grid sistemi
+  filteredProducts.forEach(function(product, index) {
+    var mainCategory = (typeof product.mainCategory === 'object') 
+      ? product.mainCategory[currentLang] || product.mainCategory.tr || product.mainCategory.en 
+      : (product.mainCategory || '');
+    var category = (typeof product.category === 'object') 
+      ? product.category[currentLang] || product.category.tr || product.category.en 
+      : (product.category || '');
+    var title = (typeof product.title === 'object') 
+      ? product.title[currentLang] || product.title.tr || product.title.en 
+      : product.title;
+    var description = (typeof product.description === 'object') 
+      ? product.description[currentLang] || product.description.tr || product.description.en 
+      : product.description;
+    var specs = (typeof product.specs === 'object') 
+      ? product.specs[currentLang] || product.specs.tr || product.specs.en 
+      : product.specs;
+    var shipping = (typeof product.shipping === 'object') 
+      ? product.shipping[currentLang] || product.shipping.tr || product.shipping.en 
+      : product.shipping;
+    
+    // Flexbox grid sistemi - her satırda 3 ürün, boş yer kalmayacak
+    html += '<div class="product-item text-center animate-box">';
     html += '<div class="product"';
     html += ' data-title="' + escapeHtml(title) + '"';
     html += ' data-price="' + escapeHtml(product.price) + '"';
     html += ' data-desc="' + escapeHtml(description) + '"';
     html += ' data-specs="' + escapeHtml(specs) + '"';
-    html += ' data-sku="' + escapeHtml(product.sku) + '"';
-    html += ' data-rating="' + product.rating + '"';
+    html += ' data-sku="' + escapeHtml(product.sku || '') + '"';
     html += ' data-ship="' + escapeHtml(shipping) + '"';
+    html += ' data-main-category="' + escapeHtml(mainCategory) + '"';
+    html += ' data-category="' + escapeHtml(category) + '"';
     html += ' data-images="' + escapeHtml(product.image) + '">';
     
-    html += '<div class="product-grid" style="background-image:url(' + product.image + ');">';
+    // resim URL'ini doğru şekilde escape et
+    var imageUrl = escapeHtml(product.image);
+    html += '<div class="product-grid" style="background-image:url(' + imageUrl + ');">';
     html += '<div class="inner">';
     html += '<p><a href="#" class="icon"><i class="icon-eye"></i></a></p>';
     html += '</div>';
     html += '</div>';
     
     html += '<div class="desc">';
+    if (category) {
+      html += '<span class="product-category">' + escapeHtml(category) + '</span>';
+    }
     html += '<h3><a href="#">' + escapeHtml(title) + '</a></h3>';
     html += '<span class="price">' + escapeHtml(product.price) + '</span>';
     html += '</div>';
-    html += '</div>';
-    html += '</div>';
+    html += '</div>'; // .product kapanış
+    html += '</div>'; // .col-md-4 kapanış
   });
   
+  // HTML'i container'a ekle
   $productsContainer.html(html);
   
-  // Ürünleri hemen göster - görünür olanları animasyonlu yap
+  // Flexbox grid için row class'ını kaldır
+  $productsContainer.removeClass('row clearfix');
+  
+  // Animasyonları başlat
   setTimeout(function() {
     $productsContainer.find('.animate-box').each(function(index) {
       var $el = $(this);
       
-      // Ekran sınırlarını al
-      var viewportTop = $(window).scrollTop();
-      var viewportBottom = viewportTop + $(window).height();
-      
-      // Element pozisyonunu al
-      var elementTop = $el.offset().top;
-      var elementHeight = $el.outerHeight() || 300; // Fallback boyut
-      var elementBottom = elementTop + elementHeight;
-      
-      // Element görünür mü kontrol et (bol buffer ile)
-      var isVisible = (elementBottom > viewportTop - 300) && (elementTop < viewportBottom + 300);
-      
-      if (isVisible) {
-        // Görünüyorsa hemen göster - küçük gecikme ile stagger efekti
-        setTimeout(function() {
-          var effect = $el.data('animate-effect') || 'fadeInUp';
-          
-          // Reflow tetikle (animasyonun çalışması için)
-          $el[0].offsetHeight;
-          
-          // Animasyon classlarını ekle
-          if (effect === 'fadeIn') {
-            $el.addClass('fadeIn animated-fast');
-          } else if (effect === 'fadeInLeft') {
-            $el.addClass('fadeInLeft animated-fast');
-          } else if (effect === 'fadeInRight') {
-            $el.addClass('fadeInRight animated-fast');
-          } else {
-            $el.addClass('fadeInUp animated-fast');
-          }
-        }, index * 50); // Görünür itemler için küçük stagger
-      }
+      setTimeout(function() {
+        $el[0].offsetHeight; // reflow
+        $el.addClass('fadeInUp animated-fast');
+      }, index * 50);
     });
     
-    // Scroll animasyonları için waypoint'leri tekrar başlat
+    // waypoint'leri tekrar başlat
     setTimeout(function() {
       if (typeof contentWayPoint === 'function') {
         contentWayPoint();
       }
     }, 200);
-  }, 50);
+  }, 10);
 }
 
 // html escape fonksiyonu (xss saldırılarına karşı koruma için)
