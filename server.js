@@ -241,8 +241,9 @@ app.delete('/api/categories/:slug', checkAdminAuth, (req, res) => {
 });
 
 // server'ı başlat - işte burada başlıyor her şey
-app.listen(PORT, () => {
-  console.log(`🚀 Admin panel backend çalışıyor: http://localhost:${PORT}`);
-  console.log(`📁 Admin panel: http://localhost:${PORT}/admin.html`);
+// Railway için 0.0.0.0 dinlemek gerekiyor, yoksa sadece localhost'tan erişilebilir
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Admin panel backend çalışıyor: http://0.0.0.0:${PORT}`);
+  console.log(`📁 Admin panel: http://0.0.0.0:${PORT}/admin.html`);
 });
 
