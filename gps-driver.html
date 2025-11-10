@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GPS Tracker - Driver</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      overflow: hidden;
+      background: #f5f7fa;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      color: white;
+      padding: 18px 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+      position: relative;
+      z-index: 1000;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .header-content label {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      opacity: 0.95;
+    }
+
+    #deviceId {
+      flex: 1;
+      max-width: 300px;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      color: #2c3e50;
+    }
+
+    #deviceId:focus {
+      outline: none;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transform: translateY(-1px);
+    }
+
+    #deviceId::placeholder {
+      color: #95a5a6;
+    }
+
+    #map {
+      width: 100%;
+      height: calc(100vh - 220px);
+      background: #e8ecf0;
+    }
+
+    footer {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 20px 24px;
+      border-top: 1px solid #e1e8ed;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1000;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e1e8ed;
+    }
+
+    #statusDot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #e74c3c;
+      box-shadow: 0 2px 6px rgba(231, 76, 60, 0.4);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    #statusDot::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0.6;
+      animation: ripple 2s infinite;
+    }
+
+    @keyframes ripple {
+      0% {
+        transform: scale(1);
+        opacity: 0.6;
+      }
+      100% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+
+    #statusDot.active {
+      background: #27ae60;
+      box-shadow: 0 2px 10px rgba(39, 174, 96, 0.5);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% { 
+        opacity: 0.9;
+        transform: scale(1.15);
+      }
+    }
+
+    #statusDot.active::before {
+      background: #27ae60;
+    }
+
+    #statusText {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2c3e50;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .status-bar.active #statusText {
+      color: #27ae60;
+    }
+
+    .controls {
+      display: flex;
+      gap: 14px;
+    }
+
+    button {
+      flex: 1;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    button:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    button > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    #startBtn {
+      background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+      color: white;
+    }
+
+    #startBtn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #229954 0%, #1e8449 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(39, 174, 96, 0.4);
+    }
+
+    #stopBtn {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      color: white;
+    }
+
+    #stopBtn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    /* Page Transition Overlay */
+    .page-transition-overlay {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      z-index: 99999 !important;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease-out;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .page-transition-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .page-transition-overlay .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Panel Link Button */
+    .panel-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      margin-left: auto;
+      flex-shrink: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .panel-link-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .panel-link-btn:active {
+      transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 0;
+      }
+
+      header {
+        padding: 14px 16px;
+      }
+
+      .header-content {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .header-left {
+        width: 100%;
+      }
+
+      #deviceId {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      #map {
+        height: calc(100vh - 280px);
+        min-height: 300px;
+        margin-bottom: 0;
+      }
+
+      footer {
+        padding: 16px !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        z-index: 1000 !important;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
+      }
+
+      .status-bar {
+        padding: 12px 16px;
+        margin-bottom: 12px;
+      }
+
+      .controls {
+        gap: 10px;
+        display: flex !important;
+        flex-direction: row !important;
+      }
+
+      button {
+        padding: 16px 20px !important;
+        font-size: 15px !important;
+        letter-spacing: 0.5px;
+        min-height: 50px !important;
+        flex: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      .panel-link-btn {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header {
+        padding: 12px;
+      }
+
+      #map {
+        height: calc(100vh - 260px);
+        min-height: 250px;
+      }
+
+      footer {
+        padding: 14px !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        z-index: 1000 !important;
+      }
+
+      .status-bar {
+        padding: 10px 12px;
+        margin-bottom: 10px;
+      }
+
+      .controls {
+        gap: 8px;
+        display: flex !important;
+        flex-direction: row !important;
+      }
+
+      button {
+        padding: 14px 16px !important;
+        font-size: 14px !important;
+        min-height: 48px !important;
+        flex: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+    }
+    /* Login Screen removed - password requirement removed */
+  </style>
+</head>
+<body>
+  <!-- GPS Content -->
+  <div id="gpsContent" style="display: block;">
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <label for="deviceId">🚗 Cihaz ID:</label>
+        <input type="text" id="deviceId" value="car-1" placeholder="Cihaz ID girin">
+      </div>
+      <a href="/gps-panel.html" class="panel-link-btn" id="panelLink">🗺️ Panel</a>
+    </div>
+  </header>
+
+  <div id="map"></div>
+
+  <footer>
+    <div class="status-bar">
+      <div id="statusDot"></div>
+      <span id="statusText">Pasif</span>
+    </div>
+    <div class="controls">
+      <button id="startBtn">🚗 Takibi Başlat</button>
+      <button id="stopBtn" disabled>⏹️ Durdur</button>
+    </div>
+  </footer>
+  </div>
+
+  <!-- jQuery (for AJAX) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Page Transition Overlay -->
+  <div id="pageTransition" class="page-transition-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Driver App Logic -->
+  <script src="/js/gps-driver.js"></script>
+  <script>
+    // Password requirement removed - content is directly accessible
+    // GPS content is already visible (display: block)
+
+    // Page transition for navigation to panel
+    document.addEventListener('DOMContentLoaded', function() {
+      var panelLink = document.getElementById('panelLink');
+      var pageTransition = document.getElementById('pageTransition');
+      
+      if (panelLink) {
+        panelLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          pageTransition.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+          pageTransition.classList.add('show');
+          
+          setTimeout(function() {
+            window.location.href = '/gps-panel.html';
+          }, 300);
+        });
+      }
+      
+      window.addEventListener('load', function() {
+        pageTransition.classList.remove('show');
+        pageTransition.style.background = 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)';
+      });
+    });
+  </script>
+</body>
+</html>

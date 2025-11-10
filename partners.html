@@ -1,0 +1,351 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Shop</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	<meta name="author" content="" />
+
+  	<!-- facebook ve twitter integration -->
+	<meta property="og:title" content=""/>
+	<meta property="og:image" content=""/>
+	<meta property="og:url" content=""/>
+	<meta property="og:site_name" content=""/>
+	<meta property="og:description" content=""/>
+	<meta name="twitter:title" content="" />
+	<meta name="twitter:image" content="" />
+	<meta name="twitter:url" content="" />
+	<meta name="twitter:card" content="" />
+
+	<!-- <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet"> -->
+	<!-- <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i" rel="stylesheet"> -->
+	
+	<!-- animate.css -->
+	<link rel="stylesheet" href="css/animate.css">
+	<!-- icomoon icon fonts -->
+	<link rel="stylesheet" href="css/icomoon.css">
+	<!-- bootstrap -->
+	<link rel="stylesheet" href="css/bootstrap.css">
+
+	<!-- flexslider -->
+	<link rel="stylesheet" href="css/flexslider.css">
+
+	<!-- owl carousel -->
+	<link rel="stylesheet" href="css/owl.carousel.min.css">
+	<link rel="stylesheet" href="css/owl.theme.default.min.css">
+
+	<!-- theme style -->
+	<link rel="stylesheet" href="css/style.css">
+
+	<!-- modernizr js -->
+	<script src="js/modernizr-2.6.2.min.js"></script>
+	<!-- for ie9 below -->
+	<!--[if lt IE 9]>
+	<script src="js/respond.min.js"></script>
+	<![endif]-->
+
+	</head>
+	<body>
+		
+	<div class="fh5co-loader"></div>
+	
+	<div id="page" style="opacity: 1 !important; visibility: visible !important; transition: none !important; -webkit-transition: none !important;">
+	<nav class="fh5co-nav" role="navigation">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-3 col-xs-2">
+					<div id="fh5co-logo"><a href="index.html">Shop.</a></div>
+				</div>
+				<div class="col-md-6 col-xs-6 text-center menu-1">
+					<ul>
+						<li><a href="index.html" data-i18n="nav.home">Home</a></li>
+						<li class="has-dropdown">
+							<a href="product.html" data-i18n="nav.products">Products</a>
+							<ul class="dropdown">
+								<!-- dropdown içeriği JS ile dinamik olarak doldurulacak -->
+							</ul>
+						</li>
+						<li><a href="about.html" data-i18n="nav.about">About</a></li>
+						<li><a href="services.html" data-i18n="nav.services">Services</a></li>
+						<li class="active"><a href="partners.html" data-i18n="nav.partners">Partners</a></li>
+						<li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
+					</ul>
+				</div>
+			<div class="col-md-3 col-xs-4 text-right">
+				<div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: nowrap;">
+					<button type="button" id="productSearchBtn" class="product-search-btn-icon" style="padding: 8px 12px; background: #6366f1; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; min-width: 40px; transition: all 0.3s;">
+						<i class="icon-search"></i>
+					</button>
+					<div class="language-switcher-group">
+						<button class="language-switcher" data-lang="tr">TR</button>
+						<button class="language-switcher" data-lang="en">EN</button>
+						<button class="language-switcher" data-lang="ka">KA</button>
+					</div>
+					<div class="hero-contact-box">
+						<a href="tel://+1235235598" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+							<i class="icon-phone"></i>
+							<span class="contact-text" data-i18n="contact.phone">+ 1235 2355 98</span>
+						</a>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Product Search Modal -->
+			<div id="productSearchModal" class="product-search-modal" style="display: none;">
+				<div class="product-search-modal-overlay"></div>
+				<div class="product-search-modal-content">
+					<button type="button" class="product-search-modal-close" id="productSearchModalClose" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; font-size: 28px; color: #333; cursor: pointer; z-index: 10; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s;">&times;</button>
+					<div class="product-search-modal-header">
+						<h2 style="margin: 0 0 20px 0; font-size: 32px; color: #1a1a1a; font-weight: 700;" data-i18n="product.searchTitle">Ürün Ara</h2>
+						<div class="product-search-modal-input-wrapper" style="position: relative; width: 100%; max-width: 600px; margin: 0 auto;">
+							<input type="text" id="productSearchInputModal" class="product-search-input-modal" data-i18n-placeholder="product.searchPlaceholderModal" placeholder="Ürün adı, açıklama veya SKU yazın..." style="width: 100%; padding: 18px 60px 18px 24px; font-size: 18px; border: 2px solid #e5e7eb; border-radius: 12px; outline: none; transition: all 0.3s;" />
+							<button type="button" id="productSearchBtnModal" class="product-search-btn-modal" data-i18n-value="product.searchButton" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 12px 20px; background: #6366f1; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; transition: all 0.3s;">
+								<i class="icon-search"></i> <span data-i18n="product.searchButton">Ara</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url(https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1920&q=80);">
+		<div class="overlay"></div>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-8 col-md-offset-2 text-center">
+					<div class="display-t">
+						<div class="display-tc animate-box" data-animate-effect="fadeIn">
+							<h1 data-i18n="partners.title">İş Ortaklarımız</h1>
+							<h2><span data-i18n="partners.subtitle">by</span> <a href="https://ulik.vercel.app/" target="_blank">Ulik</a></h2>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+	
+	<div id="fh5co-partners" class="fh5co-bg-section">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12 text-center animate-box">
+					<h2 class="divider-gradient" data-i18n="partners.heading">Güvenilir İş Ortaklarımız</h2>
+					<p data-i18n="partners.description">Kaliteli hizmet ve ürünler sunan değerli iş ortaklarımızla çalışmaktan gurur duyuyoruz.</p>
+				</div>
+			</div>
+			<div class="row" id="partnersGrid" style="margin-top: 50px;">
+				<!-- Partners will be loaded here dynamically -->
+				<div class="col-md-12 text-center" style="padding: 40px;">
+					<p style="color: #6b7280;" data-i18n="partners.loading">İş ortakları yükleniyor...</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer id="fh5co-footer" role="contentinfo">
+		<div class="container">
+			<div class="row row-pb-md">
+				<div class="col-md-4 fh5co-widget">
+					<h3>Shop.</h3>
+					<p data-i18n="footer.description">Facilis ipsum reprehenderit nemo molestias. Aut cum mollitia reprehenderit. Eos cumque dicta adipisci architecto culpa amet.</p>
+				</div>
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#" data-i18n="footer.links.about">About</a></li>
+						<li><a href="#" data-i18n="footer.links.help">Help</a></li>
+						<li><a href="#" data-i18n="footer.links.contact">Contact</a></li>
+						<li><a href="#" data-i18n="footer.links.terms">Terms</a></li>
+						<li><a href="#" data-i18n="footer.links.meetups">Meetups</a></li>
+					</ul>
+				</div>
+
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#" data-i18n="footer.links.shop">Shop</a></li>
+						<li><a href="#" data-i18n="footer.links.privacy">Privacy</a></li>
+						<li><a href="#" data-i18n="footer.links.testimonials">Testimonials</a></li>
+						<li><a href="#" data-i18n="footer.links.handbook">Handbook</a></li>
+						<li><a href="#" data-i18n="footer.links.heldDesk">Held Desk</a></li>
+					</ul>
+				</div>
+
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#" data-i18n="footer.links.findDesigners">Find Designers</a></li>
+						<li><a href="#" data-i18n="footer.links.findDevelopers">Find Developers</a></li>
+						<li><a href="#" data-i18n="footer.links.teams">Teams</a></li>
+						<li><a href="#" data-i18n="footer.links.advertise">Advertise</a></li>
+						<li><a href="#" data-i18n="footer.links.api">API</a></li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="row copyright">
+				<div class="col-md-12 text-center">
+					<p>
+						<small class="block">&copy; 2025 Shop. <span data-i18n="footer.copyright">All Rights Reserved.</span></small> 
+						<small class="block"><span data-i18n="footer.designedBy">Designed by</span> <a href="https://ulik.vercel.app/" target="_blank">Ulik</a></small>
+					</p>
+					<p>
+						<ul class="fh5co-social-icons">
+							<li><a href="#"><i class="icon-twitter"></i></a></li>
+							<li><a href="#"><i class="icon-facebook"></i></a></li>
+							<li><a href="#"><i class="icon-linkedin"></i></a></li>
+							<li><a href="#"><i class="icon-dribbble"></i></a></li>
+						</ul>
+					</p>
+				</div>
+			</div>
+
+		</div>
+	</footer>
+	</div>
+
+	<div class="gototop js-top">
+		<a href="#" class="js-gotop"><i class="icon-arrow-up"></i></a>
+	</div>
+	
+	<!-- çift dil desteği - tr/en (jquery'den önce yükle) -->
+	<script src="js/i18n.js"></script>
+	<!-- jquery -->
+	<script src="js/jquery.min.js"></script>
+	<!-- jquery easing -->
+	<script src="js/jquery.easing.1.3.js"></script>
+	<!-- bootstrap -->
+	<script src="js/bootstrap.min.js"></script>
+	<!-- waypoints -->
+	<script src="js/jquery.waypoints.min.js"></script>
+	<!-- carousel -->
+	<script src="js/owl.carousel.min.js"></script>
+	<!-- countto -->
+	<script src="js/jquery.countTo.js"></script>
+	<!-- flexslider -->
+	<script src="js/jquery.flexslider-min.js"></script>
+	<!-- ürün datası - ürünler ve kategoriler burada -->
+	<script src="js/data-products.js"></script>
+	<!-- main -->
+	<script src="js/main.js"></script>
+	<!-- partners page logic -->
+	<script>
+		// Load and display partners
+		function loadPartners() {
+			var partners = partnersData || [];
+			var $grid = $('#partnersGrid');
+			
+			if (!partners || partners.length === 0) {
+				var noPartnersText = (typeof i18n !== 'undefined' && i18n.currentLang) 
+					? (i18n.t('partners.noPartners') || 'Henüz iş ortağı eklenmemiş.')
+					: 'Henüz iş ortağı eklenmemiş.';
+				$grid.html('<div class="col-md-12 text-center" style="padding: 40px;"><p style="color: #6b7280;">' + escapeHtml(noPartnersText) + '</p></div>');
+				return;
+			}
+			
+			var html = '';
+			partners.forEach(function(partner) {
+				if (!partner || !partner.name) return;
+				
+				var imageSrc = partner.image || '';
+				var href = partner.href || '#';
+				var target = href.startsWith('http') ? '_blank' : '_self';
+				
+				html += '<div class="col-md-3 col-sm-4 col-xs-6 animate-box" style="margin-bottom: 30px;">';
+				html += '<div class="partner-card" style="background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease; text-align: center; height: 100%;">';
+				html += '<a href="' + escapeHtml(href) + '" target="' + target + '" style="text-decoration: none; color: inherit; display: block;">';
+				if (imageSrc) {
+					html += '<img src="' + escapeHtml(imageSrc) + '" alt="' + escapeHtml(partner.name) + '" style="width: 100%; height: 120px; object-fit: contain; margin-bottom: 15px; border-radius: 8px;">';
+				} else {
+					var noImageText = (typeof i18n !== 'undefined' && i18n.currentLang) 
+						? (i18n.t('partners.noImage') || 'Resim Yok')
+						: 'Resim Yok';
+					html += '<div style="width: 100%; height: 120px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 14px; margin-bottom: 15px; border-radius: 8px;">' + escapeHtml(noImageText) + '</div>';
+				}
+				html += '<h3 style="margin: 0; font-size: 18px; color: #1a1a1a; font-weight: 600;">' + escapeHtml(partner.name) + '</h3>';
+				html += '</a>';
+				html += '</div>';
+				html += '</div>';
+			});
+			
+			$grid.html(html);
+			
+			// Add hover effect
+			$('.partner-card').hover(
+				function() {
+					$(this).css({
+						'transform': 'translateY(-5px)',
+						'box-shadow': '0 8px 20px rgba(0,0,0,0.15)'
+					});
+				},
+				function() {
+					$(this).css({
+						'transform': 'translateY(0)',
+						'box-shadow': '0 4px 12px rgba(0,0,0,0.1)'
+					});
+				}
+			);
+		}
+		
+		function escapeHtml(text) {
+			var map = {
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#039;'
+			};
+			return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+		}
+		
+		// Global partnersData variable
+		var partnersData = [];
+		
+		// Load partners when page is ready
+		$(document).ready(function() {
+			// Load from API
+			$.ajax({
+				url: '/api/partners',
+				method: 'GET',
+				success: function(data) {
+					console.log('📥 Backend response:', data);
+					if (data && data.partners && Array.isArray(data.partners)) {
+						partnersData = data.partners;
+						console.log('✅ Partners loaded from API:', partnersData.length, 'partners');
+						if (partnersData.length === 0) {
+							console.warn('⚠️ Partners array is empty');
+						}
+					} else {
+						partnersData = [];
+						console.warn('⚠️ No partners data received from API. Response:', data);
+					}
+					loadPartners();
+				},
+				error: function(xhr, status, error) {
+					console.error('❌ Error loading partners from API:', {
+						status: xhr.status,
+						statusText: xhr.statusText,
+						error: error,
+						responseText: xhr.responseText
+					});
+					partnersData = [];
+					loadPartners();
+				}
+			});
+		});
+	</script>
+
+	<!-- floating whatsapp butonu - pop-up gibi kenarda -->
+	<a href="https://wa.me/905363087215?text=Merhaba,%20ürünleriniz%20hakkında%20bilgi%20almak%20istiyorum" 
+	   target="_blank" 
+	   class="whatsapp-float" 
+	   aria-label="WhatsApp ile iletişime geç">
+		<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+			<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+		</svg>
+		<span class="whatsapp-tooltip">Bize WhatsApp'tan yazın</span>
+	</a>
+
+	</body>
+</html>
+

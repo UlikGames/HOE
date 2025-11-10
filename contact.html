@@ -1,0 +1,348 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Shop</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	<meta name="author" content="" />
+
+  	<!-- facebook ve twitter integration -->
+	<meta property="og:title" content=""/>
+	<meta property="og:image" content=""/>
+	<meta property="og:url" content=""/>
+	<meta property="og:site_name" content=""/>
+	<meta property="og:description" content=""/>
+	<meta name="twitter:title" content="" />
+	<meta name="twitter:image" content="" />
+	<meta name="twitter:url" content="" />
+	<meta name="twitter:card" content="" />
+
+	<!-- <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet"> -->
+	<!-- <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i" rel="stylesheet"> -->
+	
+	<!-- animate.css -->
+	<link rel="stylesheet" href="css/animate.css">
+	<!-- icomoon icon fonts -->
+	<link rel="stylesheet" href="css/icomoon.css">
+	<!-- bootstrap -->
+	<link rel="stylesheet" href="css/bootstrap.css">
+
+	<!-- flexslider -->
+	<link rel="stylesheet" href="css/flexslider.css">
+
+	
+	<!-- owl carousel -->
+	<link rel="stylesheet" href="css/owl.carousel.min.css">
+	<link rel="stylesheet" href="css/owl.theme.default.min.css">
+
+	<!-- theme style -->
+	<link rel="stylesheet" href="css/style.css">
+
+	<!-- free openstreetmap + leaflet map -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+	<!-- modernizr js -->
+	<script src="js/modernizr-2.6.2.min.js"></script>
+	<!-- for ie9 below -->
+	<!--[if lt IE 9]>
+	<script src="js/respond.min.js"></script>
+	<![endif]-->
+
+	</head>
+	<body>
+		
+	<div class="fh5co-loader"></div>
+	
+	<div id="page" style="opacity: 1 !important; visibility: visible !important; transition: none !important; -webkit-transition: none !important;">
+	<nav class="fh5co-nav" role="navigation">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-3 col-xs-2">
+					<div id="fh5co-logo"><a href="index.html">Shop.</a></div>
+				</div>
+				<div class="col-md-6 col-xs-6 text-center menu-1">
+					<ul>
+						<li><a href="index.html" data-i18n="nav.home">Home</a></li>
+						<li class="has-dropdown">
+							<a href="product.html" data-i18n="nav.products">Products</a>
+							<ul class="dropdown">
+								<!-- dropdown içeriği JS ile dinamik olarak doldurulacak -->
+							</ul>
+						</li>
+						<li><a href="about.html" data-i18n="nav.about">About</a></li>
+						<li><a href="services.html" data-i18n="nav.services">Services</a></li>
+						<li><a href="partners.html" data-i18n="nav.partners">Partners</a></li>
+						<li class="active"><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
+					</ul>
+				</div>
+			<div class="col-md-3 col-xs-4 text-right">
+				<div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: nowrap;">
+					<button type="button" id="productSearchBtn" class="product-search-btn-icon" style="padding: 8px 12px; background: #6366f1; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; min-width: 40px; transition: all 0.3s;">
+						<i class="icon-search"></i>
+					</button>
+					<div class="language-switcher-group">
+						<button class="language-switcher" data-lang="tr">TR</button>
+						<button class="language-switcher" data-lang="en">EN</button>
+						<button class="language-switcher" data-lang="ka">KA</button>
+					</div>
+					<div class="hero-contact-box">
+						<a href="tel://+1235235598" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+							<i class="icon-phone"></i>
+							<span class="contact-text" data-i18n="contact.phone">+ 1235 2355 98</span>
+						</a>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Product Search Modal -->
+			<div id="productSearchModal" class="product-search-modal" style="display: none;">
+				<div class="product-search-modal-overlay"></div>
+				<div class="product-search-modal-content">
+					<button type="button" class="product-search-modal-close" id="productSearchModalClose" style="position: absolute; top: 20px; right: 20px; background: transparent; border: none; font-size: 28px; color: #333; cursor: pointer; z-index: 10; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s;">&times;</button>
+					<div class="product-search-modal-header">
+						<h2 style="margin: 0 0 20px 0; font-size: 32px; color: #1a1a1a; font-weight: 700;" data-i18n="product.searchTitle">Ürün Ara</h2>
+						<div class="product-search-modal-input-wrapper" style="position: relative; width: 100%; max-width: 600px; margin: 0 auto;">
+							<input type="text" id="productSearchInputModal" class="product-search-input-modal" data-i18n-placeholder="product.searchPlaceholderModal" placeholder="Ürün adı, açıklama veya SKU yazın..." style="width: 100%; padding: 18px 60px 18px 24px; font-size: 18px; border: 2px solid #e5e7eb; border-radius: 12px; outline: none; transition: all 0.3s;" />
+							<button type="button" id="productSearchBtnModal" class="product-search-btn-modal" data-i18n-value="product.searchButton" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 12px 20px; background: #6366f1; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; transition: all 0.3s;">
+								<i class="icon-search"></i> <span data-i18n="product.searchButton">Ara</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+				<!-- search cart kısmı kapalı - lazım olursa açarsın
+					<ul>
+						<li class="search">
+							<div class="input-group">
+						      <input type="text" placeholder="Search..">
+						      <span class="input-group-btn">
+						        <button class="btn btn-primary" type="button"><i class="icon-search"></i></button>
+						      </span>
+						    </div>
+						</li>
+						<li class="shopping-cart"><a href="#" class="cart"><span><small>0</small><i class="icon-shopping-cart"></i></span></a></li>
+					</ul>
+				</div> -->
+			</div>
+			
+		</div>
+	</nav>
+
+	<header id="fh5co-header" class="fh5co-cover fh5co-cover-sm" role="banner" style="background-image:url(https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1920&q=80);">
+		<div class="overlay"></div>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-8 col-md-offset-2 text-center">
+					<div class="display-t">
+						<div class="display-tc animate-box" data-animate-effect="fadeIn">
+							<h1 data-i18n="contact.title">Contact Us</h1>
+							<h2><span data-i18n="contact.subtitle">by</span> <a href="https://ulik.vercel.app/" target="_blank">Ulik</a></h2>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<!-- Contact Form Section -->
+	<div id="fh5co-contact">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-12 text-center animate-box">
+					<h4 class="contact-form-label" data-i18n="contact.formLabel">İLETİŞİM FORMU</h4>
+					<h2 class="contact-form-title" data-i18n="contact.formTitle">Bize Ulaşın</h2>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12 animate-box">
+					<form action="#" class="contact-form">
+						<div class="row">
+							<!-- Sol Kolon -->
+							<div class="col-md-6">
+								<div class="form-group">
+									<input type="text" id="fullname" name="fullname" class="form-control" data-i18n-placeholder="contact.fullname" placeholder="Adınız Soyadınız" required>
+								</div>
+								<div class="form-group">
+									<input type="text" id="phone" name="phone" class="form-control" data-i18n-placeholder="contact.phoneInput" placeholder="Telefon Numarası" required>
+								</div>
+							</div>
+							<!-- Sağ Kolon -->
+							<div class="col-md-6">
+								<div class="form-group">
+									<input type="email" id="email" name="email" class="form-control" data-i18n-placeholder="contact.email" placeholder="E-Posta Adresi" pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}" required>
+								</div>
+								<div class="form-group">
+									<input type="text" id="subject" name="subject" class="form-control" data-i18n-placeholder="contact.subject" placeholder="Konu" required>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="form-group">
+									<textarea name="message" id="message" cols="30" rows="8" class="form-control" data-i18n-placeholder="contact.message" placeholder="Mesajınız" required></textarea>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<div class="form-group checkbox-group">
+									<label class="checkbox-label">
+										<input type="checkbox" id="kvkk" name="kvkk" required>
+										<span data-i18n="contact.kvkkText">Kvkk Şartlarını okudum ve onaylıyorum.</span>
+									</label>
+								</div>
+								<div class="form-group text-center">
+									<input type="submit" data-i18n-value="contact.submitForm" value="FORMU GÖNDER" class="btn btn-primary btn-submit">
+								</div>
+							</div>
+						</div>
+					</form>		
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Map Section with Contact Info Panel Overlay -->
+	<div id="contact-map-section">
+		<div class="map-container">
+			<div id="map"></div>
+			<!-- Overlay Contact Info Box -->
+			<div class="contact-info-panel-overlay">
+				<div class="contact-info-content">
+					<div class="contact-details-box">
+						<ul class="contact-info-list">
+							<li class="phone">
+								<span class="label" data-i18n="contact.phoneLabel">Telefon Numarası</span>
+								<a href="tel://1234567920" data-i18n="contact.phone">+ 1235 2355 98</a>
+							</li>
+							<li class="email">
+								<span class="label" data-i18n="contact.emailLabel">E-Posta Adresi</span>
+								<a href="mailto:info@yoursite.com" data-i18n="contact.emailAddress">info@yoursite.com</a>
+							</li>
+							<li class="company-address">
+								<span class="label" data-i18n="contact.companyAddressLabel">Firma Adresi</span>
+								<span data-i18n="contact.address">Batumi, Adjara, Georgia</span>
+							</li>
+						</ul>
+						<div class="social-icons">
+							<a href="#" class="social-icon" aria-label="Facebook"><i class="icon-facebook"></i></a>
+							<a href="#" class="social-icon" aria-label="Instagram"><i class="icon-instagram"></i></a>
+							<a href="https://wa.me/905363087215?text=Merhaba,%20ürünleriniz%20hakkında%20bilgi%20almak%20istiyorum" target="_blank" class="social-icon" aria-label="WhatsApp">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;">
+									<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+								</svg>
+							</a>
+							<a href="#" class="social-icon" aria-label="LinkedIn"><i class="icon-linkedin"></i></a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<footer id="fh5co-footer" role="contentinfo">
+		<div class="container">
+			<div class="row row-pb-md">
+				<div class="col-md-4 fh5co-widget">
+					<h3>Shop.</h3>
+					<p data-i18n="footer.description">Facilis ipsum reprehenderit nemo molestias. Aut cum mollitia reprehenderit. Eos cumque dicta adipisci architecto culpa amet.</p>
+				</div>
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#" data-i18n="footer.links.about">About</a></li>
+						<li><a href="#" data-i18n="footer.links.help">Help</a></li>
+						<li><a href="#" data-i18n="footer.links.contact">Contact</a></li>
+						<li><a href="#" data-i18n="footer.links.terms">Terms</a></li>
+						<li><a href="#" data-i18n="footer.links.meetups">Meetups</a></li>
+					</ul>
+				</div>
+
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#" data-i18n="footer.links.shop">Shop</a></li>
+						<li><a href="#" data-i18n="footer.links.privacy">Privacy</a></li>
+						<li><a href="#" data-i18n="footer.links.testimonials">Testimonials</a></li>
+						<li><a href="#" data-i18n="footer.links.handbook">Handbook</a></li>
+						<li><a href="#" data-i18n="footer.links.heldDesk">Held Desk</a></li>
+					</ul>
+				</div>
+
+				<div class="col-md-2 col-sm-4 col-xs-6 col-md-push-1">
+					<ul class="fh5co-footer-links">
+						<li><a href="#" data-i18n="footer.links.findDesigners">Find Designers</a></li>
+						<li><a href="#" data-i18n="footer.links.findDevelopers">Find Developers</a></li>
+						<li><a href="#" data-i18n="footer.links.teams">Teams</a></li>
+						<li><a href="#" data-i18n="footer.links.advertise">Advertise</a></li>
+						<li><a href="#" data-i18n="footer.links.api">API</a></li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="row copyright">
+				<div class="col-md-12 text-center">
+					<p>
+						<small class="block">&copy; 2025 Shop. <span data-i18n="footer.copyright">All Rights Reserved.</span></small> 
+						<small class="block"><span data-i18n="footer.designedBy">Designed by</span> <a href="https://ulik.vercel.app/" target="_blank">Ulik</a></small>
+					</p>
+					<p>
+						<ul class="fh5co-social-icons">
+							<li><a href="#"><i class="icon-twitter"></i></a></li>
+							<li><a href="#"><i class="icon-facebook"></i></a></li>
+							<li><a href="#"><i class="icon-linkedin"></i></a></li>
+							<li><a href="#"><i class="icon-dribbble"></i></a></li>
+						</ul>
+					</p>
+				</div>
+			</div>
+
+		</div>
+	</footer>
+	</div>
+
+	<div class="gototop js-top">
+		<a href="#" class="js-gotop"><i class="icon-arrow-up"></i></a>
+	</div>
+	
+	<!-- çift dil desteği - tr/en (jquery'den önce yükle) -->
+	<script src="js/i18n.js"></script>
+	<!-- jquery -->
+	<script src="js/jquery.min.js"></script>
+	<!-- jquery easing -->
+	<script src="js/jquery.easing.1.3.js"></script>
+	<!-- bootstrap -->
+	<script src="js/bootstrap.min.js"></script>
+	<!-- waypoints -->
+	<script src="js/jquery.waypoints.min.js"></script>
+	<!-- carousel -->
+	<script src="js/owl.carousel.min.js"></script>
+	<!-- countto -->
+	<script src="js/jquery.countTo.js"></script>
+	<!-- flexslider -->
+	<script src="js/jquery.flexslider-min.js"></script>
+	<!-- ürün datası - ürünler ve kategoriler burada -->
+	<script src="js/data-products.js"></script>
+	<!-- google map - kendi api key'ini ekle buraya -->
+	<!-- <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE&sensor=false"></script> -->
+	<script src="js/google_map.js"></script>
+
+	<!-- main -->
+	<script src="js/main.js"></script>
+
+	<!-- floating whatsapp butonu - pop-up gibi kenarda -->
+	<a href="https://wa.me/905363087215?text=Merhaba,%20ürünleriniz%20hakkında%20bilgi%20almak%20istiyorum" 
+	   target="_blank" 
+	   class="whatsapp-float" 
+	   aria-label="WhatsApp ile iletişime geç">
+		<svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+			<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+		</svg>
+		<span class="whatsapp-tooltip">Bize WhatsApp'tan yazın</span>
+	</a>
+
+	</body>
+</html>
+

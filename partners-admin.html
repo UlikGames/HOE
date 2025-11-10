@@ -1,0 +1,1765 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>İş Ortakları Yönetimi</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/style.css">
+	
+	<style>
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: "Montserrat", Arial, sans-serif;
+			background: linear-gradient(135deg, #ec4899 0%, #db2777 25%, #be185d 50%, #9f1239 75%, #831843 100%);
+			background-size: 400% 400%;
+			animation: gradientShift 15s ease infinite, fadeIn 0.4s ease-in;
+			min-height: 100vh;
+		}
+		
+		@keyframes gradientShift {
+			0% { background-position: 0% 50%; }
+			50% { background-position: 100% 50%; }
+			100% { background-position: 0% 50%; }
+		}
+		
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		/* Geçiş Overlay */
+		.page-transition-overlay {
+			position: fixed !important;
+			top: 0 !important;
+			left: 0 !important;
+			right: 0 !important;
+			bottom: 0 !important;
+			width: 100vw !important;
+			height: 100vh !important;
+			background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+			z-index: 99999 !important;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.3s ease-out;
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			margin: 0 !important;
+			padding: 0 !important;
+		}
+		
+		.page-transition-overlay.hide {
+			opacity: 0;
+			pointer-events: none;
+		}
+		
+		.page-transition-overlay.show {
+			opacity: 1;
+			pointer-events: all;
+		}
+		
+		.page-transition-overlay .spinner {
+			width: 60px;
+			height: 60px;
+			border: 4px solid rgba(255, 255, 255, 0.3);
+			border-top-color: #fff;
+			border-radius: 50%;
+			animation: spin 0.8s linear infinite;
+			margin: 0 auto;
+			flex-shrink: 0;
+		}
+		
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
+		
+		.partner-header {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			color: #fff;
+			padding: 24px 32px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+			position: sticky;
+			top: 0;
+			z-index: 100;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.partner-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+			animation: shimmer 3s infinite;
+		}
+		
+		@keyframes shimmer {
+			0% { left: -100%; }
+			100% { left: 100%; }
+		}
+		
+		.partner-header-content {
+			max-width: 1400px;
+			margin: 0 auto;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 20px;
+			position: relative;
+			z-index: 1;
+		}
+		
+		.partner-header h1 {
+			margin: 0;
+			font-size: 32px;
+			font-weight: 700;
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+			letter-spacing: -0.5px;
+		}
+		
+		.btn-back {
+			background: rgba(255, 255, 255, 0.2);
+			color: #fff;
+			padding: 12px 24px;
+			border: 1.5px solid rgba(255, 255, 255, 0.3);
+			border-radius: 12px;
+			text-decoration: none;
+			font-size: 14px;
+			font-weight: 600;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.btn-back::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.btn-back:hover::before {
+			left: 100%;
+		}
+		
+		.btn-back:hover {
+			background: rgba(255, 255, 255, 0.3);
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+			border-color: rgba(255, 255, 255, 0.5);
+		}
+		
+		.partner-container {
+			max-width: 1400px;
+			margin: 0 auto;
+			padding: 30px 20px;
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(24px);
+			-webkit-backdrop-filter: blur(24px);
+			border-radius: 24px;
+			border: 1.5px solid rgba(255, 255, 255, 0.3);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+			            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.partner-container::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+			animation: shimmer 3s infinite;
+		}
+		
+		.btn-admin {
+			background: linear-gradient(135deg, #ec4899 0%, #db2777 50%, #be185d 100%);
+			color: #fff;
+			padding: 12px 30px;
+			border: none;
+			border-radius: 12px;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			box-shadow: 0 8px 24px rgba(236, 72, 153, 0.35),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.btn-admin::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.btn-admin:hover::before {
+			left: 100%;
+		}
+		
+		.btn-admin:hover {
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 12px 32px rgba(236, 72, 153, 0.45),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		}
+		
+		.btn-admin:active {
+			transform: translateY(0) scale(0.98);
+		}
+		
+		.partner-card {
+			background: rgba(255, 255, 255, 0.08) !important;
+			backdrop-filter: blur(40px) !important;
+			-webkit-backdrop-filter: blur(40px) !important;
+			border-radius: 24px;
+			padding: 30px;
+			margin-bottom: 30px;
+			box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25),
+			            0 0 0 2px rgba(255, 255, 255, 0.3) inset,
+			            inset 0 2px 4px rgba(255, 255, 255, 0.2),
+			            inset 0 -2px 4px rgba(255, 255, 255, 0.1),
+			            0 4px 20px rgba(236, 72, 153, 0.15);
+			border: 2px solid rgba(255, 255, 255, 0.5) !important;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.partner-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+			animation: shimmer 3s infinite;
+		}
+		
+		.partner-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2),
+			            0 0 0 1px rgba(255, 255, 255, 0.3) inset,
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			border-color: rgba(255, 255, 255, 0.5);
+			background: rgba(255, 255, 255, 0.2);
+		}
+		
+		.partner-list {
+			display: grid;
+			gap: 15px;
+			margin-top: 20px;
+		}
+		
+		.partner-item {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 16px 20px;
+			background: rgba(255, 255, 255, 0.2);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			border-radius: 12px;
+			margin-bottom: 10px;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+			gap: 16px;
+		}
+		
+		.partner-item:hover {
+			border-color: rgba(236, 72, 153, 0.4);
+			box-shadow: 0 8px 24px rgba(236, 72, 153, 0.2),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			transform: translateY(-2px);
+			background: rgba(255, 255, 255, 0.25);
+		}
+		
+		.partner-item-info {
+			flex: 1;
+			display: flex;
+			align-items: center;
+			gap: 16px;
+			min-width: 0;
+			overflow: hidden;
+		}
+		
+		.partner-item-image {
+			width: 250px;
+			height: 250px;
+			min-width: 250px;
+			max-width: 250px;
+			object-fit: contain;
+			border-radius: 16px;
+			border: 2px solid rgba(255, 255, 255, 0.4);
+			background: rgba(255, 255, 255, 0.15);
+			flex-shrink: 0;
+			padding: 12px;
+			box-sizing: border-box;
+		}
+		
+		.partner-item-image img {
+			width: 100%;
+			height: 100%;
+			object-fit: contain;
+		}
+		
+		.partner-item-details {
+			flex: 1;
+			min-width: 0;
+			overflow: hidden;
+		}
+		
+		.partner-item-details p {
+			margin: 6px 0;
+			font-size: 14px;
+			color: rgba(255, 255, 255, 0.9);
+			word-break: break-all;
+			text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+			overflow-wrap: break-word;
+		}
+		
+		.partner-item-details h3 {
+			margin: 0 0 8px 0;
+			font-size: 18px;
+			color: #fff;
+			font-weight: 600;
+			text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		
+		
+		.partner-item-details a {
+			color: #ec4899;
+			text-decoration: none;
+			font-weight: 500;
+			border-bottom: 2px solid rgba(236, 72, 153, 0.4);
+			transition: all 0.3s ease;
+			background: rgba(255, 255, 255, 0.9);
+			padding: 2px 6px;
+			border-radius: 4px;
+			display: inline-block;
+		}
+		
+		.partner-item-details a:hover {
+			color: #be185d;
+			border-bottom-color: rgba(190, 24, 93, 0.8);
+			background: rgba(255, 255, 255, 1);
+			box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+		}
+		
+		.partner-item-actions {
+			display: flex;
+			gap: 10px;
+			flex-shrink: 0;
+		}
+		
+		.btn-edit {
+			background: #10b981;
+			color: #fff;
+			padding: 8px 16px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 14px;
+			font-weight: 600;
+		}
+		
+		.btn-delete {
+			background: #ef4444;
+			color: #fff;
+			padding: 8px 16px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 14px;
+			font-weight: 600;
+		}
+		
+		/* Modern Popup Modal */
+		.popup-modal-overlay {
+			position: fixed !important;
+			top: 0 !important;
+			left: 0 !important;
+			right: 0 !important;
+			bottom: 0 !important;
+			background: rgba(0, 0, 0, 0.6);
+			backdrop-filter: blur(4px);
+			z-index: 99999 !important;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			padding: 20px;
+			animation: fadeIn 0.2s ease-out;
+		}
+		
+		.popup-modal-overlay.show {
+			display: flex;
+		}
+		
+		.popup-modal {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(24px);
+			-webkit-backdrop-filter: blur(24px);
+			border-radius: 24px;
+			width: 100%;
+			max-width: 450px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			overflow: hidden;
+			animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			transform-origin: center;
+			position: relative;
+			margin: auto;
+		}
+		
+		@keyframes slideUp {
+			from {
+				transform: translateY(30px) scale(0.95);
+				opacity: 0;
+			}
+			to {
+				transform: translateY(0) scale(1);
+				opacity: 1;
+			}
+		}
+		
+		.popup-modal-header {
+			padding: 24px 30px 20px;
+			background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+			color: #fff;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 15px;
+		}
+		
+		.popup-modal-header h3 {
+			margin: 0;
+			font-size: 20px;
+			font-weight: 700;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+		
+		.popup-modal-header .popup-icon {
+			font-size: 24px;
+			width: 32px;
+			height: 32px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 8px;
+		}
+		
+		.popup-modal-body {
+			padding: 30px;
+			color: #fff;
+			font-size: 15px;
+			line-height: 1.6;
+			background: rgba(255, 255, 255, 0.1);
+		}
+		
+		.popup-modal-body p {
+			margin: 0 0 15px 0;
+			color: #fff;
+		}
+		
+		.popup-modal-body strong {
+			color: rgba(255, 255, 255, 0.9);
+			font-weight: 600;
+		}
+		
+		.popup-modal-footer {
+			padding: 20px 30px;
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			display: flex;
+			justify-content: flex-end;
+			gap: 12px;
+			border-top: 1px solid rgba(255, 255, 255, 0.2);
+		}
+		
+		.popup-btn {
+			padding: 12px 24px;
+			border: none;
+			border-radius: 10px;
+			font-size: 15px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			min-width: 100px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+		}
+		
+		.popup-btn-primary {
+			background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+			color: #fff;
+			box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+		}
+		
+		.popup-btn-primary:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+		}
+		
+		.popup-btn-secondary {
+			background: #fff;
+			color: #6b7280;
+			border: 2px solid #e5e7eb;
+		}
+		
+		.popup-btn-secondary:hover {
+			background: #f3f4f6;
+			border-color: #d1d5db;
+		}
+		
+		.popup-btn-danger {
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+			color: #fff;
+			box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+		}
+		
+		.popup-btn-danger:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+		}
+		
+		.popup-btn-success {
+			background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+			color: #fff;
+			box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+		}
+		
+		.popup-btn-success:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+		}
+		
+		/* Image Upload Container */
+		.image-upload-container {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+		
+		.upload-buttons-row {
+			display: flex;
+			gap: 10px;
+			align-items: center;
+		}
+		
+		.btn-upload, .btn-url-add {
+			white-space: nowrap;
+			padding: 12px 20px;
+		}
+		
+		.url-input {
+			width: 100%;
+			padding: 12px 16px;
+			border: 2px solid #e5e7eb;
+			border-radius: 8px;
+			font-size: 14px;
+		}
+		
+		@media (max-width: 768px) {
+			.partner-header {
+				padding: 16px 20px;
+			}
+			.partner-header h1 { 
+				font-size: 22px; 
+			}
+			.partner-container { 
+				padding: 20px 15px; 
+			}
+			.btn-back {
+				padding: 10px 16px;
+				font-size: 13px;
+			}
+			
+			.popup-modal {
+				max-width: 90%;
+				margin: 20px;
+			}
+			
+			.popup-modal-header {
+				padding: 20px 24px 16px;
+			}
+			
+			.popup-modal-header h3 {
+				font-size: 18px;
+			}
+			
+			.popup-modal-body {
+				padding: 24px;
+				font-size: 14px;
+			}
+			
+			.popup-modal-footer {
+				padding: 16px 24px;
+				flex-direction: column-reverse;
+			}
+			
+			.popup-btn {
+				width: 100%;
+			}
+			
+			.image-upload-container {
+				gap: 12px;
+			}
+			
+			.upload-buttons-row {
+				flex-direction: column;
+				width: 100%;
+				gap: 10px;
+			}
+			
+			.btn-upload, .btn-url-add {
+				width: 100%;
+				padding: 14px 20px;
+				font-size: 14px;
+			}
+			
+			.url-input {
+				width: 100%;
+				padding: 14px 16px;
+				font-size: 16px;
+			}
+			
+			.partner-item {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 15px;
+			}
+			
+			.partner-item-info {
+				width: 100%;
+				flex-direction: column;
+				align-items: flex-start;
+			}
+			
+			.partner-item-actions {
+				width: 100%;
+				justify-content: flex-end;
+			}
+		}
+		
+		/* Modal Stilleri */
+		.admin-modal-overlay {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.6);
+			backdrop-filter: blur(8px);
+			-webkit-backdrop-filter: blur(8px);
+			z-index: 10000;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 20px;
+			overflow-y: auto;
+		}
+		
+		.admin-modal {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(24px);
+			-webkit-backdrop-filter: blur(24px);
+			border-radius: 24px;
+			width: 100%;
+			max-width: 700px;
+			max-height: 90vh;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			display: flex;
+			flex-direction: column;
+			overflow: hidden;
+		}
+		
+		.admin-modal-header {
+			padding: 20px 30px;
+			border-bottom: 1.5px solid rgba(255, 255, 255, 0.2);
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+			color: #fff;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.admin-modal-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+			animation: shimmer 3s infinite;
+		}
+		
+		.admin-modal-header h2 {
+			margin: 0;
+			font-size: 24px;
+			color: #fff;
+		}
+		
+		.admin-modal-close {
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			color: #fff;
+			font-size: 32px;
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			line-height: 1;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		}
+		
+		.admin-modal-close:hover {
+			background: rgba(255, 255, 255, 0.3);
+			transform: scale(1.1) rotate(90deg);
+			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+		}
+		
+		.admin-modal-body {
+			padding: 30px;
+			overflow-y: auto;
+			flex: 1;
+			background: rgba(255, 255, 255, 0.1);
+		}
+		
+		.admin-form-group {
+			margin-bottom: 20px;
+		}
+		
+		.admin-form-group label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 600;
+			color: #fff;
+			font-size: 14px;
+			text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+		}
+		
+		.admin-form-group input,
+		.admin-form-group textarea {
+			width: 100%;
+			padding: 12px 16px;
+			border: 2px solid rgba(255, 255, 255, 0.3);
+			border-radius: 12px;
+			font-size: 14px;
+			font-family: "Montserrat", Arial, sans-serif;
+			transition: all 0.3s;
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			color: #1a1a1a;
+		}
+		
+		.admin-form-group input:focus,
+		.admin-form-group textarea:focus {
+			outline: none;
+			border-color: #ec4899;
+			box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+		}
+		
+		.btn-admin-secondary {
+			background: #6b7280;
+		}
+		
+		.partner-image-preview {
+			margin-bottom: 10px;
+			display: none;
+		}
+		
+		.partner-image-preview img {
+			max-width: 200px;
+			max-height: 150px;
+			border-radius: 8px;
+			border: 2px solid #e5e7eb;
+			object-fit: cover;
+			display: block;
+		}
+	</style>
+</head>
+<body>
+	<!-- Şifre Giriş Ekranı -->
+	<div id="loginScreen" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #ec4899 0%, #db2777 25%, #be185d 50%, #9f1239 75%, #831843 100%); background-size: 400% 400%; animation: gradientShift 15s ease infinite; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+		<div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); padding: 50px 40px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2) inset; max-width: 450px; width: 100%; border: 1.5px solid rgba(255, 255, 255, 0.2); position: relative; overflow: hidden;">
+			<div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #ec4899, #db2777, #be185d);"></div>
+			<h2 style="margin: 0 0 30px 0; text-align: center; color: #fff; font-size: 28px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);">🔒 İş Ortakları Yönetimi</h2>
+			<div class="alert alert-error" id="loginError" style="display: none; margin-bottom: 20px; padding: 15px 20px; border-radius: 12px; background: rgba(254, 226, 226, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #991b1b; border: 1.5px solid rgba(239, 68, 68, 0.3); box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);"></div>
+			<div style="margin-bottom:20px;">
+				<label style="display: block; margin-bottom: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.95); font-size: 14px;">Şifre</label>
+				<input type="password" id="adminPassword" placeholder="Admin şifresini gir..." style="width: 100%; padding: 14px 18px; border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 12px; font-size: 16px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); outline: none; transition: all 0.3s;">
+			</div>
+			<style>
+				#adminPassword:focus {
+					border-color: #ec4899 !important;
+					box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.1), 0 4px 16px rgba(236, 72, 153, 0.15) !important;
+					background: rgba(255, 255, 255, 1) !important;
+				}
+			</style>
+			<button onclick="checkPassword()" class="btn-admin" style="width: 100%; margin-top: 20px; padding: 16px 30px; font-size: 16px;">Giriş Yap</button>
+		</div>
+	</div>
+
+	<div id="pageContent" style="display: none;">
+	<!-- Modern Popup Modal -->
+	<div id="popupModal" class="popup-modal-overlay">
+		<div class="popup-modal">
+			<div class="popup-modal-header">
+				<h3>
+					<span class="popup-icon" id="popupIcon">ℹ</span>
+					<span id="popupTitle">Bilgi</span>
+				</h3>
+			</div>
+			<div class="popup-modal-body">
+				<p id="popupMessage"></p>
+			</div>
+			<div class="popup-modal-footer" id="popupFooter">
+				<!-- Butonlar JavaScript ile eklenecek -->
+			</div>
+		</div>
+	</div>
+	
+	<header class="partner-header">
+		<div class="partner-header-content">
+			<h1>🤝 İş Ortakları Yönetimi</h1>
+			<div style="display: flex; gap: 10px;">
+				<a href="admin.html" class="btn-back">← Admin Paneli</a>
+			</div>
+		</div>
+	</header>
+	
+	<div class="partner-container">
+		<div class="partner-card">
+			<div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+				<button class="btn-admin" onclick="openPartnerModal()">➕ Yeni İş Ortağı Ekle</button>
+				<button class="btn-admin" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="savePartnersToServer()">💾 Sunucuya Kaydet</button>
+			</div>
+			
+			<h2 style="margin: 20px 0 15px 0; font-size: 20px; color: #1a1a1a;">Mevcut İş Ortakları</h2>
+			<div id="partnersList" class="partner-list">
+				<p style="color: #6b7280; text-align: center; padding: 40px;">İş ortakları yükleniyor...</p>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Partner Modal -->
+	<div id="partnerModal" class="admin-modal-overlay" style="display: none;">
+		<div class="admin-modal" style="max-width: 700px;">
+			<div class="admin-modal-header">
+				<h2 id="partnerModalTitle">Yeni İş Ortağı Ekle</h2>
+				<button type="button" class="admin-modal-close" onclick="closePartnerModal()">&times;</button>
+			</div>
+			<div class="admin-modal-body">
+				<form id="partnerForm">
+					<input type="hidden" id="partnerIndex" value="-1">
+					
+					<div class="admin-form-group">
+						<label>İş Ortağı Adı</label>
+						<input type="text" id="partnerName" required placeholder="Örn: ABC Şirketi">
+					</div>
+					
+					<div class="admin-form-group">
+						<label>İş Ortağı Görseli</label>
+						<div id="partnerImagePreview" class="partner-image-preview" style="margin-bottom: 10px;">
+							<img id="partnerImagePreviewImg" src="" alt="Preview">
+						</div>
+						<div class="image-upload-container">
+							<input type="file" id="partnerImageFile" accept="image/*" style="display: none;" onchange="uploadPartnerImage()">
+							<div class="upload-buttons-row">
+								<button type="button" id="uploadPartnerBtn" class="btn-admin btn-upload" onclick="document.getElementById('partnerImageFile').click()">📁 Bilgisayardan Yükle</button>
+								<button type="button" class="btn-admin btn-url-add" onclick="addPartnerImageUrl()">+ URL Ekle</button>
+							</div>
+							<input type="text" id="partnerImage" placeholder="Veya URL ekle" class="url-input">
+						</div>
+					</div>
+					
+					<div class="admin-form-group">
+						<label>Link (Href)</label>
+						<input type="url" id="partnerHref" placeholder="https://example.com" required>
+						<small style="color: #6b7280;">İş ortağının web sitesi veya sayfa linki</small>
+					</div>
+					
+					<div style="display: flex; gap: 10px; margin-top: 20px;">
+						<button type="button" class="btn-admin" onclick="savePartner()">Kaydet</button>
+						<button type="button" class="btn-admin btn-admin-secondary" onclick="closePartnerModal()">İptal</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script src="js/jquery.min.js"></script>
+	<script>
+		var partnersData = [];
+		
+		// Modern Popup Modal Fonksiyonları
+		var popupResolve = null;
+		
+		function showAlert(type, message) {
+			return new Promise(function(resolve) {
+				var $modal = $('#popupModal');
+				var $icon = $('#popupIcon');
+				var $title = $('#popupTitle');
+				var $message = $('#popupMessage');
+				var $footer = $('#popupFooter');
+				
+				var icon = 'ℹ', title = 'Bilgi';
+				switch(type) {
+					case 'success': icon = '✓'; title = 'Başarılı'; break;
+					case 'error': icon = '✕'; title = 'Hata'; break;
+					case 'warning': icon = '⚠'; title = 'Uyarı'; break;
+				}
+				
+				$icon.text(icon);
+				$title.text(title);
+				$message.html((message || '').replace(/\n/g, '<br>'));
+				$footer.html('<button class="popup-btn popup-btn-primary" onclick="closePopup()">Tamam</button>');
+				
+				popupResolve = resolve;
+				$modal.addClass('show');
+				$(document).off('keydown.popup').on('keydown.popup', function(e) {
+					if (e.key === 'Enter' || e.key === 'Escape') closePopup();
+				});
+			});
+		}
+		
+		function showConfirm(message, title) {
+			if (!title) title = 'Onay';
+			return new Promise(function(resolve) {
+				var $modal = $('#popupModal');
+				$('#popupIcon').text('❓');
+				$('#popupTitle').text(title);
+				$('#popupMessage').html((message || '').replace(/\n/g, '<br>'));
+				$('#popupFooter').html(
+					'<button class="popup-btn popup-btn-secondary" onclick="closePopup(false)">İptal</button>' +
+					'<button class="popup-btn popup-btn-primary" onclick="closePopup(true)">Tamam</button>'
+				);
+				popupResolve = resolve;
+				$modal.addClass('show');
+				$(document).off('keydown.popup').on('keydown.popup', function(e) {
+					if (e.key === 'Enter') closePopup(true);
+					else if (e.key === 'Escape') closePopup(false);
+				});
+			});
+		}
+		
+		function closePopup(result) {
+			$('#popupModal').removeClass('show');
+			$(document).off('keydown.popup');
+			if (popupResolve) {
+				popupResolve(result !== false);
+				popupResolve = null;
+			}
+		}
+		
+		$(document).on('click', '.popup-modal-overlay', function(e) {
+			if (e.target === this) closePopup(false);
+		});
+		
+		// Partners yükle
+		function loadPartners() {
+			// Önce backend'den yükle (API)
+			$.ajax({
+				url: '/api/partners',
+				method: 'GET',
+				success: function(response) {
+					if (response && response.partners && response.partners.length > 0) {
+						partnersData = response.partners;
+						// ID'leri ekle (yoksa)
+						partnersData = partnersData.map(function(p, index) {
+							if (!p.id) {
+								p.id = index + 1;
+							}
+							return p;
+						});
+						localStorage.setItem('adminPartners', JSON.stringify(partnersData));
+						renderPartners();
+						return;
+					}
+					
+					// Backend'den veri yoksa, localStorage'dan yükle ve backend'e kaydet
+					var stored = localStorage.getItem('adminPartners');
+					if (stored) {
+						try {
+							var localPartners = JSON.parse(stored);
+							if (localPartners && localPartners.length > 0) {
+								partnersData = localPartners;
+								// ID'leri ekle (yoksa)
+								partnersData = partnersData.map(function(p, index) {
+									if (!p.id) {
+										p.id = index + 1;
+									}
+									return p;
+								});
+								renderPartners();
+								
+								// localStorage'daki veriler backend'de yok, otomatik kaydet
+								console.log('💾 localStorage\'da veri var ama backend\'de yok. Otomatik kaydediliyor...');
+								savePartnersToServer();
+								return;
+							}
+						} catch(e) {
+							console.error('❌ localStorage parse hatası:', e);
+						}
+					}
+					
+					// Backend'den veri yoksa, localStorage'dan yükle
+					if (typeof window.partnersData !== 'undefined' && window.partnersData.length > 0) {
+						partnersData = window.partnersData;
+						partnersData = partnersData.map(function(p, index) {
+							if (!p.id) {
+								p.id = index + 1;
+							}
+							return p;
+						});
+						renderPartners();
+						return;
+					}
+					
+					$('#partnersList').html('<p style="color: #6b7280; text-align: center; padding: 40px;">Henüz iş ortağı eklenmemiş.</p>');
+				},
+				error: function() {
+					// API hatası durumunda fallback
+					if (typeof window.partnersData !== 'undefined' && window.partnersData.length > 0) {
+						partnersData = window.partnersData;
+						partnersData = partnersData.map(function(p, index) {
+							if (!p.id) {
+								p.id = index + 1;
+							}
+							return p;
+						});
+						renderPartners();
+					} else {
+						var stored = localStorage.getItem('adminPartners');
+						if (stored) {
+							try {
+								partnersData = JSON.parse(stored);
+								renderPartners();
+							} catch(e) {
+								$('#partnersList').html('<p style="color: #6b7280; text-align: center; padding: 40px;">Henüz iş ortağı eklenmemiş.</p>');
+							}
+						} else {
+							$('#partnersList').html('<p style="color: #6b7280; text-align: center; padding: 40px;">Henüz iş ortağı eklenmemiş.</p>');
+						}
+					}
+				}
+			});
+		}
+		
+		// Partners listele
+		function renderPartners() {
+			var $list = $('#partnersList');
+			
+			if (!partnersData || partnersData.length === 0) {
+				$list.html('<p style="color: #6b7280; text-align: center; padding: 40px;">Henüz iş ortağı eklenmemiş.</p>');
+				return;
+			}
+			
+			var html = '';
+			partnersData.forEach(function(partner, index) {
+				var name = partner.name || 'İsimsiz';
+				var image = partner.image || '';
+				var href = partner.href || '#';
+				
+				html += '<div class="partner-item">';
+				html += '<div class="partner-item-info">';
+				if (image) {
+					html += '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(name) + '" class="partner-item-image">';
+				} else {
+					html += '<div class="partner-item-image" style="background: rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.7); font-size: 14px; width: 250px; height: 250px; border-radius: 16px;">Resim Yok</div>';
+				}
+				html += '<div class="partner-item-details">';
+				html += '<h3>' + escapeHtml(name) + '</h3>';
+				html += '<p><a href="' + escapeHtml(href) + '" target="_blank">' + escapeHtml(href) + '</a></p>';
+				html += '</div>';
+				html += '</div>';
+				html += '<div class="partner-item-actions">';
+				html += '<button class="btn-edit" onclick="editPartner(' + index + ')">✏️ Düzenle</button>';
+				html += '<button class="btn-delete" onclick="deletePartner(' + index + ')">🗑️ Sil</button>';
+				html += '</div>';
+				html += '</div>';
+			});
+			
+			$list.html(html);
+		}
+		
+		// Partner modal
+		function openPartnerModal() {
+			$('#partnerIndex').val('-1');
+			$('#partnerModalTitle').text('Yeni İş Ortağı Ekle');
+			$('#partnerForm')[0].reset();
+			$('#partnerImagePreview').hide();
+			$('#partnerImageFile').val('');
+			$('#partnerImage').val('');
+			$('#partnerModal').css('display', 'flex');
+		}
+		
+		function closePartnerModal() {
+			$('#partnerModal').hide();
+			$('#partnerImagePreview').hide();
+			$('#partnerImageFile').val('');
+			$('#partnerImage').val('');
+			$('#partnerImagePreviewImg').attr('src', '');
+		}
+		
+		function editPartner(index) {
+			if (index < 0 || index >= partnersData.length) return;
+			
+			var partner = partnersData[index];
+			$('#partnerIndex').val(index);
+			$('#partnerModalTitle').text('İş Ortağını Düzenle');
+			
+			$('#partnerName').val(partner.name || '');
+			$('#partnerHref').val(partner.href || '');
+			
+			// Image'i yükle
+			var image = partner.image || '';
+			$('#partnerImage').val(image);
+			
+			// Preview göster
+			var $previewImg = $('#partnerImagePreviewImg');
+			var $preview = $('#partnerImagePreview');
+			var errorTimeout = null;
+			var imageLoaded = false;
+			
+			if (image && image.trim().length > 0) {
+				var imageUrl = (typeof image === 'string') ? image.trim() : image;
+				
+				// Önceki event handler'ları temizle
+				$previewImg.off('error load');
+				
+				// Resim zaten yüklenmişse (cache'den)
+				if ($previewImg[0].src === imageUrl && $previewImg[0].complete && $previewImg[0].naturalWidth > 0) {
+					$preview.show();
+				} else {
+					// Yeni resim yükle
+					$previewImg.attr('src', imageUrl);
+					
+					// Load event - resim başarıyla yüklendi
+					$previewImg.on('load', function() {
+						imageLoaded = true;
+						if (errorTimeout) {
+							clearTimeout(errorTimeout);
+							errorTimeout = null;
+						}
+						$preview.show();
+					});
+					
+					// Error event - resim yüklenemedi (sadece gerçek hata durumunda)
+					$previewImg.on('error', function() {
+						// Eğer resim zaten yüklendiyse, hata mesajı gösterme
+						if (imageLoaded) return;
+						
+						// Kısa bir gecikme ile kontrol et
+						if (errorTimeout) {
+							clearTimeout(errorTimeout);
+						}
+						
+						errorTimeout = setTimeout(function() {
+							// Hala yüklenmemişse ve hata varsa
+							if (!imageLoaded && (!$previewImg[0].complete || $previewImg[0].naturalWidth === 0)) {
+								$preview.hide();
+							}
+						}, 500);
+					});
+					
+					// Resim zaten yüklenmişse (cache'den hızlı yükleme)
+					setTimeout(function() {
+						if ($previewImg[0].complete && $previewImg[0].naturalWidth > 0) {
+							imageLoaded = true;
+							if (errorTimeout) {
+								clearTimeout(errorTimeout);
+								errorTimeout = null;
+							}
+							$preview.show();
+						}
+					}, 100);
+				}
+			} else {
+				$preview.hide();
+			}
+			$('#partnerImageFile').val('');
+			
+			$('#partnerModal').css('display', 'flex');
+		}
+		
+		function deletePartner(index) {
+			if (index < 0 || index >= partnersData.length) return;
+			
+			var partner = partnersData[index];
+			var name = partner.name || 'İsimsiz';
+			
+			showConfirm('"' + name + '" iş ortağını silmek istediğinize emin misiniz?', 'İş Ortağı Silme').then(function(confirmed) {
+				if (!confirmed) return;
+				
+				partnersData.splice(index, 1);
+				localStorage.setItem('adminPartners', JSON.stringify(partnersData));
+				renderPartners();
+				
+				// Backend'e kaydet
+				savePartnersToServer();
+			});
+		}
+		
+		function savePartner() {
+			var index = parseInt($('#partnerIndex').val());
+			var name = $('#partnerName').val().trim();
+			var image = $('#partnerImage').val().trim();
+			var href = $('#partnerHref').val().trim();
+			
+			if (!name) {
+				showAlert('warning', 'İş ortağı adı gerekli!');
+				return;
+			}
+			
+			if (!href) {
+				showAlert('warning', 'Link gerekli!');
+				return;
+			}
+			
+			var partner = {
+				id: index === -1 ? (partnersData.length > 0 ? Math.max.apply(null, partnersData.map(function(p) { return p.id || 0; })) + 1 : 1) : partnersData[index].id,
+				name: name,
+				image: image || '',
+				href: href
+			};
+			
+			if (index === -1) {
+				partnersData.push(partner);
+			} else {
+				partnersData[index] = partner;
+			}
+			
+			localStorage.setItem('adminPartners', JSON.stringify(partnersData));
+			renderPartners();
+			closePartnerModal();
+			
+			// Backend'e kaydet
+			savePartnersToServer();
+		}
+		
+		// Sunucuya kaydet
+		function savePartnersToServer() {
+			// Önce session kontrolü yap
+			$.ajax({
+				url: '/api/admin/check-session',
+				method: 'GET',
+				success: function(sessionResponse) {
+					if (!sessionResponse.authenticated) {
+						showAlert('error', 'Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+						$('#pageContent').hide();
+						$('#loginScreen').show();
+						return;
+					}
+					
+					// Session var, kaydetme işlemini yap
+					performSave();
+				},
+				error: function() {
+					showAlert('error', 'Oturum kontrolü yapılamadı. Lütfen tekrar giriş yapın.');
+					$('#pageContent').hide();
+					$('#loginScreen').show();
+				}
+			});
+			
+			function performSave() {
+				$.ajax({
+					url: '/api/partners/save',
+					method: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify({
+						partners: partnersData
+					}),
+					success: function(response) {
+						localStorage.setItem('adminPartners', JSON.stringify(partnersData));
+						showAlert('success', 'İş ortakları başarıyla kaydedildi!');
+					},
+					error: function(xhr) {
+						if (xhr.status === 401) {
+							showAlert('error', 'Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+							$('#pageContent').hide();
+							$('#loginScreen').show();
+						} else {
+							showAlert('error', 'İş ortakları backend\'e kaydedilemedi! Lütfen tekrar deneyin.');
+						}
+					}
+				});
+			}
+		}
+		
+		// Partner görsel yükle
+		function uploadPartnerImage() {
+			var fileInput = document.getElementById('partnerImageFile');
+			if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
+			
+			var file = fileInput.files[0];
+			var formData = new FormData();
+			formData.append('image', file);
+			
+			// Backend session kullanılıyor, cookie'ler otomatik gönderiliyor
+			
+			var btn = document.getElementById('uploadPartnerBtn');
+			var isMobile = window.innerWidth <= 768;
+			var defaultText = isMobile ? '📁 Telefondan Yükle' : '📁 Bilgisayardan Yükle';
+			var originalText = btn ? (btn.innerHTML || defaultText) : defaultText;
+			if (btn) {
+				btn.innerHTML = '⏳ Yükleniyor...';
+				btn.disabled = true;
+			}
+			
+			$.ajax({
+				url: '/api/upload-image',
+				method: 'POST',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function(response) {
+					if (response && response.success && response.url) {
+						var imageUrl = response.url;
+						$('#partnerImage').val(imageUrl);
+						
+						var $previewImg = $('#partnerImagePreviewImg');
+						var $preview = $('#partnerImagePreview');
+						var errorTimeout = null;
+						var imageLoaded = false;
+						
+						// Önceki event handler'ları temizle
+						$previewImg.off('error load');
+						
+						// Resim zaten yüklenmişse (cache'den)
+						if ($previewImg[0].src === imageUrl && $previewImg[0].complete && $previewImg[0].naturalWidth > 0) {
+							$preview.show();
+						} else {
+							// Yeni resim yükle
+							$previewImg.attr('src', imageUrl);
+							
+							// Load event - resim başarıyla yüklendi
+							$previewImg.on('load', function() {
+								imageLoaded = true;
+								if (errorTimeout) {
+									clearTimeout(errorTimeout);
+									errorTimeout = null;
+								}
+								$preview.show();
+							});
+							
+							// Error event - resim yüklenemedi (sadece gerçek hata durumunda)
+							$previewImg.on('error', function() {
+								// Eğer resim zaten yüklendiyse, hata mesajı gösterme
+								if (imageLoaded) return;
+								
+								// Kısa bir gecikme ile kontrol et
+								if (errorTimeout) {
+									clearTimeout(errorTimeout);
+								}
+								
+								errorTimeout = setTimeout(function() {
+									// Hala yüklenmemişse ve hata varsa
+									if (!imageLoaded && (!$previewImg[0].complete || $previewImg[0].naturalWidth === 0)) {
+										$preview.hide();
+									}
+								}, 500);
+							});
+							
+							// Resim zaten yüklenmişse (cache'den hızlı yükleme)
+							setTimeout(function() {
+								if ($previewImg[0].complete && $previewImg[0].naturalWidth > 0) {
+									imageLoaded = true;
+									if (errorTimeout) {
+										clearTimeout(errorTimeout);
+										errorTimeout = null;
+									}
+									$preview.show();
+								}
+							}, 100);
+						}
+						
+						if (btn) {
+							btn.innerHTML = originalText;
+							btn.disabled = false;
+						}
+						fileInput.value = '';
+					} else {
+						showAlert('error', 'Resim yükleme başarısız!');
+						if (btn) {
+							btn.innerHTML = originalText;
+							btn.disabled = false;
+						}
+					}
+				},
+				error: function(xhr) {
+					showAlert('error', 'Resim yüklenirken hata oluştu!');
+					if (btn) {
+						btn.innerHTML = originalText;
+						btn.disabled = false;
+					}
+				}
+			});
+		}
+		
+		// URL'den partner görseli ekle
+		function addPartnerImageUrl() {
+			var url = $('#partnerImage').val().trim();
+			if (!url) return;
+			
+			if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
+				var $previewImg = $('#partnerImagePreviewImg');
+				var $preview = $('#partnerImagePreview');
+				var errorTimeout = null;
+				var imageLoaded = false;
+				
+				// Önceki event handler'ları temizle
+				$previewImg.off('error load');
+				
+				// Resim zaten yüklenmişse (cache'den)
+				if ($previewImg[0].src === url && $previewImg[0].complete && $previewImg[0].naturalWidth > 0) {
+					$preview.show();
+					return;
+				}
+				
+				// Yeni resim yükle
+				$previewImg.attr('src', url);
+				
+				// Load event - resim başarıyla yüklendi
+				$previewImg.on('load', function() {
+					imageLoaded = true;
+					if (errorTimeout) {
+						clearTimeout(errorTimeout);
+						errorTimeout = null;
+					}
+					$preview.show();
+				});
+				
+				// Error event - resim yüklenemedi (sadece gerçek hata durumunda)
+				$previewImg.on('error', function() {
+					// Eğer resim zaten yüklendiyse, hata mesajı gösterme
+					if (imageLoaded) return;
+					
+					// Kısa bir gecikme ile kontrol et (bazı durumlarda yanlış pozitif olabilir)
+					if (errorTimeout) {
+						clearTimeout(errorTimeout);
+					}
+					
+					errorTimeout = setTimeout(function() {
+						// Hala yüklenmemişse ve hata varsa
+						if (!imageLoaded && (!$previewImg[0].complete || $previewImg[0].naturalWidth === 0)) {
+							$preview.hide();
+							showAlert('error', 'Resim yüklenemedi! URL\'yi kontrol edin.');
+						}
+					}, 500);
+				});
+				
+				// Resim zaten yüklenmişse (cache'den hızlı yükleme)
+				setTimeout(function() {
+					if ($previewImg[0].complete && $previewImg[0].naturalWidth > 0) {
+						imageLoaded = true;
+						if (errorTimeout) {
+							clearTimeout(errorTimeout);
+							errorTimeout = null;
+						}
+						$preview.show();
+					}
+				}, 100);
+			} else {
+				showAlert('warning', 'Geçerli bir URL girin! (http://, https:// veya / ile başlamalı)');
+			}
+		}
+		
+		$(document).on('keypress', '#partnerImage', function(e) {
+			if (e.which === 13) {
+				e.preventDefault();
+				addPartnerImageUrl();
+			}
+		});
+		
+		window.openPartnerModal = openPartnerModal;
+		window.closePartnerModal = closePartnerModal;
+		window.uploadPartnerImage = uploadPartnerImage;
+		window.addPartnerImageUrl = addPartnerImageUrl;
+		window.editPartner = editPartner;
+		window.deletePartner = deletePartner;
+		window.savePartner = savePartner;
+		window.savePartnersToServer = savePartnersToServer;
+		window.closePopup = closePopup;
+		
+		// HTML escape
+		function escapeHtml(text) {
+			if (!text) return '';
+			var map = {
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#039;'
+			};
+			return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
+		}
+		
+		// Sayfa yüklendiğinde - şifre kontrolünden sonra çalışacak
+		function initPartnersPage() {
+			loadPartners();
+		}
+	</script>
+	
+	<script>
+		// BACKEND SESSION KULLANIYOR - localStorage/sessionStorage yok
+		var MAX_LOGIN_ATTEMPTS = 5;
+		var LOGIN_ATTEMPTS_KEY = 'adminLoginAttempts';
+		var LOCKOUT_TIME_KEY = 'adminLockoutUntil';
+		var LOCKOUT_DURATION = 15 * 60 * 1000;
+
+		function checkLogin() {
+			checkLockout();
+			
+			// Backend'e session kontrolü için istek at
+			$.ajax({
+				url: '/api/admin/check-session',
+				method: 'GET',
+				success: function(response) {
+					if (response.authenticated) {
+						// Session var - içeriği göster
+						$('#loginScreen').hide();
+						$('#pageContent').show();
+						if (typeof initPartnersPage === 'function') {
+							initPartnersPage();
+						}
+					} else {
+						// Session yok veya süresi dolmuş
+						if (response.expired) {
+							showAlert('warning', 'Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+						}
+						$('#loginScreen').show();
+						$('#pageContent').hide();
+					}
+				},
+				error: function() {
+					// Hata durumunda login ekranını göster
+					$('#loginScreen').show();
+					$('#pageContent').hide();
+				}
+			});
+		}
+
+		function checkLockout() {
+			var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+			if (lockoutUntil) {
+				var now = Date.now();
+				var unlockTime = parseInt(lockoutUntil);
+				
+				if (now < unlockTime) {
+					var remainingMinutes = Math.ceil((unlockTime - now) / (60 * 1000));
+					$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Lütfen ' + remainingMinutes + ' dakika sonra tekrar deneyin.').fadeIn(300);
+					$('#adminPassword').prop('disabled', true);
+					$('button[onclick="checkPassword()"]').prop('disabled', true);
+					return true;
+				} else {
+					localStorage.removeItem(LOCKOUT_TIME_KEY);
+					localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+				}
+			}
+			return false;
+		}
+		
+		function checkPassword() {
+			if (checkLockout()) return;
+			
+			var password = $('#adminPassword').val();
+			
+			if (!password) {
+				$('#loginError').text('⚠️ Şifre gerekli!').fadeIn(300);
+				return;
+			}
+			
+			$.ajax({
+				url: '/api/admin/check-password',
+				method: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify({ password: password }),
+				success: function(response) {
+					if (response.success) {
+						localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+						localStorage.removeItem(LOCKOUT_TIME_KEY);
+						
+					// Backend session oluşturuldu - frontend'de bir şey yapmaya gerek yok
+					
+					$('#pageTransition').removeClass('show').addClass('hide');
+					
+					$('#loginScreen').fadeOut(300);
+					$('#pageContent').fadeIn(300);
+					$('#loginError').hide();
+					$('#adminPassword').val('');
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+					initPartnersPage();
+					}
+				},
+				error: function(xhr) {
+					var attempts = parseInt(localStorage.getItem(LOGIN_ATTEMPTS_KEY) || '0');
+					attempts++;
+					localStorage.setItem(LOGIN_ATTEMPTS_KEY, attempts.toString());
+					
+					var remainingAttempts = MAX_LOGIN_ATTEMPTS - attempts;
+					
+					if (attempts >= MAX_LOGIN_ATTEMPTS) {
+						var lockoutUntil = Date.now() + LOCKOUT_DURATION;
+						localStorage.setItem(LOCKOUT_TIME_KEY, lockoutUntil.toString());
+						
+						$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Hesap 15 dakika süreyle kilitlendi.').fadeIn(300);
+						$('#adminPassword').prop('disabled', true);
+						$('button[onclick="checkPassword()"]').prop('disabled', true);
+						
+						setTimeout(function() {
+							localStorage.removeItem(LOCKOUT_TIME_KEY);
+							localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+							$('#loginError').hide();
+							$('#adminPassword').prop('disabled', false);
+							$('button[onclick="checkPassword()"]').prop('disabled', false);
+							$('#adminPassword').val('').focus();
+						}, LOCKOUT_DURATION);
+					} else {
+						var errorMsg = '❌ Yanlış şifre!';
+						if (xhr.responseJSON && xhr.responseJSON.error) {
+							errorMsg = '❌ ' + xhr.responseJSON.error;
+						}
+						errorMsg += '<br>Kalan deneme hakkı: ' + remainingAttempts;
+						$('#loginError').html(errorMsg).fadeIn(300);
+					}
+					
+					$('#adminPassword').val('').focus();
+				}
+			});
+		}
+
+		$(document).on('keypress', '#adminPassword', function(e) {
+			if (e.which === 13) {
+				checkPassword();
+			}
+		});
+		
+		setInterval(function() {
+			var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+			if (lockoutUntil) {
+				var now = Date.now();
+				var unlockTime = parseInt(lockoutUntil);
+				
+				if (now < unlockTime) {
+					var remainingMinutes = Math.ceil((unlockTime - now) / (60 * 1000));
+					$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Lütfen ' + remainingMinutes + ' dakika sonra tekrar deneyin.');
+				} else {
+					localStorage.removeItem(LOCKOUT_TIME_KEY);
+					localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+					$('#loginError').hide();
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+				}
+			}
+			
+			// Backend session kontrolü checkLogin() içinde yapılıyor
+			// Eski sessionStorage kodları kaldırıldı
+		}, 60000);
+
+		function updateUploadButtonText() {
+			var isMobile = window.innerWidth <= 768;
+			var buttonText = isMobile ? '📁 Telefondan Yükle' : '📁 Bilgisayardan Yükle';
+			
+			$('#uploadPartnerBtn').text(buttonText);
+		}
+
+		$(document).ready(function() {
+			checkLogin();
+			
+			updateUploadButtonText();
+			$(window).on('resize', updateUploadButtonText);
+			
+			// Backend session kontrolü zaten checkLogin() içinde yapılıyor
+			// Burada sadece overlay'i ayarla
+			$('#pageTransition').removeClass('show').addClass('hide');
+			
+			$('a[href="admin.html"]').on('click', function(e) {
+				e.preventDefault();
+				$('#pageTransition').removeClass('hide').addClass('show');
+				setTimeout(function() {
+					window.location.href = 'admin.html';
+				}, 300);
+			});
+		});
+	</script>
+	
+	<!-- Geçiş Overlay -->
+	<div class="page-transition-overlay" id="pageTransition">
+		<div class="spinner"></div>
+	</div>
+	</div>
+</body>
+</html>
+

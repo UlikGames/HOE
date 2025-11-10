@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "home": "Ana Sayfa",
+    "products": "Ürünler",
+    "about": "Hakkımızda",
+    "services": "Hizmetler",
+    "partners": "İş Ortakları",
+    "contact": "İletişim"
+  },
+  "index": {
+    "services": {
+      "creditCard": {
+        "title": "Kredi Kartı",
+        "description": "Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove",
+        "button": "Daha Fazla"
+      },
+      "saveMoney": {
+        "title": "Para Biriktir",
+        "description": "Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove",
+        "button": "Daha Fazla"
+      },
+      "freeDelivery": {
+        "title": "Ücretsiz Kargo",
+        "description": "Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove",
+        "button": "Daha Fazla"
+      }
+    },
+    "testimonial": {
+      "title": "Referanslar",
+      "subtitle": "Mutlu Müşteriler"
+    },
+    "counter": {
+      "creativityFuel": "Yaratıcılık Yakıtı",
+      "happyClients": "Mutlu Müşteri",
+      "allProducts": "Tüm Ürünler",
+      "hoursSpent": "Harcanan Saat"
+    }
+  },
+  "product": {
+    "title": "Ürünler",
+    "subtitle": "Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.",
+    "coolStuff": "Harika Ürünler",
+    "modal": {
+      "description": "Açıklama",
+      "specs": "Özellikler",
+      "shipping": "Kargo"
+    }
+  },
+  "about": {
+    "title": "Hakkımızda",
+    "subtitle": "Some random shit by"
+  },
+  "services": {
+    "title": "Hizmetler",
+    "subtitle": "Some random shit by"
+  },
+  "contact": {
+    "title": "İletişim",
+    "subtitle": "Some random shit by",
+    "phone": "+ 1235 2355 98"
+  },
+  "partners": {
+    "title": "İş Ortaklarımız",
+    "subtitle": "tarafından",
+    "heading": "Güvenilir İş Ortaklarımız",
+    "description": "Kaliteli hizmet ve ürünler sunan değerli iş ortaklarımızla çalışmaktan gurur duyuyoruz.",
+    "loading": "İş ortakları yükleniyor...",
+    "noPartners": "Henüz iş ortağı eklenmemiş.",
+    "noImage": "Resim Yok"
+  },
+  "footer": {
+    "description": "Facilis ipsum reprehenderit nemo molestias. Aut cum mollitia reprehenderit. Eos cumque dicta adipisci architecto culpa amet.",
+    "links": {
+      "about": "Hakkımızda",
+      "help": "Yardım",
+      "contact": "İletişim",
+      "terms": "Şartlar",
+      "meetups": "Buluşmalar",
+      "shop": "Mağaza",
+      "privacy": "Gizlilik",
+      "testimonials": "Referanslar",
+      "handbook": "El Kitabı",
+      "heldDesk": "Destek",
+      "findDesigners": "Tasarımcı Bul",
+      "findDevelopers": "Geliştirici Bul",
+      "teams": "Takımlar",
+      "advertise": "Reklam Ver",
+      "api": "API"
+    },
+    "copyright": "Tüm Hakları Saklıdır.",
+    "designedBy": "tarafından tasarlandı"
+  }
+}
+

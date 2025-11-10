@@ -1,0 +1,2439 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Araç Stoğu</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Araç stoğu yönetim paneli" />
+	<meta name="author" content="" />
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/style.css">
+	
+	<style>
+		/* Stok Yönetimi Sayfası Stilleri */
+		* {
+			box-sizing: border-box;
+		}
+		
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: "Montserrat", Arial, sans-serif;
+			background: linear-gradient(135deg, #f59e0b 0%, #d97706 25%, #b45309 50%, #92400e 75%, #78350f 100%);
+			background-size: 400% 400%;
+			animation: gradientShift 15s ease infinite, fadeIn 0.4s ease-in;
+			min-height: 100vh;
+		}
+		
+		@keyframes gradientShift {
+			0% { background-position: 0% 50%; }
+			50% { background-position: 100% 50%; }
+			100% { background-position: 0% 50%; }
+		}
+		
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		/* Geçiş Overlay */
+		.page-transition-overlay {
+			position: fixed !important;
+			top: 0 !important;
+			left: 0 !important;
+			right: 0 !important;
+			bottom: 0 !important;
+			width: 100vw !important;
+			height: 100vh !important;
+			background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+			z-index: 99999 !important;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.3s ease-out;
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			margin: 0 !important;
+			padding: 0 !important;
+		}
+		
+		.page-transition-overlay.hide {
+			opacity: 0;
+			pointer-events: none;
+		}
+		
+		.page-transition-overlay.show {
+			opacity: 1;
+			pointer-events: all;
+		}
+		
+		.page-transition-overlay .spinner {
+			width: 60px;
+			height: 60px;
+			border: 4px solid rgba(255, 255, 255, 0.3);
+			border-top-color: #fff;
+			border-radius: 50%;
+			animation: spin 0.8s linear infinite;
+			margin: 0 auto;
+			flex-shrink: 0;
+		}
+		
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
+		
+		/* Header */
+		.stock-header {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			color: #fff;
+			padding: 24px 32px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+			position: sticky;
+			top: 0;
+			z-index: 100;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.stock-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+			animation: shimmer 3s infinite;
+		}
+		
+		@keyframes shimmer {
+			0% { left: -100%; }
+			100% { left: 100%; }
+		}
+		
+		.stock-header-content {
+			max-width: 1400px;
+			margin: 0 auto;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			flex-wrap: nowrap;
+			gap: 20px;
+			position: relative;
+			z-index: 1;
+		}
+		
+		.stock-header-content > h1 {
+			flex-shrink: 0;
+			margin: 0;
+		}
+		
+		.stock-header h1 {
+			margin: 0;
+			font-size: 32px;
+			font-weight: 700;
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+			letter-spacing: -0.5px;
+		}
+		
+		.stock-header-actions {
+			flex-shrink: 0;
+			display: flex;
+			align-items: center;
+			gap: 12px;
+			flex-wrap: nowrap;
+			min-width: 0;
+		}
+		
+		#bulkActions {
+			display: none;
+			align-items: center;
+			gap: 12px;
+			flex-wrap: nowrap;
+			background: rgba(255, 255, 255, 0.2);
+			backdrop-filter: blur(15px);
+			-webkit-backdrop-filter: blur(15px);
+			padding: 12px 20px;
+			border-radius: 16px;
+			border: 1.5px solid rgba(255, 255, 255, 0.3);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			flex-shrink: 0;
+		}
+		
+		#bulkActions.show {
+			display: flex;
+		}
+		
+		#selectedCount {
+			color: #fff;
+			font-weight: 600;
+			font-size: 15px;
+			padding: 10px 18px;
+			background: rgba(255, 255, 255, 0.25);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			border-radius: 10px;
+			white-space: nowrap;
+			border: 1px solid rgba(255, 255, 255, 0.3);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		}
+		
+		.btn-admin {
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.15) 100%);
+			color: #fff;
+			padding: 12px 24px;
+			border: none;
+			border-radius: 12px;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			white-space: nowrap;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.btn-admin::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.btn-admin:hover::before {
+			left: 100%;
+		}
+		
+		.btn-admin:hover {
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.25) 100%);
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		}
+		
+		.btn-admin:active {
+			transform: translateY(0) scale(0.98);
+		}
+		
+		.btn-bulk-add {
+			background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+			color: #fff;
+		}
+		
+		.btn-bulk-remove {
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+			color: #fff;
+		}
+		
+		.btn-bulk-clear {
+			background: rgba(255, 255, 255, 0.2);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			color: #fff;
+			border: 1.5px solid rgba(255, 255, 255, 0.3);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		}
+		
+		.btn-clear-all {
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+			color: #fff;
+		}
+		
+		.btn-back {
+			background: rgba(255, 255, 255, 0.2);
+			color: #fff;
+			padding: 12px 24px;
+			border: 1.5px solid rgba(255, 255, 255, 0.3);
+			border-radius: 12px;
+			text-decoration: none;
+			font-size: 14px;
+			font-weight: 600;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			position: relative;
+			overflow: hidden;
+			flex-shrink: 0;
+			white-space: nowrap;
+		}
+		
+		.btn-back::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.btn-back:hover::before {
+			left: 100%;
+		}
+		
+		.btn-back:hover {
+			background: rgba(255, 255, 255, 0.3);
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+			border-color: rgba(255, 255, 255, 0.5);
+		}
+		
+		/* Main Container */
+		.stock-container {
+			max-width: 1400px;
+			margin: 0 auto;
+			padding: 30px 20px;
+		}
+		
+		/* Ana İçerik */
+		.stock-main-content {
+			width: 100%;
+		}
+		
+		.stock-stats {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+			gap: 20px;
+			margin-bottom: 30px;
+		}
+		
+		.stat-card {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			padding: 24px;
+			border-radius: 16px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+		
+		.stat-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15),
+			            0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+			border-color: rgba(255, 255, 255, 0.4);
+		}
+		
+		.stat-card h3 {
+			margin: 0 0 10px 0;
+			font-size: 14px;
+			color: rgba(255, 255, 255, 0.9);
+			font-weight: 500;
+			text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+		}
+		
+		.stat-card .stat-number {
+			font-size: 32px;
+			font-weight: 700;
+			color: #fff;
+			text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+		}
+		
+		.stat-card.stat-green .stat-number {
+			color: #10b981;
+			text-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+		}
+		
+		.stat-card.stat-orange .stat-number {
+			color: #fff;
+			text-shadow: 0 0 12px rgba(0, 0, 0, 0.9),
+			            0 0 24px rgba(0, 0, 0, 0.7),
+			            0 4px 16px rgba(0, 0, 0, 0.6),
+			            0 0 0 3px rgba(0, 0, 0, 0.5),
+			            0 0 0 4px rgba(255, 255, 255, 0.3);
+		}
+		
+		.stat-card.stat-red .stat-number {
+			color: #ef4444;
+			text-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+		}
+		
+		/* Ürün Grid */
+		.products-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			gap: 25px;
+		}
+		
+		/* Mobil için 2'li grid */
+		@media (max-width: 768px) {
+			.stock-header {
+				padding: 16px 16px;
+			}
+			
+			.stock-header-content {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 12px;
+			}
+			
+			.stock-header h1 {
+				font-size: 24px;
+				gap: 10px;
+			}
+			
+			.stock-header-actions {
+				width: 100%;
+				flex-wrap: wrap;
+				gap: 8px;
+			}
+			
+			#bulkActions {
+				padding: 10px 14px;
+				gap: 8px;
+				flex-wrap: wrap;
+			}
+			
+			#selectedCount {
+				font-size: 13px;
+				padding: 8px 14px;
+			}
+			
+			.btn-back {
+				padding: 10px 16px;
+				font-size: 13px;
+			}
+			
+			.btn-admin {
+				padding: 10px 14px;
+				font-size: 13px;
+				min-height: 40px;
+			}
+			
+			.btn-clear-all {
+				padding: 10px 14px;
+				font-size: 13px;
+				min-height: 40px;
+			}
+			
+			.products-grid {
+				grid-template-columns: repeat(2, 1fr) !important;
+				gap: 12px;
+			}
+		}
+		
+		/* Çok küçük ekranlar için 2'li (aynı kalıyor) */
+		@media (max-width: 480px) {
+			.stock-header {
+				padding: 12px 12px;
+			}
+			
+			.stock-header h1 {
+				font-size: 20px;
+				gap: 8px;
+			}
+			
+			.stock-header-actions {
+				gap: 6px;
+			}
+			
+			#bulkActions {
+				padding: 8px 12px;
+				gap: 6px;
+			}
+			
+			#selectedCount {
+				font-size: 12px;
+				padding: 6px 12px;
+			}
+			
+			.btn-back {
+				padding: 8px 12px;
+				font-size: 12px;
+			}
+			
+			.btn-admin {
+				padding: 8px 12px;
+				font-size: 12px;
+				min-height: 36px;
+			}
+			
+			.btn-admin span {
+				font-size: 14px;
+			}
+			
+			.btn-clear-all {
+				padding: 8px 12px;
+				font-size: 12px;
+				min-height: 36px;
+			}
+			
+			.btn-clear-all span {
+				font-size: 14px;
+			}
+			
+			.products-grid {
+				grid-template-columns: repeat(2, 1fr) !important;
+				gap: 10px;
+			}
+		}
+		
+		.product-stock-card {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			border-radius: 16px;
+			overflow: hidden;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			display: flex;
+			flex-direction: column;
+			position: relative;
+		}
+		
+		.product-stock-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15),
+			            0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+			border-color: rgba(255, 255, 255, 0.4);
+		}
+		
+		.product-stock-card.selected {
+			border: 2px solid #f59e0b;
+			box-shadow: 0 12px 40px rgba(245, 158, 11, 0.4),
+			            0 0 0 1px rgba(245, 158, 11, 0.3) inset;
+			transform: scale(1.02);
+		}
+		
+		/* Product Card Checkbox */
+		.product-checkbox {
+			position: absolute;
+			opacity: 0;
+			cursor: pointer;
+			height: 0;
+			width: 0;
+		}
+		
+		.product-checkbox-wrapper {
+			position: absolute;
+			top: 12px;
+			right: 12px;
+			z-index: 10;
+			width: 28px;
+			height: 28px;
+		}
+		
+		.product-checkbox-custom {
+			position: relative;
+			display: inline-block;
+			width: 28px;
+			height: 28px;
+			cursor: pointer;
+		}
+		
+		.product-checkbox-custom .checkmark {
+			position: absolute;
+			top: 0;
+			left: 0;
+			height: 28px;
+			width: 28px;
+			background: rgba(255, 255, 255, 0.95);
+			border: 3px solid #d1d5db;
+			border-radius: 8px;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+			backdrop-filter: blur(10px);
+		}
+		
+		.product-checkbox-custom:hover .checkmark {
+			border-color: #f59e0b;
+			transform: scale(1.1);
+			box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+		}
+		
+		.product-checkbox:checked ~ .product-checkbox-custom .checkmark {
+			background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+			border-color: #f59e0b;
+			box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+			transform: scale(1.1);
+		}
+		
+		.product-checkbox-custom .checkmark:after {
+			content: "";
+			position: absolute;
+			display: none;
+			left: 9px;
+			top: 5px;
+			width: 6px;
+			height: 12px;
+			border: solid white;
+			border-width: 0 3px 3px 0;
+			transform: rotate(45deg);
+		}
+		
+		.product-checkbox:checked ~ .product-checkbox-custom .checkmark:after {
+			display: block;
+		}
+		
+		.product-stock-image {
+			width: 100%;
+			height: 200px;
+			object-fit: cover;
+			background: #f3f4f6;
+		}
+		
+		.product-stock-body {
+			padding: 20px;
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+		}
+		
+		.product-stock-title {
+			margin: 0 0 8px 0;
+			font-size: 16px;
+			font-weight: 600;
+			color: #fff;
+			line-height: 1.4;
+			text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+		}
+		
+		.product-stock-sku {
+			margin: 0 0 15px 0;
+			font-size: 12px;
+			color: rgba(255, 255, 255, 0.8);
+		}
+		
+		.product-stock-current {
+			margin: auto 0 15px 0;
+			text-align: center;
+		}
+		
+		.stock-label {
+			font-size: 12px;
+			color: rgba(255, 255, 255, 0.9);
+			margin-bottom: 8px;
+			font-weight: 500;
+			text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+		}
+		
+		.stock-value {
+			font-size: 42px;
+			font-weight: 700;
+			margin: 0;
+			line-height: 1;
+			text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+		}
+		
+		.stock-value.stock-high {
+			color: #10b981;
+		}
+		
+		.stock-value.stock-low {
+			color: #fff;
+			text-shadow: 0 0 12px rgba(0, 0, 0, 0.9),
+			            0 0 24px rgba(0, 0, 0, 0.7),
+			            0 4px 16px rgba(0, 0, 0, 0.6),
+			            0 0 0 3px rgba(0, 0, 0, 0.5),
+			            0 0 0 4px rgba(255, 255, 255, 0.3);
+			font-weight: 900;
+		}
+		
+		.stock-value.stock-zero {
+			color: #ef4444;
+		}
+		
+		.stock-controls {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			gap: 12px;
+			margin-top: 15px;
+		}
+		
+		.quantity-controls {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			gap: 10px;
+			width: 100%;
+		}
+		
+		.quantity-input-wrapper {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			border-radius: 12px;
+			padding: 4px;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+		}
+		
+		.btn-quantity {
+			width: 36px;
+			height: 36px;
+			border: none;
+			border-radius: 10px;
+			font-size: 20px;
+			font-weight: 700;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: rgba(255, 255, 255, 0.2);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			color: #fff;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			border: 1px solid rgba(255, 255, 255, 0.3);
+		}
+		
+		.btn-quantity:hover {
+			background: rgba(245, 158, 11, 0.3);
+			color: #fff;
+			box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+			border-color: rgba(245, 158, 11, 0.5);
+			transform: scale(1.1);
+		}
+		
+		.btn-quantity:active {
+			transform: scale(0.95);
+		}
+		
+		.quantity-input {
+			width: 60px;
+			height: 36px;
+			border: 2px solid rgba(255, 255, 255, 0.2);
+			border-radius: 10px;
+			text-align: center;
+			font-size: 16px;
+			font-weight: 600;
+			color: #1a1a1a;
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			padding: 0;
+			-moz-appearance: textfield;
+			appearance: textfield;
+		}
+		
+		.quantity-input::-webkit-outer-spin-button,
+		.quantity-input::-webkit-inner-spin-button {
+			-webkit-appearance: none;
+			appearance: none;
+			margin: 0;
+		}
+		
+		.quantity-input:focus {
+			outline: none;
+			border-color: #f59e0b;
+			box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1),
+			           0 4px 16px rgba(245, 158, 11, 0.15);
+			background: rgba(255, 255, 255, 1);
+		}
+		
+		.stock-action-buttons {
+			display: flex;
+			gap: 10px;
+			width: 100%;
+		}
+		
+		.btn-stock-action {
+			flex: 1;
+			padding: 12px 20px;
+			border: none;
+			border-radius: 12px;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.btn-stock-action::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.btn-stock-action:hover::before {
+			left: 100%;
+		}
+		
+		.btn-stock-action:active {
+			transform: scale(0.98);
+		}
+		
+		.btn-stock-add {
+			background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+			color: #fff;
+		}
+		
+		.btn-stock-add:hover {
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		}
+		
+		.btn-stock-remove {
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+			color: #fff;
+		}
+		
+		.btn-stock-remove:hover {
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 12px 32px rgba(239, 68, 68, 0.4),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		}
+		
+		.btn-stock-action:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
+		
+		/* Mobil Uyumluluk */
+		@media (max-width: 768px) {
+			.stock-container {
+				padding: 20px 15px;
+			}
+			
+			.stock-header {
+				padding: 16px 20px;
+			}
+			
+			.stock-header h1 {
+				font-size: 22px;
+			}
+			
+			.stock-header-actions {
+				gap: 8px;
+			}
+			
+			.btn-admin {
+				padding: 8px 14px;
+				font-size: 12px;
+			}
+			
+			.products-grid {
+				grid-template-columns: repeat(2, 1fr) !important;
+				gap: 12px;
+			}
+			
+			.product-stock-image {
+				height: 150px;
+			}
+			
+			.product-stock-body {
+				padding: 12px;
+			}
+			
+			.product-stock-title {
+				font-size: 14px;
+				margin-bottom: 8px;
+			}
+			
+			.stock-value {
+				font-size: 32px;
+			}
+			
+			.stock-label {
+				font-size: 11px;
+				margin-bottom: 6px;
+			}
+			
+			.btn-stock-action {
+				padding: 12px 16px !important;
+				font-size: 13px !important;
+				min-height: 44px;
+				display: flex !important;
+				align-items: center;
+				justify-content: center;
+				white-space: nowrap;
+				overflow: visible;
+			}
+			
+			.stock-action-buttons {
+				gap: 10px;
+				display: flex !important;
+				width: 100%;
+			}
+			
+			.btn-quantity {
+				width: 36px;
+				height: 36px;
+				font-size: 20px;
+				flex-shrink: 0;
+			}
+			
+			.quantity-input {
+				font-size: 14px;
+				padding: 6px 10px;
+				width: 60px;
+				min-width: 60px;
+			}
+			
+			.quantity-controls {
+				display: flex !important;
+				width: 100%;
+				justify-content: center;
+			}
+			
+			.stock-controls {
+				display: flex !important;
+				flex-direction: column;
+				gap: 12px;
+			}
+			
+			.stock-stats {
+				grid-template-columns: 1fr;
+			}
+		}
+		
+		/* Çok küçük ekranlar için 2'li (aynı kalıyor) */
+		@media (max-width: 480px) {
+			.products-grid {
+				grid-template-columns: repeat(2, 1fr) !important;
+				gap: 10px;
+			}
+			
+			.product-stock-image {
+				height: 120px;
+			}
+			
+			.product-stock-body {
+				padding: 10px;
+			}
+			
+			.btn-stock-action {
+				padding: 10px 12px !important;
+				font-size: 12px !important;
+				min-height: 40px;
+			}
+		}
+		
+		/* Loading */
+		.loading {
+			text-align: center;
+			padding: 60px 20px;
+			color: rgba(255, 255, 255, 0.9);
+		}
+		
+		.empty-state {
+			text-align: center;
+			padding: 60px 20px;
+			color: rgba(255, 255, 255, 0.9);
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			min-height: 400px;
+			width: 100%;
+			grid-column: 1 / -1;
+		}
+		
+		.empty-state h3 {
+			font-size: 20px;
+			margin-bottom: 10px;
+			color: #fff;
+			text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+		}
+		
+		.empty-state p {
+			margin: 0;
+			color: rgba(255, 255, 255, 0.8);
+			line-height: 1.6;
+		}
+		
+		/* Modern Popup Modal */
+		.popup-modal-overlay {
+			position: fixed !important;
+			top: 0 !important;
+			left: 0 !important;
+			right: 0 !important;
+			bottom: 0 !important;
+			background: rgba(0, 0, 0, 0.6);
+			backdrop-filter: blur(4px);
+			z-index: 99999 !important;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			padding: 20px;
+			animation: fadeIn 0.2s ease-out;
+		}
+		
+		.popup-modal-overlay.show {
+			display: flex;
+		}
+		
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+			}
+			to {
+				opacity: 1;
+			}
+		}
+		
+		.popup-modal {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(24px);
+			-webkit-backdrop-filter: blur(24px);
+			border-radius: 24px;
+			width: 100%;
+			max-width: 450px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			overflow: hidden;
+			animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			transform-origin: center;
+			position: relative;
+			margin: auto;
+		}
+		
+		@keyframes slideUp {
+			from {
+				transform: translateY(30px) scale(0.95);
+				opacity: 0;
+			}
+			to {
+				transform: translateY(0) scale(1);
+				opacity: 1;
+			}
+		}
+		
+		.popup-modal-header {
+			padding: 24px 30px 20px;
+			background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+			color: #fff;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 15px;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.popup-modal-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 2px;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+		}
+		
+		.popup-modal-header h3 {
+			margin: 0;
+			font-size: 20px;
+			font-weight: 700;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+		}
+		
+		.popup-modal-header .popup-icon {
+			font-size: 24px;
+			width: 36px;
+			height: 36px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: rgba(255, 255, 255, 0.2);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			border-radius: 10px;
+			border: 1px solid rgba(255, 255, 255, 0.3);
+		}
+		
+		.popup-modal-body {
+			padding: 30px;
+			color: #fff;
+			font-size: 15px;
+			line-height: 1.6;
+			background: rgba(255, 255, 255, 0.1);
+		}
+		
+		.popup-modal-body p {
+			margin: 0 0 15px 0;
+			color: #fff;
+		}
+		
+		.popup-modal-body strong {
+			color: rgba(255, 255, 255, 0.9);
+			font-weight: 600;
+		}
+		
+		.popup-modal-footer {
+			padding: 20px 30px;
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			display: flex;
+			justify-content: flex-end;
+			gap: 12px;
+			border-top: 1px solid rgba(255, 255, 255, 0.2);
+		}
+		
+		.popup-btn {
+			padding: 12px 24px;
+			border: none;
+			border-radius: 12px;
+			font-size: 15px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			min-width: 100px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.popup-btn::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.popup-btn:hover::before {
+			left: 100%;
+		}
+		
+		.popup-btn-primary {
+			background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+			color: #fff;
+			box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		}
+		
+		.popup-btn-primary:hover {
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 12px 32px rgba(245, 158, 11, 0.45),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		}
+		
+		.popup-btn-secondary {
+			background: rgba(255, 255, 255, 0.2);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			color: #fff;
+			border: 1.5px solid rgba(255, 255, 255, 0.3);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		}
+		
+		.popup-btn-secondary:hover {
+			background: rgba(255, 255, 255, 0.3);
+			border-color: rgba(255, 255, 255, 0.5);
+			transform: translateY(-2px) scale(1.02);
+		}
+		
+		.popup-btn-danger {
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+			color: #fff;
+			box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		}
+		
+		.popup-btn-danger:hover {
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 12px 32px rgba(239, 68, 68, 0.45),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		}
+		
+		.popup-btn-success {
+			background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+			color: #fff;
+			box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		}
+		
+		.popup-btn-success:hover {
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 12px 32px rgba(16, 185, 129, 0.45),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		}
+		
+		@media (max-width: 768px) {
+			.popup-modal {
+				max-width: 90%;
+				margin: 20px;
+			}
+			
+			.popup-modal-header {
+				padding: 20px 24px 16px;
+			}
+			
+			.popup-modal-header h3 {
+				font-size: 18px;
+			}
+			
+			.popup-modal-body {
+				padding: 24px;
+				font-size: 14px;
+			}
+			
+			.popup-modal-footer {
+				padding: 16px 24px;
+				flex-direction: column-reverse;
+			}
+			
+			.popup-btn {
+				width: 100%;
+			}
+		}
+	</style>
+</head>
+<body>
+	<!-- Şifre Giriş Ekranı -->
+	<div id="loginScreen" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #f59e0b 0%, #d97706 25%, #b45309 50%, #92400e 75%, #78350f 100%); background-size: 400% 400%; animation: gradientShift 15s ease infinite; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+		<div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); padding: 50px 40px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2) inset; max-width: 450px; width: 100%; border: 1.5px solid rgba(255, 255, 255, 0.2); position: relative; overflow: hidden;">
+			<div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #f59e0b, #d97706, #b45309);"></div>
+			<h2 style="margin: 0 0 30px 0; text-align: center; color: #fff; font-size: 28px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);">🔒 Araç Stoğu</h2>
+			<div class="alert alert-error" id="loginError" style="display: none; margin-bottom: 20px; padding: 15px 20px; border-radius: 12px; background: rgba(254, 226, 226, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #991b1b; border: 1.5px solid rgba(239, 68, 68, 0.3); box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);"></div>
+			<div style="margin-bottom:20px;">
+				<label style="display: block; margin-bottom: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.95); font-size: 14px;">Şifre</label>
+				<input type="password" id="adminPassword" placeholder="Admin şifresini gir..." style="width: 100%; padding: 14px 18px; border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 12px; font-size: 16px; background: rgba(255, 255, 255, 1); color: #1a1a1a; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); outline: none; transition: all 0.3s;">
+			</div>
+			<style>
+				#adminPassword::placeholder {
+					color: rgba(107, 114, 128, 0.6) !important;
+				}
+				#adminPassword:focus {
+					border-color: #f59e0b !important;
+					box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1), 0 4px 16px rgba(245, 158, 11, 0.15) !important;
+					background: rgba(255, 255, 255, 1) !important;
+				}
+			</style>
+			<button onclick="checkPassword()" class="btn-admin" style="width: 100%; margin-top: 20px; padding: 16px 30px; font-size: 16px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);">Giriş Yap</button>
+		</div>
+	</div>
+
+	<div id="pageContent" style="display: none;">
+	<!-- Modern Popup Modal -->
+	<div id="popupModal" class="popup-modal-overlay">
+		<div class="popup-modal">
+			<div class="popup-modal-header">
+				<h3>
+					<span class="popup-icon" id="popupIcon">ℹ</span>
+					<span id="popupTitle">Bilgi</span>
+				</h3>
+			</div>
+			<div class="popup-modal-body">
+				<p id="popupMessage"></p>
+			</div>
+			<div class="popup-modal-footer" id="popupFooter">
+				<!-- Butonlar JavaScript ile eklenecek -->
+			</div>
+		</div>
+	</div>
+	
+	<!-- Header -->
+	<div class="stock-header">
+		<div class="stock-header-content">
+			<h1>
+				🚚 Araç Stoğu
+			</h1>
+		<div class="stock-header-actions">
+			<div id="bulkActions" class="bulk-actions-container">
+				<span id="selectedCount">0 ürün seçili</span>
+				<button class="btn-admin btn-bulk-remove" onclick="bulkRemoveStock()">
+					<span style="font-size: 16px;">➖</span> Toplu Çıkar
+				</button>
+				<button class="btn-admin btn-bulk-add" onclick="bulkAddStock()">
+					<span style="font-size: 16px;">➕</span> Toplu Ekle
+				</button>
+				<button class="btn-admin btn-bulk-clear" onclick="clearSelection()">
+					<span style="font-size: 16px;">✕</span> Temizle
+				</button>
+			</div>
+			<button class="btn-admin btn-clear-all" onclick="clearVehicleStock()">
+				<span style="font-size: 16px;">🗑️</span> Tümünü Temizle
+			</button>
+			<a href="stock.html" class="btn-back" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: rgba(255, 255, 255, 0.3);">
+				<span style="font-size: 16px;">📦</span> Ana Stok
+			</a>
+			<a href="admin.html" class="btn-back">← Admin Paneli</a>
+		</div>
+		</div>
+	</div>
+	
+	<!-- Main Container -->
+	<div class="stock-container">
+		<!-- Ana İçerik -->
+		<main class="stock-main-content">
+			<!-- İstatistikler -->
+			<div class="stock-stats">
+				<div class="stat-card stat-green">
+					<h3>Stokta Var</h3>
+					<p class="stat-number" id="inStockCount">0</p>
+				</div>
+				<div class="stat-card stat-orange">
+					<h3>Az Stok (< 10)</h3>
+					<p class="stat-number" id="lowStockCount">0</p>
+				</div>
+				<div class="stat-card stat-red">
+					<h3>Stokta Yok</h3>
+					<p class="stat-number" id="outOfStockCount">0</p>
+				</div>
+			</div>
+			
+			<!-- Ürün Grid -->
+			<div class="products-grid" id="productsGrid">
+				<div class="loading">Yükleniyor...</div>
+			</div>
+		</main>
+	</div>
+	
+	<script src="js/jquery.min.js"></script>
+	<script src="js/data-products.js"></script>
+	<script>
+		// Global değişkenler
+		var productsData = [];
+		var filteredProducts = [];
+		var vehicleStockIdentifiers = [];
+		var vehicleStockData = {}; // { identifier: { quantity, originalQuantity, addedAt } }
+		
+		// Sayfa yüklendiğinde - şifre kontrolünden sonra çalışacak
+		function initVehicleStockPage() {
+			loadProducts();
+		}
+		
+		// Ürünleri yükle
+		function loadProducts() {
+			// Backend'den araç stoğu identifier'larını al
+			// Backend session kullanılıyor, cookie'ler otomatik gönderiliyor
+			$.ajax({
+				url: '/api/vehicle-stock',
+				method: 'GET',
+				success: function(response) {
+					if (response.success && response.vehicleStock) {
+						// Backend'den gelen veri object array formatında: [{ identifier, quantity, originalQuantity, addedAt }, ...]
+						vehicleStockIdentifiers = [];
+						vehicleStockData = {};
+						
+						if (Array.isArray(response.vehicleStock)) {
+							response.vehicleStock.forEach(function(item) {
+								var identifier = typeof item === 'string' ? item : (item.identifier || item);
+								vehicleStockIdentifiers.push(identifier);
+								
+								// Eski formatı yeni formata dönüştür (backward compatibility)
+								if (typeof item === 'object' && item.identifier) {
+									vehicleStockData[identifier] = {
+										quantity: parseInt(item.quantity) || 0,
+										originalQuantity: parseInt(item.originalQuantity) || parseInt(item.quantity) || 0,
+										addedAt: item.addedAt || Date.now()
+									};
+								} else {
+									// Eski format (sadece identifier)
+									vehicleStockData[identifier] = {
+										quantity: 0,
+										originalQuantity: 0,
+										addedAt: Date.now()
+									};
+								}
+							});
+						}
+						console.log('✅ Vehicle stock loaded:', vehicleStockIdentifiers.length, 'items');
+						console.log('✅ Vehicle stock data:', vehicleStockData);
+					} else {
+						vehicleStockIdentifiers = [];
+						vehicleStockData = {};
+					}
+					
+					if (vehicleStockIdentifiers.length === 0) {
+						$('#productsGrid').html('<div class="empty-state"><h3>Araç stoğunda ürün yok</h3><p>stock.html sayfasından ürün seçip "Araç Stoğuna Ekle" butonuna tıklayın.</p></div>');
+						updateStats();
+						return;
+					}
+					
+					// Sonra ürünleri yükle
+					loadProductsData();
+				},
+				error: function(xhr, status, error) {
+					console.error('❌ Error loading vehicle stock:', error);
+					vehicleStockIdentifiers = [];
+					$('#productsGrid').html('<div class="empty-state"><h3>Hata</h3><p>Araç stoğu yüklenemedi. Lütfen sayfayı yenileyin.</p></div>');
+					updateStats();
+				}
+			});
+		}
+		
+		// Ürün verilerini yükle
+		function loadProductsData() {
+			$.ajax({
+				url: '/api/products',
+				method: 'GET',
+				success: function(data) {
+					if (data.products && data.products.length > 0) {
+						productsData = data.products;
+						filterVehicleProducts();
+					} else {
+						$('#productsGrid').html('<div class="empty-state"><h3>Ürün bulunamadı</h3><p>Henüz ürün eklenmemiş.</p></div>');
+					}
+				},
+				error: function(xhr, status, error) {
+					console.error('loadProductsData: API hatası', status, error);
+					$('#productsGrid').html('<div class="empty-state"><h3 style="color: #ef4444;">⚠️ Ürünler yüklenemedi</h3><p>Sunucu çalışmıyor olabilir.</p></div>');
+				}
+			});
+		}
+		
+		// localStorage kullanımı kaldırıldı - artık sadece backend kullanılıyor
+		
+		// Araç stoğundaki ürünleri filtrele
+		function filterVehicleProducts() {
+			if (vehicleStockIdentifiers.length === 0) {
+				filteredProducts = [];
+				renderProducts();
+				return;
+			}
+			
+			console.log('🔍 Filtering products. Identifiers:', vehicleStockIdentifiers);
+			console.log('🔍 Total products:', productsData.length);
+			
+			filteredProducts = productsData.filter(function(product) {
+				// SKU veya title ile eşleştir
+				var sku = product.sku || '';
+				var title = typeof product.title === 'object' ? product.title.tr : product.title;
+				
+				var matches = vehicleStockIdentifiers.indexOf(sku) !== -1 || 
+				              vehicleStockIdentifiers.indexOf(title) !== -1;
+				
+				if (matches) {
+					console.log('✅ Match found:', sku || title);
+				}
+				
+				return matches;
+			});
+			
+			console.log('✅ Filtered products count:', filteredProducts.length);
+			renderProducts();
+		}
+		
+		// Ürünleri render et
+		function renderProducts() {
+			// İstatistikleri hesapla
+			var inStock = 0;
+			var lowStock = 0;
+			var outOfStock = 0;
+			
+			filteredProducts.forEach(function(product) {
+				var stock = parseInt(product.stock) || 0;
+				if (stock > 10) {
+					inStock++;
+				} else if (stock > 0) {
+					lowStock++;
+				} else {
+					outOfStock++;
+				}
+			});
+			
+			$('#inStockCount').text(inStock);
+			$('#lowStockCount').text(lowStock);
+			$('#outOfStockCount').text(outOfStock);
+			
+			// Ürün kartlarını render et
+			if (filteredProducts.length === 0) {
+				$('#productsGrid').html('<div class="empty-state"><h3>Araç stoğunda ürün yok</h3><p>stock.html sayfasından ürün seçip "Araç Stoğuna Ekle" butonuna tıklayın.</p></div>');
+				return;
+			}
+			
+			var html = '';
+			filteredProducts.forEach(function(product, index) {
+				var title = typeof product.title === 'object' ? product.title.tr : product.title;
+				var sku = product.sku || '-';
+				var identifier = product.sku || title;
+				var mainStock = parseInt(product.stock) || 0; // Ana depo stoku
+				var vehicleQuantity = vehicleStockData[identifier] ? (parseInt(vehicleStockData[identifier].quantity) || 0) : 0; // Araç stoğu miktarı
+				var image = product.image || (product.images && product.images[0]) || '';
+				
+				var stockClass = 'stock-high';
+				if (vehicleQuantity === 0) {
+					stockClass = 'stock-zero';
+				} else if (vehicleQuantity < 10) {
+					stockClass = 'stock-low';
+				}
+				
+			html += '<div class="product-stock-card" data-index="' + index + '">';
+			html += '<div class="product-checkbox-wrapper">';
+			html += '<input type="checkbox" class="product-checkbox" id="product-checkbox-' + index + '" data-index="' + index + '" onchange="updateSelection()">';
+			html += '<label for="product-checkbox-' + index + '" class="product-checkbox-custom">';
+			html += '<span class="checkmark"></span>';
+			html += '</label>';
+			html += '</div>';
+			if (image) {
+				html += '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(title) + '" class="product-stock-image">';
+			} else {
+				html += '<div class="product-stock-image" style="background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 14px;">Resim Yok</div>';
+			}
+				html += '<div class="product-stock-body">';
+				html += '<h3 class="product-stock-title">' + escapeHtml(title) + '</h3>';
+				html += '<p class="product-stock-sku">SKU: ' + escapeHtml(sku) + '</p>';
+				html += '<div class="product-stock-current">';
+				html += '<div class="stock-label">Araç Stoğu</div>';
+				html += '<p class="stock-value ' + stockClass + '">' + vehicleQuantity + '</p>';
+				html += '</div>';
+				html += '<div class="product-stock-current" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.1);">';
+				html += '<div class="stock-label" style="font-size: 12px; color: rgba(255, 255, 255, 0.7);">Ana Depo</div>';
+				html += '<p class="stock-value" style="font-size: 16px; color: rgba(255, 255, 255, 0.9);">' + mainStock + '</p>';
+				html += '</div>';
+				html += '<div class="stock-controls">';
+				html += '<div class="quantity-controls">';
+				html += '<button class="btn-quantity" onclick="changeQuantity(' + index + ', -1)">−</button>';
+				html += '<input type="number" id="quantity-' + index + '" class="quantity-input" value="1" min="1" onchange="validateQuantity(' + index + ')">';
+				html += '<button class="btn-quantity" onclick="changeQuantity(' + index + ', 1)">+</button>';
+				html += '</div>';
+				html += '<div class="stock-action-buttons">';
+				html += '<button class="btn-stock-action btn-stock-remove" onclick="removeStock(' + index + ')">➖ Çıkar</button>';
+				html += '<button class="btn-stock-action btn-stock-add" onclick="addStock(' + index + ')">➕ Ekle</button>';
+				html += '</div>';
+				html += '</div>';
+				html += '</div>';
+				html += '</div>';
+			});
+			
+			$('#productsGrid').html(html);
+		}
+		
+		// İstatistikleri güncelle
+		function updateStats() {
+			var inStock = 0;
+			var lowStock = 0;
+			var outOfStock = 0;
+			
+			filteredProducts.forEach(function(product) {
+				var stock = parseInt(product.stock) || 0;
+				if (stock > 10) {
+					inStock++;
+				} else if (stock > 0) {
+					lowStock++;
+				} else {
+					outOfStock++;
+				}
+			});
+			
+			$('#inStockCount').text(inStock);
+			$('#lowStockCount').text(lowStock);
+			$('#outOfStockCount').text(outOfStock);
+		}
+		
+		// Miktar değiştir (quantity input)
+		function changeQuantity(index, change) {
+			var $input = $('#quantity-' + index);
+			var currentValue = parseInt($input.val()) || 1;
+			var newValue = currentValue + change;
+			
+			if (newValue < 1) {
+				newValue = 1;
+			}
+			
+			$input.val(newValue);
+		}
+		
+		// Miktar doğrula
+		function validateQuantity(index) {
+			var $input = $('#quantity-' + index);
+			var value = parseInt($input.val()) || 1;
+			
+			if (value < 1) {
+				value = 1;
+				$input.val(value);
+			}
+		}
+		
+		// Stok ekle (sadece araç stoğuna)
+		function addStock(index) {
+			var product = filteredProducts[index];
+			if (!product) return;
+			
+			var $input = $('#quantity-' + index);
+			var quantity = parseInt($input.val()) || 1;
+			
+			var identifier = product.sku || (typeof product.title === 'object' ? product.title.tr : product.title);
+			var currentVehicleQuantity = vehicleStockData[identifier] ? (parseInt(vehicleStockData[identifier].quantity) || 0) : 0;
+			var newVehicleQuantity = currentVehicleQuantity + quantity;
+			
+			var message = 'Araç stoğuna ' + quantity + ' adet eklenecek.\n\n';
+			message += '<strong>Araç Stoğu:</strong> ' + currentVehicleQuantity + ' → ' + newVehicleQuantity + '\n\n';
+			message += 'Onaylıyor musunuz?';
+			
+			showConfirm(message, 'Araç Stoğuna Ekle').then(function(confirmed) {
+				if (confirmed) {
+					// Araç stoğuna ekle
+					if (!vehicleStockData[identifier]) {
+						vehicleStockData[identifier] = {
+							quantity: 0,
+							originalQuantity: 0,
+							addedAt: Date.now()
+						};
+					}
+					vehicleStockData[identifier].quantity = newVehicleQuantity;
+					vehicleStockData[identifier].originalQuantity = (vehicleStockData[identifier].originalQuantity || 0) + quantity;
+					
+					// Backend'e kaydet
+					saveVehicleStockToBackend();
+					
+					// UI'ı güncelle
+					renderProducts();
+				}
+			});
+		}
+		
+		// Stok çıkar (sadece araç stoğundan)
+		function removeStock(index) {
+			var product = filteredProducts[index];
+			if (!product) return;
+			
+			var $input = $('#quantity-' + index);
+			var quantity = parseInt($input.val()) || 1;
+			
+			var identifier = product.sku || (typeof product.title === 'object' ? product.title.tr : product.title);
+			var currentVehicleQuantity = vehicleStockData[identifier] ? (parseInt(vehicleStockData[identifier].quantity) || 0) : 0;
+			var newVehicleQuantity = currentVehicleQuantity - quantity;
+			
+			if (newVehicleQuantity < 0) {
+				showAlert('error', 'Araç stoğu miktarı 0\'ın altına düşemez!');
+				return;
+			}
+			
+			var message = 'Araç stoğundan ' + quantity + ' adet çıkarılacak (satış).\n\n<strong>Mevcut Araç Stoğu:</strong> ' + currentVehicleQuantity + '\n<strong>Yeni Araç Stoğu:</strong> ' + newVehicleQuantity + '\n\nOnaylıyor musunuz?';
+			
+			showConfirm(message, 'Satış (Araç Stoğundan Çıkar)').then(function(confirmed) {
+				if (confirmed) {
+					updateVehicleStock(index, -quantity);
+				}
+			});
+		}
+		
+		// Araç stoğunu güncelle (sadece vehicle stock quantity, ana stoku değiştirme)
+		function updateVehicleStock(index, change, showAlertMsg) {
+			if (showAlertMsg === undefined) showAlertMsg = true;
+			var product = filteredProducts[index];
+			if (!product) return;
+			
+			var identifier = product.sku || (typeof product.title === 'object' ? product.title.tr : product.title);
+			
+			if (!vehicleStockData[identifier]) {
+				if (showAlertMsg) showAlert('error', 'Araç stoğunda bu ürün bulunamadı!');
+				return;
+			}
+			
+			var currentVehicleQuantity = parseInt(vehicleStockData[identifier].quantity) || 0;
+			var newVehicleQuantity = currentVehicleQuantity + change;
+			
+			if (newVehicleQuantity < 0) {
+				if (showAlertMsg) showAlert('error', 'Araç stoğu miktarı 0\'ın altına düşemez!');
+				return;
+			}
+			
+			// Vehicle stock quantity'yi güncelle
+			vehicleStockData[identifier].quantity = newVehicleQuantity;
+			
+			// Backend'e kaydet
+			saveVehicleStockToBackend();
+			
+			// UI'ı güncelle
+			renderProducts();
+		}
+		
+		// Eski updateStock fonksiyonu (geriye uyumluluk için - artık kullanılmıyor)
+		function updateStock(index, change, showAlertMsg) {
+			// Araç stoğu için updateVehicleStock kullan
+			updateVehicleStock(index, change, showAlertMsg);
+		}
+		
+		// Vehicle stock'u backend'e kaydet
+		function saveVehicleStockToBackend() {
+			// Önce session kontrolü yap
+			$.ajax({
+				url: '/api/admin/check-session',
+				method: 'GET',
+				success: function(sessionResponse) {
+					if (!sessionResponse.authenticated) {
+						console.warn('⚠️ Session expired, skipping vehicle stock save');
+						return;
+					}
+					
+					// Session var, kaydetme işlemini yap
+					performVehicleStockSave();
+				},
+				error: function() {
+					console.warn('⚠️ Session check failed, skipping vehicle stock save');
+				}
+			});
+			
+			function performVehicleStockSave() {
+				// Vehicle stock array'ini oluştur
+				var vehicleStockArray = [];
+				for (var identifier in vehicleStockData) {
+					if (vehicleStockData.hasOwnProperty(identifier)) {
+						vehicleStockArray.push({
+							identifier: identifier,
+							quantity: vehicleStockData[identifier].quantity,
+							originalQuantity: vehicleStockData[identifier].originalQuantity,
+							addedAt: vehicleStockData[identifier].addedAt
+						});
+					}
+				}
+				
+				// Backend'e PUT request ile güncelle
+				$.ajax({
+					url: '/api/vehicle-stock',
+					method: 'PUT',
+					contentType: 'application/json',
+					data: JSON.stringify({
+						vehicleStock: vehicleStockArray
+					}),
+					success: function(response) {
+						if (response.success) {
+							console.log('✅ Vehicle stock saved to backend');
+						}
+					},
+					error: function(xhr) {
+						console.error('❌ Error saving vehicle stock:', xhr);
+					}
+				});
+			}
+		}
+		
+		// Backend'e kaydet (otomatik çağrılıyor)
+		function saveToBackend() {
+			// Önce session kontrolü yap
+			$.ajax({
+				url: '/api/admin/check-session',
+				method: 'GET',
+				success: function(sessionResponse) {
+					if (!sessionResponse.authenticated) {
+						console.warn('⚠️ Session expired, skipping auto-save');
+						return;
+					}
+					
+					// Session var, kaydetme işlemini yap
+					performSave();
+				},
+				error: function() {
+					console.warn('⚠️ Session check failed, skipping auto-save');
+				}
+			});
+			
+			function performSave() {
+				// mainCategories'ı yükle
+				var mainCategories = [];
+				if (typeof window.mainCategories !== 'undefined') {
+					mainCategories = window.mainCategories;
+				} else {
+					// localStorage kullanımı kaldırıldı - backend'den yükleniyor
+					console.warn('⚠️ mainCategories backend\'den yüklenmemiş');
+				}
+				
+				// Carousel verilerini de al (varsa)
+				// localStorage kullanımı kaldırıldı - backend'den yükleniyor
+				// Carousel verileri backend'den /api/products endpoint'inden geliyor
+				var carousel = null;
+				
+				$.ajax({
+					url: '/api/products/save',
+					method: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify({
+						products: productsData,
+						mainCategories: mainCategories,
+						carousel: carousel
+					}),
+					success: function(response) {
+						// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+						console.log('✅ Products saved to backend successfully');
+					},
+					error: function(xhr, status, error) {
+						if (xhr.status === 401) {
+							console.warn('⚠️ Session expired during save');
+						} else {
+							console.error('❌ Error saving products to backend:', error);
+						}
+					}
+				});
+			}
+		}
+		
+		// Seçili ürünleri yönet
+		function updateSelection() {
+			var selected = [];
+			$('.product-checkbox:checked').each(function() {
+				selected.push(parseInt($(this).data('index')));
+			});
+			
+			// Seçili ürün kartlarına 'selected' class ekle
+			$('.product-stock-card').removeClass('selected');
+			selected.forEach(function(index) {
+				$('.product-stock-card[data-index="' + index + '"]').addClass('selected');
+			});
+			
+			// Toplu işlem butonlarını göster/gizle
+			if (selected.length > 0) {
+				$('#bulkActions').addClass('show');
+				$('#selectedCount').text(selected.length + ' ürün seçili');
+			} else {
+				$('#bulkActions').removeClass('show');
+			}
+		}
+		
+		// Seçimi temizle
+		function clearSelection() {
+			$('.product-checkbox').prop('checked', false);
+			$('.product-stock-card').removeClass('selected');
+			$('#bulkActions').removeClass('show');
+		}
+		
+		// Toplu stok ekle - her ürünün kendi miktar input'unu kullan
+		function bulkAddStock() {
+			var selected = [];
+			$('.product-checkbox:checked').each(function() {
+				selected.push(parseInt($(this).data('index')));
+			});
+			
+			if (selected.length === 0) {
+				showAlert('warning', 'Lütfen en az bir ürün seçin!');
+				return;
+			}
+			
+			// Önce tüm miktarları ve ürünleri topla (index'ler kaybolmadan önce)
+			var operations = [];
+			selected.forEach(function(index) {
+				var $input = $('#quantity-' + index);
+				var quantity = parseInt($input.val()) || 1;
+				var product = filteredProducts[index];
+				if (product) {
+					operations.push({
+						product: product,
+						quantity: quantity,
+						index: index
+					});
+				}
+			});
+			
+			// Özet mesajı oluştur
+			var summary = [];
+			var totalQuantity = 0;
+			operations.forEach(function(op) {
+				var title = typeof op.product.title === 'object' ? op.product.title.tr : op.product.title;
+				var identifier = op.product.sku || title;
+				var currentVehicleQuantity = vehicleStockData[identifier] ? (parseInt(vehicleStockData[identifier].quantity) || 0) : 0;
+				summary.push(title + ': ' + currentVehicleQuantity + ' → ' + (currentVehicleQuantity + op.quantity) + ' (+' + op.quantity + ')');
+				totalQuantity += op.quantity;
+			});
+			
+			var message = selected.length + ' ürünün araç stoğu güncellenecek:\n\n';
+			message += summary.join('\n');
+			message += '\n\nToplam: ' + totalQuantity + ' adet eklenecek\n\n';
+			message += 'Onaylıyor musunuz?';
+			
+			showConfirm(message, 'Toplu Araç Stoğu Ekleme').then(function(confirmed) {
+				if (!confirmed) return;
+				processBulkAdd(operations, selected);
+			});
+		}
+		
+		// Toplu ekleme işlemini yap (sadece araç stoğuna)
+		function processBulkAdd(operations, selected) {
+			var successCount = 0;
+			operations.forEach(function(op) {
+				var product = op.product;
+				var quantity = op.quantity;
+				var identifier = product.sku || (typeof product.title === 'object' ? product.title.tr : product.title);
+				
+				// Araç stoğuna ekle
+				if (!vehicleStockData[identifier]) {
+					vehicleStockData[identifier] = {
+						quantity: 0,
+						originalQuantity: 0,
+						addedAt: Date.now()
+					};
+				}
+				var currentVehicleQuantity = parseInt(vehicleStockData[identifier].quantity) || 0;
+				vehicleStockData[identifier].quantity = currentVehicleQuantity + quantity;
+				vehicleStockData[identifier].originalQuantity = (vehicleStockData[identifier].originalQuantity || 0) + quantity;
+				successCount++;
+			});
+			
+			// Backend'e kaydet
+			saveVehicleStockToBackend();
+			
+			// Tek seferde render et
+			renderProducts();
+			
+			// Seçimi temizle
+			clearSelection();
+			
+			showAlert('success', successCount + ' ürünün araç stoğu güncellendi!');
+		}
+		
+		// Toplu stok çıkar - her ürünün kendi miktar input'unu kullan
+		function bulkRemoveStock() {
+			var selected = [];
+			$('.product-checkbox:checked').each(function() {
+				selected.push(parseInt($(this).data('index')));
+			});
+			
+			if (selected.length === 0) {
+				showAlert('warning', 'Lütfen en az bir ürün seçin!');
+				return;
+			}
+			
+			// Önce tüm miktarları ve ürünleri topla (index'ler kaybolmadan önce)
+			var operations = [];
+			selected.forEach(function(index) {
+				var $input = $('#quantity-' + index);
+				var quantity = parseInt($input.val()) || 1;
+				var product = filteredProducts[index];
+				if (product) {
+					operations.push({
+						product: product,
+						quantity: quantity,
+						index: index
+					});
+				}
+			});
+			
+			// Önce kontrol et - hiçbirinin araç stoğu 0'ın altına düşmeyecek mi?
+			var willFail = false;
+			var failedProducts = [];
+			operations.forEach(function(op) {
+				var identifier = op.product.sku || (typeof op.product.title === 'object' ? op.product.title.tr : op.product.title);
+				var currentVehicleQuantity = vehicleStockData[identifier] ? (parseInt(vehicleStockData[identifier].quantity) || 0) : 0;
+				if (currentVehicleQuantity - op.quantity < 0) {
+					willFail = true;
+					var title = typeof op.product.title === 'object' ? op.product.title.tr : op.product.title;
+					failedProducts.push(title + ' (araç stoğu: ' + currentVehicleQuantity + ', çıkarılacak: ' + op.quantity + ')');
+				}
+			});
+			
+			if (willFail) {
+				var errorMsg = 'Bazı ürünlerin araç stoğu 0\'ın altına düşecek:\n\n';
+				errorMsg += failedProducts.join('\n');
+				errorMsg += '\n\nLütfen miktarları kontrol edin.';
+				showAlert('error', errorMsg);
+				return;
+			}
+			
+			// Özet mesajı oluştur
+			var summary = [];
+			var totalQuantity = 0;
+			operations.forEach(function(op) {
+				var title = typeof op.product.title === 'object' ? op.product.title.tr : op.product.title;
+				var identifier = op.product.sku || title;
+				var currentVehicleQuantity = vehicleStockData[identifier] ? (parseInt(vehicleStockData[identifier].quantity) || 0) : 0;
+				summary.push(title + ': ' + currentVehicleQuantity + ' → ' + (currentVehicleQuantity - op.quantity) + ' (-' + op.quantity + ')');
+				totalQuantity += op.quantity;
+			});
+			
+			var message = selected.length + ' ürünün araç stoğu güncellenecek:\n\n';
+			message += summary.join('\n');
+			message += '\n\nToplam: ' + totalQuantity + ' adet çıkarılacak\n\n';
+			message += 'Onaylıyor musunuz?';
+			
+			showConfirm(message, 'Toplu Stok Çıkarma').then(function(confirmed) {
+				if (!confirmed) return;
+				processBulkRemove(operations, selected);
+			});
+		}
+		
+		// Toplu çıkarma işlemini yap (sadece araç stoğundan)
+		function processBulkRemove(operations, selected) {
+			var successCount = 0;
+			operations.forEach(function(op) {
+				var product = op.product;
+				var quantity = op.quantity;
+				var identifier = product.sku || (typeof product.title === 'object' ? product.title.tr : product.title);
+				
+				if (!vehicleStockData[identifier]) {
+					return; // Araç stoğunda yok, atla
+				}
+				
+				var currentVehicleQuantity = parseInt(vehicleStockData[identifier].quantity) || 0;
+				var newVehicleQuantity = currentVehicleQuantity - quantity;
+				
+				if (newVehicleQuantity >= 0) {
+					vehicleStockData[identifier].quantity = newVehicleQuantity;
+					successCount++;
+				}
+			});
+			
+			// Backend'e kaydet
+			saveVehicleStockToBackend();
+			
+			// Tek seferde render et
+			renderProducts();
+			
+			// Seçimi temizle
+			clearSelection();
+			
+			showAlert('success', successCount + ' ürünün araç stoğu güncellendi!');
+		}
+		
+		// Tümünü temizle (kalan miktarları ana stoka geri döndür)
+		function clearVehicleStock() {
+			// Kalan miktarları hesapla
+			var totalRemaining = 0;
+			var itemsWithStock = [];
+			for (var identifier in vehicleStockData) {
+				if (vehicleStockData.hasOwnProperty(identifier)) {
+					var remaining = parseInt(vehicleStockData[identifier].quantity) || 0;
+					if (remaining > 0) {
+						totalRemaining += remaining;
+						itemsWithStock.push({ identifier: identifier, quantity: remaining });
+					}
+				}
+			}
+			
+			var message = 'Tüm araç stoğu temizlenecek ve kalan miktarlar ana stoka geri döndürülecek.\n\n';
+			if (totalRemaining > 0) {
+				message += '<strong>Toplam ' + totalRemaining + ' adet ürün ana stoka geri döndürülecek.</strong>\n\n';
+			} else {
+				message += 'Araç stoğunda kalan ürün yok.\n\n';
+			}
+			message += 'Bu işlem geri alınamaz. Devam etmek istiyor musunuz?';
+			
+			showConfirm(message, 'Tümünü Temizle').then(function(confirmed) {
+				if (!confirmed) return;
+				
+				// Önce session kontrolü yap
+				$.ajax({
+					url: '/api/admin/check-session',
+					method: 'GET',
+					success: function(sessionResponse) {
+						if (!sessionResponse.authenticated) {
+							showAlert('error', 'Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+							$('#pageContent').hide();
+							$('#loginScreen').show();
+							return;
+						}
+						
+						// Session var, temizleme işlemini yap
+						performClear();
+					},
+					error: function() {
+						showAlert('error', 'Oturum kontrolü yapılamadı. Lütfen tekrar giriş yapın.');
+						$('#pageContent').hide();
+						$('#loginScreen').show();
+					}
+				});
+				
+				function performClear() {
+					$.ajax({
+						url: '/api/vehicle-stock',
+						method: 'DELETE',
+						success: function(response) {
+							if (response.success) {
+								var message = 'Araç stoğu temizlendi!';
+								if (response.returnedCount > 0) {
+									message += '\n\n' + response.returnedCount + ' ürünün kalan miktarı ana stoka geri döndürüldü.';
+								}
+								vehicleStockIdentifiers = [];
+								vehicleStockData = {};
+								filteredProducts = [];
+								renderProducts();
+								showAlert('success', message);
+								
+								// Sayfayı yenile (ana stok güncellenmiş olabilir)
+								setTimeout(function() {
+									window.location.reload();
+								}, 2000);
+							}
+						},
+						error: function(xhr) {
+							var errorMsg = 'Araç stoğu temizlenirken hata oluştu!';
+							if (xhr.responseJSON && xhr.responseJSON.error) {
+								errorMsg = xhr.responseJSON.error;
+							}
+							if (xhr.status === 401) {
+								showAlert('error', 'Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+								$('#pageContent').hide();
+								$('#loginScreen').show();
+							} else {
+								showAlert('error', errorMsg);
+							}
+						}
+					});
+				}
+			});
+		}
+		
+		// Modern Popup Modal Fonksiyonları
+		var popupResolve = null;
+		
+		// Alert popup (sadece OK butonu)
+		function showAlert(type, message) {
+			return new Promise(function(resolve) {
+				var $modal = $('#popupModal');
+				var $icon = $('#popupIcon');
+				var $title = $('#popupTitle');
+				var $message = $('#popupMessage');
+				var $footer = $('#popupFooter');
+				
+				// İkon ve başlık ayarla
+				var icon = 'ℹ';
+				var title = 'Bilgi';
+				
+				switch(type) {
+					case 'success':
+						icon = '✓';
+						title = 'Başarılı';
+						break;
+					case 'error':
+						icon = '✕';
+						title = 'Hata';
+						break;
+					case 'warning':
+						icon = '⚠';
+						title = 'Uyarı';
+						break;
+				}
+				
+				$icon.text(icon);
+				$title.text(title);
+				$message.html(message.replace(/\n/g, '<br>'));
+				
+				// Footer - sadece OK butonu
+				$footer.html(
+					'<button class="popup-btn popup-btn-primary" onclick="closePopup()">Tamam</button>'
+				);
+				
+				popupResolve = resolve;
+				$modal.addClass('show');
+				
+				// Enter tuşu ile kapat
+				$(document).off('keydown.popup').on('keydown.popup', function(e) {
+					if (e.key === 'Enter' || e.key === 'Escape') {
+						closePopup();
+					}
+				});
+			});
+		}
+		
+		// Confirm popup (OK ve Cancel butonları)
+		function showConfirm(message, title) {
+			if (!title) title = 'Onay';
+			
+			return new Promise(function(resolve) {
+				var $modal = $('#popupModal');
+				var $icon = $('#popupIcon');
+				var $titleEl = $('#popupTitle');
+				var $message = $('#popupMessage');
+				var $footer = $('#popupFooter');
+				
+				$icon.text('❓');
+				$titleEl.text(title);
+				$message.html(message.replace(/\n/g, '<br>'));
+				
+				// Footer - OK ve Cancel butonları
+				$footer.html(
+					'<button class="popup-btn popup-btn-secondary" onclick="closePopup(false)">İptal</button>' +
+					'<button class="popup-btn popup-btn-primary" onclick="closePopup(true)">Tamam</button>'
+				);
+				
+				popupResolve = resolve;
+				$modal.addClass('show');
+				
+				// Enter ve Escape tuşları
+				$(document).off('keydown.popup').on('keydown.popup', function(e) {
+					if (e.key === 'Enter') {
+						closePopup(true);
+					} else if (e.key === 'Escape') {
+						closePopup(false);
+					}
+				});
+			});
+		}
+		
+		// Popup'ı kapat
+		function closePopup(result) {
+			var $modal = $('#popupModal');
+			$modal.removeClass('show');
+			$(document).off('keydown.popup');
+			
+			if (popupResolve) {
+				popupResolve(result !== false);
+				popupResolve = null;
+			}
+		}
+		
+		// Overlay'e tıklayınca kapatma (confirm için iptal)
+		$(document).on('click', '.popup-modal-overlay', function(e) {
+			if (e.target === this) {
+				closePopup(false);
+			}
+		});
+		
+		// HTML escape
+		function escapeHtml(text) {
+			if (typeof text !== 'string') return text;
+			var map = {
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#039;'
+			};
+			return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+		}
+		
+		// Global fonksiyonlar (onclick için)
+		window.changeQuantity = changeQuantity;
+		window.validateQuantity = validateQuantity;
+		window.addStock = addStock;
+		window.removeStock = removeStock;
+		window.updateStock = updateStock;
+		window.updateSelection = updateSelection;
+		window.clearSelection = clearSelection;
+		window.bulkAddStock = bulkAddStock;
+		window.bulkRemoveStock = bulkRemoveStock;
+		window.clearVehicleStock = clearVehicleStock;
+		window.closePopup = closePopup;
+	</script>
+	
+	<script>
+		// BACKEND SESSION KULLANIYOR - localStorage/sessionStorage yok
+		var MAX_LOGIN_ATTEMPTS = 5;
+		var LOGIN_ATTEMPTS_KEY = 'adminLoginAttempts';
+		var LOCKOUT_TIME_KEY = 'adminLockoutUntil';
+		var LOCKOUT_DURATION = 15 * 60 * 1000;
+
+		function checkLogin() {
+			checkLockout();
+			
+			// Backend'e session kontrolü için istek at
+			$.ajax({
+				url: '/api/admin/check-session',
+				method: 'GET',
+				success: function(response) {
+					if (response.authenticated) {
+						// Session var - içeriği göster
+						$('#loginScreen').hide();
+						$('#pageContent').show();
+						if (typeof initVehicleStockPage === 'function') {
+							initVehicleStockPage();
+						}
+					} else {
+						// Session yok veya süresi dolmuş
+						if (response.expired) {
+							showAlert('warning', 'Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+						}
+						$('#loginScreen').show();
+						$('#pageContent').hide();
+					}
+				},
+				error: function() {
+					// Hata durumunda login ekranını göster
+					$('#loginScreen').show();
+					$('#pageContent').hide();
+				}
+			});
+		}
+
+		function checkLockout() {
+			var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+			if (lockoutUntil) {
+				var now = Date.now();
+				var unlockTime = parseInt(lockoutUntil);
+				
+				if (now < unlockTime) {
+					var remainingMinutes = Math.ceil((unlockTime - now) / (60 * 1000));
+					$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Lütfen ' + remainingMinutes + ' dakika sonra tekrar deneyin.').fadeIn(300);
+					$('#adminPassword').prop('disabled', true);
+					$('button[onclick="checkPassword()"]').prop('disabled', true);
+					return true;
+				} else {
+					localStorage.removeItem(LOCKOUT_TIME_KEY);
+					localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+				}
+			}
+			return false;
+		}
+		
+		function checkPassword() {
+			if (checkLockout()) return;
+			
+			var password = $('#adminPassword').val();
+			
+			if (!password) {
+				$('#loginError').text('⚠️ Şifre gerekli!').fadeIn(300);
+				return;
+			}
+			
+			$.ajax({
+				url: '/api/admin/check-password',
+				method: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify({ password: password }),
+				success: function(response) {
+					if (response.success) {
+						localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+						localStorage.removeItem(LOCKOUT_TIME_KEY);
+						
+					// Backend session oluşturuldu - frontend'de bir şey yapmaya gerek yok
+					
+					// Overlay'i gizle
+					$('#pageTransition').removeClass('show').addClass('hide');
+					
+					$('#loginScreen').fadeOut(300);
+					$('#pageContent').fadeIn(300);
+					$('#loginError').hide();
+					$('#adminPassword').val('');
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+					// Sayfayı başlat
+					initVehicleStockPage();
+					}
+				},
+				error: function(xhr) {
+					var attempts = parseInt(localStorage.getItem(LOGIN_ATTEMPTS_KEY) || '0');
+					attempts++;
+					localStorage.setItem(LOGIN_ATTEMPTS_KEY, attempts.toString());
+					
+					var remainingAttempts = MAX_LOGIN_ATTEMPTS - attempts;
+					
+					if (attempts >= MAX_LOGIN_ATTEMPTS) {
+						var lockoutUntil = Date.now() + LOCKOUT_DURATION;
+						localStorage.setItem(LOCKOUT_TIME_KEY, lockoutUntil.toString());
+						
+						$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Hesap 15 dakika süreyle kilitlendi.').fadeIn(300);
+						$('#adminPassword').prop('disabled', true);
+						$('button[onclick="checkPassword()"]').prop('disabled', true);
+						
+						setTimeout(function() {
+							localStorage.removeItem(LOCKOUT_TIME_KEY);
+							localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+							$('#loginError').hide();
+							$('#adminPassword').prop('disabled', false);
+							$('button[onclick="checkPassword()"]').prop('disabled', false);
+							$('#adminPassword').val('').focus();
+						}, LOCKOUT_DURATION);
+					} else {
+						var errorMsg = '❌ Yanlış şifre!';
+						if (xhr.responseJSON && xhr.responseJSON.error) {
+							errorMsg = '❌ ' + xhr.responseJSON.error;
+						}
+						errorMsg += '<br>Kalan deneme hakkı: ' + remainingAttempts;
+						$('#loginError').html(errorMsg).fadeIn(300);
+					}
+					
+					$('#adminPassword').val('').focus();
+				}
+			});
+		}
+
+		$(document).on('keypress', '#adminPassword', function(e) {
+			if (e.which === 13) {
+				checkPassword();
+			}
+		});
+		
+		// Session timeout kontrolü
+		setInterval(function() {
+			var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+			if (lockoutUntil) {
+				var now = Date.now();
+				var unlockTime = parseInt(lockoutUntil);
+				
+				if (now < unlockTime) {
+					var remainingMinutes = Math.ceil((unlockTime - now) / (60 * 1000));
+					$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Lütfen ' + remainingMinutes + ' dakika sonra tekrar deneyin.');
+				} else {
+					localStorage.removeItem(LOCKOUT_TIME_KEY);
+					localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+					$('#loginError').hide();
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+				}
+			}
+			
+			// Backend session kontrolü checkLogin() içinde yapılıyor
+			// Eski sessionStorage kodları kaldırıldı
+		}, 60000);
+
+		// Sayfa yüklendiğinde kontrol et
+		$(document).ready(function() {
+			checkLogin();
+			
+			// Backend session kontrolü zaten checkLogin() içinde yapılıyor
+			// Burada sadece overlay'i ayarla
+			$('#pageTransition').removeClass('show').addClass('hide');
+			
+			// Admin Paneli linkine animasyonlu geçiş ekle
+			$('a[href="admin.html"]').on('click', function(e) {
+				e.preventDefault();
+				$('#pageTransition').removeClass('hide').addClass('show');
+				setTimeout(function() {
+					window.location.href = 'admin.html';
+				}, 300);
+			});
+		});
+	</script>
+	
+	<!-- Geçiş Overlay -->
+	<div class="page-transition-overlay" id="pageTransition">
+		<div class="spinner"></div>
+	</div>
+	</div>
+</body>
+</html>
+

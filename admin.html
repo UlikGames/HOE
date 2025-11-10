@@ -1,0 +1,742 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Admin Panel</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta name="description" content="Admin panel giriş sayfası" />
+	
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/style.css">
+	
+	<style>
+		* { box-sizing: border-box; }
+		body { 
+			margin: 0; 
+			padding: 0; 
+			font-family: "Montserrat", Arial, sans-serif; 
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+			background-size: 400% 400%;
+			animation: gradientShift 15s ease infinite;
+			min-height: 100vh;
+		}
+		
+		@keyframes gradientShift {
+			0% { background-position: 0% 50%; }
+			50% { background-position: 100% 50%; }
+			100% { background-position: 0% 50%; }
+		}
+		
+		.admin-header {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			color: #fff;
+			padding: 30px 0;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.admin-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+			animation: shimmer 3s infinite;
+		}
+		
+		@keyframes shimmer {
+			0% { left: -100%; }
+			100% { left: 100%; }
+		}
+		
+		.admin-header h1 {
+			margin: 0;
+			font-size: 32px;
+			font-weight: 700;
+			background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+		}
+		
+		.btn-admin {
+			background: linear-gradient(135deg, #7c5dff 0%, #6247ff 50%, #4f46e5 100%);
+			color: #fff;
+			padding: 12px 30px;
+			border: none;
+			border-radius: 12px;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			box-shadow: 0 8px 24px rgba(124, 93, 255, 0.35),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.btn-admin::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.btn-admin:hover::before {
+			left: 100%;
+		}
+		
+		.btn-admin:hover {
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 12px 32px rgba(124, 93, 255, 0.45),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		}
+		
+		.btn-admin:active {
+			transform: translateY(0) scale(0.98);
+		}
+		
+		.btn-admin-danger {
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+			box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		}
+		
+		.btn-admin-danger:hover {
+			box-shadow: 0 12px 32px rgba(239, 68, 68, 0.45),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		}
+		
+		.admin-form-group {
+			margin-bottom: 20px;
+		}
+		
+		.admin-form-group label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 600;
+			color: #1a1a1a;
+			font-size: 14px;
+		}
+		
+		.admin-form-group input {
+			width: 100%;
+			padding: 14px 18px;
+			border: 2px solid rgba(124, 93, 255, 0.2);
+			border-radius: 12px;
+			font-size: 14px;
+			font-family: "Montserrat", Arial, sans-serif;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+		}
+		
+		.admin-form-group input:focus {
+			outline: none;
+			border-color: #7c5dff;
+			box-shadow: 0 0 0 4px rgba(124, 93, 255, 0.1),
+			           0 4px 16px rgba(124, 93, 255, 0.15);
+			background: rgba(255, 255, 255, 1);
+		}
+		
+		.alert {
+			padding: 15px 20px;
+			border-radius: 12px;
+			margin-bottom: 20px;
+			display: none;
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			border: 1.5px solid;
+			animation: slideInDown 0.3s ease-out;
+		}
+		
+		@keyframes slideInDown {
+			from {
+				opacity: 0;
+				transform: translateY(-10px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		.alert-error {
+			background: rgba(254, 226, 226, 0.9);
+			color: #991b1b;
+			border-color: rgba(239, 68, 68, 0.3);
+			box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);
+		}
+		
+		.admin-menu-card {
+			display: flex;
+			height: 100%;
+			width: 100%;
+		}
+		
+		.admin-menu-card > div {
+			width: 100%;
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			min-height: 320px;
+			padding: 50px 35px !important;
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			border-radius: 20px;
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+			            0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.admin-menu-card > div::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.admin-menu-card:hover > div::before {
+			left: 100%;
+		}
+		
+		.admin-menu-card > div > div:first-child {
+			font-size: 72px !important;
+			margin-bottom: 25px !important;
+			filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+			transition: transform 0.3s ease;
+		}
+		
+		.admin-menu-card > div h2 {
+			font-size: 26px !important;
+			margin-bottom: 18px !important;
+			color: #fff;
+			text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+			font-weight: 700;
+		}
+		
+		.admin-menu-card > div p {
+			font-size: 15px !important;
+			color: rgba(255, 255, 255, 0.9);
+			text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+		}
+		
+		.admin-menu-card:hover > div {
+			transform: translateY(-8px) scale(1.02);
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25),
+			            0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+			border-color: rgba(255, 255, 255, 0.4);
+		}
+		
+		.admin-menu-card:hover > div > div:first-child {
+			transform: scale(1.1) rotate(5deg);
+		}
+		
+		.admin-menu-card:active > div {
+			transform: translateY(-4px) scale(0.98);
+			transition: transform 0.1s;
+		}
+		
+		/* Geçiş Overlay */
+		.page-transition-overlay {
+			position: fixed !important;
+			top: 0 !important;
+			left: 0 !important;
+			right: 0 !important;
+			bottom: 0 !important;
+			width: 100vw !important;
+			height: 100vh !important;
+			background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+			z-index: 99999 !important;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.3s ease-out;
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			margin: 0 !important;
+			padding: 0 !important;
+		}
+		
+		.page-transition-overlay.show {
+			opacity: 1;
+			pointer-events: all;
+		}
+		
+		.page-transition-overlay .spinner {
+			width: 60px;
+			height: 60px;
+			border: 4px solid rgba(255, 255, 255, 0.3);
+			border-top-color: #fff;
+			border-radius: 50%;
+			animation: spin 0.8s linear infinite;
+			margin: 0 auto;
+			flex-shrink: 0;
+		}
+		
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
+		
+		/* Sayfa yüklendiğinde fade-in */
+		body {
+			animation: fadeIn 0.4s ease-in;
+		}
+		
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		/* Default grid (PC) - 3 sütun */
+		.admin-grid-container {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 35px;
+			width: 100%;
+			align-items: stretch;
+		}
+		
+		/* Admin content wrapper */
+		.admin-content-wrapper {
+			max-width: 1600px;
+			margin: 0 auto;
+			padding: 60px 40px;
+			display: flex;
+			justify-content: center;
+		}
+		
+		/* Mobil için 2'li grid - tüm mobil cihazlar için (430px iPhone 14 dahil) */
+		@media (max-width: 768px) {
+			.admin-menu-card > div {
+				padding: 30px 20px;
+			}
+			.admin-menu-card > div > div:first-child {
+				font-size: 48px;
+			}
+			.admin-grid-container {
+				display: grid !important;
+				grid-template-columns: repeat(2, 1fr) !important;
+				gap: 20px !important;
+				width: 100% !important;
+				max-width: 100% !important;
+			}
+			
+			.admin-menu-card {
+				width: 100% !important;
+				min-width: 0 !important;
+				max-width: 100% !important;
+				flex: 0 0 calc(50% - 10px) !important;
+				box-sizing: border-box !important;
+			}
+			
+			.admin-menu-card > div {
+				width: 100% !important;
+				max-width: 100% !important;
+			}
+			
+			.admin-content-wrapper {
+				max-width: 100% !important;
+				padding: 30px 20px !important;
+			}
+		}
+		
+		/* Çok küçük ekranlar için de 2'li kalıyor (480px altı) */
+		@media (max-width: 480px) {
+			.admin-grid-container {
+				display: grid !important;
+				grid-template-columns: repeat(2, 1fr) !important;
+				gap: 15px !important;
+				width: 100% !important;
+				max-width: 100% !important;
+			}
+			
+			.admin-menu-card > div {
+				padding: 25px 15px;
+			}
+			
+			.admin-menu-card > div > div:first-child {
+				font-size: 40px;
+			}
+			
+			.admin-menu-card > div h2 {
+				font-size: 20px !important;
+			}
+		}
+	</style>
+</head>
+<body>
+	<!-- Şifre Giriş Ekranı -->
+	<div id="loginScreen" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%); background-size: 400% 400%; animation: gradientShift 15s ease infinite; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+		<div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); padding: 50px 40px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2) inset; max-width: 450px; width: 100%; border: 1.5px solid rgba(255, 255, 255, 0.2); position: relative; overflow: hidden;">
+			<div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #7c5dff, #6247ff, #4f46e5);"></div>
+			<h2 style="margin: 0 0 30px 0; text-align: center; color: #fff; font-size: 28px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);">🔒 Admin Paneli</h2>
+			<div class="alert alert-error" id="loginError" style="display: none; margin-bottom: 20px;"></div>
+			<div class="admin-form-group">
+				<label style="color: rgba(255, 255, 255, 0.95); font-weight: 600; margin-bottom: 10px;">Şifre</label>
+				<input type="password" id="adminPassword" placeholder="Admin şifresini gir..." style="width: 100%; padding: 14px 18px; border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 12px; font-size: 16px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: all 0.3s;">
+			</div>
+			<button onclick="checkPassword()" class="btn-admin" style="width: 100%; margin-top: 20px; padding: 16px 30px; font-size: 16px;">Giriş Yap</button>
+		</div>
+	</div>
+
+	<div id="adminContent" style="display: none;">
+		<div class="admin-header">
+			<div style="max-width: 1400px; margin: 0 auto; padding: 0 20px;">
+				<h1>⚙️ Admin Panel</h1>
+				<p style="margin: 10px 0 0 0; opacity: 0.9;">Yönetim panelini seçin</p>
+				<button onclick="logout()" class="btn-admin btn-admin-danger" style="margin-top: 15px;">🚪 Çıkış Yap</button>
+			</div>
+		</div>
+		
+		<!-- Geçiş Overlay -->
+		<div class="page-transition-overlay" id="pageTransition">
+			<div class="spinner"></div>
+		</div>
+		
+		<div class="admin-content-wrapper">
+			<div class="admin-grid-container">
+				<!-- Ürün Yönetimi Kartı -->
+				<a href="products.html" class="admin-menu-card" style="text-decoration: none; color: inherit;">
+					<div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border-radius: 16px; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;">
+						<div style="font-size: 64px; text-align: center; margin-bottom: 20px;">📦</div>
+						<h2 style="margin: 0 0 15px 0; font-size: 24px; color: #fff; text-align: center;">Ürün Yönetimi</h2>
+						<p style="margin: 0; color: rgba(255, 255, 255, 0.9); text-align: center; font-size: 14px; line-height: 1.6;">Ürün ekle, düzenle ve sil</p>
+					</div>
+				</a>
+				
+				<!-- Stok Yönetimi Kartı -->
+				<a href="stock.html" class="admin-menu-card" style="text-decoration: none; color: inherit;">
+					<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;">
+						<div style="font-size: 64px; text-align: center; margin-bottom: 20px;">📊</div>
+						<h2 style="margin: 0 0 15px 0; font-size: 24px; color: #fff; text-align: center;">Stok Yönetimi</h2>
+						<p style="margin: 0; color: rgba(255, 255, 255, 0.9); text-align: center; font-size: 14px; line-height: 1.6;">Stok miktarlarını yönet</p>
+					</div>
+				</a>
+				
+				<!-- Araç Stoğu Kartı -->
+				<a href="vehicle-stock.html" class="admin-menu-card" style="text-decoration: none; color: inherit;">
+					<div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 16px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;">
+						<div style="font-size: 64px; text-align: center; margin-bottom: 20px;">🚚</div>
+						<h2 style="margin: 0 0 15px 0; font-size: 24px; color: #fff; text-align: center;">Araç Stoğu</h2>
+						<p style="margin: 0; color: rgba(255, 255, 255, 0.9); text-align: center; font-size: 14px; line-height: 1.6;">Günlük satış için seçili ürünler</p>
+					</div>
+				</a>
+				
+				<!-- Kategoriler Kartı -->
+				<a href="categories.html" class="admin-menu-card" style="text-decoration: none; color: inherit;">
+					<div style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); border-radius: 16px; box-shadow: 0 10px 30px rgba(6, 182, 212, 0.3); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;">
+						<div style="font-size: 64px; text-align: center; margin-bottom: 20px;">📂</div>
+						<h2 style="margin: 0 0 15px 0; font-size: 24px; color: #fff; text-align: center;">Kategoriler</h2>
+						<p style="margin: 0; color: rgba(255, 255, 255, 0.9); text-align: center; font-size: 14px; line-height: 1.6;">Kategori ekle ve düzenle</p>
+					</div>
+				</a>
+				
+				<!-- Carousel Kartı -->
+				<a href="carousel.html" class="admin-menu-card" style="text-decoration: none; color: inherit;">
+					<div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 16px; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;">
+						<div style="font-size: 64px; text-align: center; margin-bottom: 20px;">🎠</div>
+						<h2 style="margin: 0 0 15px 0; font-size: 24px; color: #fff; text-align: center;">Carousel</h2>
+						<p style="margin: 0; color: rgba(255, 255, 255, 0.9); text-align: center; font-size: 14px; line-height: 1.6;">Ana sayfa slider'ını yönet</p>
+					</div>
+				</a>
+				
+				<!-- GPS Takip Kartı -->
+				<a href="/gps-panel.html" class="admin-menu-card" style="text-decoration: none; color: inherit;">
+					<div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 16px; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;">
+						<div style="font-size: 64px; text-align: center; margin-bottom: 20px;">🗺️</div>
+						<h2 style="margin: 0 0 15px 0; font-size: 24px; color: #fff; text-align: center;">GPS Takip</h2>
+						<p style="margin: 0; color: rgba(255, 255, 255, 0.9); text-align: center; font-size: 14px; line-height: 1.6;">Araç rotalarını görüntüle</p>
+					</div>
+				</a>
+				
+				<!-- İş Ortakları Kartı -->
+				<a href="partners-admin.html" class="admin-menu-card" style="text-decoration: none; color: inherit;">
+					<div style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); border-radius: 16px; box-shadow: 0 10px 30px rgba(236, 72, 153, 0.3); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;">
+						<div style="font-size: 64px; text-align: center; margin-bottom: 20px;">🤝</div>
+						<h2 style="margin: 0 0 15px 0; font-size: 24px; color: #fff; text-align: center;">İş Ortakları</h2>
+						<p style="margin: 0; color: rgba(255, 255, 255, 0.9); text-align: center; font-size: 14px; line-height: 1.6;">İş ortaklarını yönet</p>
+					</div>
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<script src="js/jquery.min.js"></script>
+	<script>
+		// BACKEND SESSION KULLANIYOR - localStorage/sessionStorage yok
+		// yanlış şifre deneme limiti - bruteforce'a karşı koruma
+		var MAX_LOGIN_ATTEMPTS = 5; // maksimum deneme hakkı
+		var LOGIN_ATTEMPTS_KEY = 'adminLoginAttempts';
+		var LOCKOUT_TIME_KEY = 'adminLockoutUntil';
+		var LOCKOUT_DURATION = 15 * 60 * 1000; // 15 dakika kilitleme süresi
+
+		// sayfa yüklendiğinde backend'den session kontrolü yap
+		function checkLogin() {
+			// kilitleme kontrolü
+			checkLockout();
+			
+			// Backend'e session kontrolü için istek at
+			$.ajax({
+				url: '/api/admin/check-session',
+				method: 'GET',
+				success: function(response) {
+					if (response.authenticated) {
+						// Session var - içeriği göster
+						$('#loginScreen').hide();
+						$('#adminContent').show();
+					} else {
+						// Session yok veya süresi dolmuş
+						if (response.expired) {
+							alert('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+						}
+						$('#loginScreen').show();
+						$('#adminContent').hide();
+					}
+				},
+				error: function() {
+					// Hata durumunda login ekranını göster
+					$('#loginScreen').show();
+					$('#adminContent').hide();
+				}
+			});
+		}
+
+		// kilitleme kontrolü - hala kilitli mi?
+		function checkLockout() {
+			var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+			if (lockoutUntil) {
+				var now = Date.now();
+				var unlockTime = parseInt(lockoutUntil);
+				
+				if (now < unlockTime) {
+					// hala kilitli
+					var remainingMinutes = Math.ceil((unlockTime - now) / (60 * 1000));
+					$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Lütfen ' + remainingMinutes + ' dakika sonra tekrar deneyin.').fadeIn(300);
+					$('#adminPassword').prop('disabled', true);
+					$('button[onclick="checkPassword()"]').prop('disabled', true);
+					return true;
+				} else {
+					// kilitleme süresi doldu - reset et
+					localStorage.removeItem(LOCKOUT_TIME_KEY);
+					localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+				}
+			}
+			return false;
+		}
+		
+		// şifreyi backend'e gönder ve doğrula
+		function checkPassword() {
+			// kilitleme kontrolü
+			if (checkLockout()) {
+				return;
+			}
+			
+			var password = $('#adminPassword').val();
+			
+			if (!password) {
+				$('#loginError').text('⚠️ Şifre gerekli!').fadeIn(300);
+				return;
+			}
+			
+			// backend'e istek at
+			$.ajax({
+				url: '/api/admin/check-password',
+				method: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify({ password: password }),
+				success: function(response) {
+					if (response.success) {
+						// başarılı giriş - deneme sayısını resetle
+						localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+						localStorage.removeItem(LOCKOUT_TIME_KEY);
+						
+						// Backend session oluşturuldu - frontend'de bir şey yapmaya gerek yok
+						$('#loginScreen').fadeOut(300);
+						$('#adminContent').fadeIn(300);
+						$('#loginError').hide();
+						$('#adminPassword').val('');
+						$('#adminPassword').prop('disabled', false);
+						$('button[onclick="checkPassword()"]').prop('disabled', false);
+					}
+				},
+				error: function(xhr) {
+					// yanlış şifre - deneme sayısını artır
+					var attempts = parseInt(localStorage.getItem(LOGIN_ATTEMPTS_KEY) || '0');
+					attempts++;
+					localStorage.setItem(LOGIN_ATTEMPTS_KEY, attempts.toString());
+					
+					var remainingAttempts = MAX_LOGIN_ATTEMPTS - attempts;
+					
+					if (attempts >= MAX_LOGIN_ATTEMPTS) {
+						// limit aşıldı - kilitle
+						var lockoutUntil = Date.now() + LOCKOUT_DURATION;
+						localStorage.setItem(LOCKOUT_TIME_KEY, lockoutUntil.toString());
+						
+						$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Hesap 15 dakika süreyle kilitlendi.').fadeIn(300);
+						$('#adminPassword').prop('disabled', true);
+						$('button[onclick="checkPassword()"]').prop('disabled', true);
+						
+						// 15 dakika sonra otomatik açılsın
+						setTimeout(function() {
+							localStorage.removeItem(LOCKOUT_TIME_KEY);
+							localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+							$('#loginError').hide();
+							$('#adminPassword').prop('disabled', false);
+							$('button[onclick="checkPassword()"]').prop('disabled', false);
+							$('#adminPassword').val('').focus();
+						}, LOCKOUT_DURATION);
+					} else {
+						var errorMsg = '❌ Yanlış şifre!';
+						if (xhr.responseJSON && xhr.responseJSON.error) {
+							errorMsg = '❌ ' + xhr.responseJSON.error;
+						}
+						errorMsg += '<br>Kalan deneme hakkı: ' + remainingAttempts;
+						$('#loginError').html(errorMsg).fadeIn(300);
+					}
+					
+					$('#adminPassword').val('').focus();
+				}
+			});
+		}
+
+		// enter tuşuna basınca da giriş yapsın
+		$(document).on('keypress', '#adminPassword', function(e) {
+			if (e.which === 13) {
+				checkPassword();
+			}
+		});
+
+		// çıkış yap - backend session'ı temizle
+		function logout() {
+			$.ajax({
+				url: '/api/admin/logout',
+				method: 'POST',
+				success: function() {
+					$('#adminContent').fadeOut(300);
+					$('#loginScreen').fadeIn(300);
+					$('#adminPassword').val('').focus();
+				},
+				error: function() {
+					// Hata olsa bile frontend'de çıkış yap
+					$('#adminContent').fadeOut(300);
+					$('#loginScreen').fadeIn(300);
+					$('#adminPassword').val('').focus();
+				}
+			});
+		}
+		
+		// her dakika timeout kontrolü yap
+		setInterval(function() {
+			// kilitleme kontrolü
+			var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+			if (lockoutUntil) {
+				var now = Date.now();
+				var unlockTime = parseInt(lockoutUntil);
+				
+				if (now < unlockTime) {
+					var remainingMinutes = Math.ceil((unlockTime - now) / (60 * 1000));
+					$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Lütfen ' + remainingMinutes + ' dakika sonra tekrar deneyin.');
+				} else {
+					localStorage.removeItem(LOCKOUT_TIME_KEY);
+					localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+					$('#loginError').hide();
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+				}
+			}
+			
+			// Backend'den session kontrolü
+			$.ajax({
+				url: '/api/admin/check-session',
+				method: 'GET',
+				success: function(response) {
+					if (!response.authenticated) {
+						if (response.expired) {
+							alert('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+						}
+						$('#adminContent').fadeOut(300);
+						$('#loginScreen').fadeIn(300);
+					}
+				},
+				error: function() {
+					// Hata durumunda bir şey yapma
+				}
+			});
+		}, 60000); // her 1 dakikada bir kontrol et
+
+		checkLogin();
+		
+		// Kart linklerine animasyonlu geçiş ekle
+		$(document).ready(function() {
+			// Her sayfanın renk şeması
+			var pageColors = {
+				'products.html': 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+				'products': 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+				'stock.html': 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+				'stock': 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+				'vehicle-stock.html': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+				'vehicle-stock': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+				'categories.html': 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+				'categories': 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
+				'carousel.html': 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+				'carousel': 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+				'gps-panel.html': 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+				'gps-panel': 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+			};
+			
+			$('.admin-menu-card').on('click', function(e) {
+				e.preventDefault();
+				var targetUrl = $(this).attr('href');
+				var fileName = targetUrl.split('/').pop(); // Dosya adını al (örn: 'gps-panel.html')
+				
+				// Önce tam dosya adıyla dene, sonra .html'siz dene
+				var bgColor = pageColors[fileName] || pageColors[fileName.replace('.html', '')] || pageColors[targetUrl] || 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)';
+				
+				// Overlay rengini değiştir
+				$('#pageTransition').css('background', bgColor);
+				
+				// Overlay'i göster
+				$('#pageTransition').addClass('show');
+				
+				// Kısa bir gecikme sonra yönlendir (animasyon görünsün)
+				setTimeout(function() {
+					window.location.href = targetUrl;
+				}, 300);
+			});
+		});
+	</script>
+</body>
+</html>

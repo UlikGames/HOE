@@ -1,0 +1,20 @@
+[
+  {
+    "id": "24edb58f-d6b3-4744-9d71-961ddcb81e92",
+    "name": "NVIDIA",
+    "image": "https://upload.wikimedia.org/wikipedia/sco/thumb/2/21/Nvidia_logo.svg/351px-Nvidia_logo.svg.png?20150924223142",
+    "href": "https://www.nvidia.com/"
+  },
+  {
+    "id": "4431807e-b996-4aba-a538-1869c937973b",
+    "name": "dayısanayi",
+    "image": "https://wsyhxhsufhjtvyjkumhd.supabase.co/storage/v1/object/public/product-images/product-1762677775719-137565647.jpg",
+    "href": "https://erdemkimya.com/"
+  },
+  {
+    "id": null,
+    "name": "anan",
+    "image": "/images/uploads/product-1762719422802-900151601.png",
+    "href": "https://www.anan.com/"
+  }
+]

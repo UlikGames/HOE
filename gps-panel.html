@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPS Tracker - Admin Panel</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      overflow: hidden;
+      background: #f5f5f5;
+    }
+
+    header {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      padding: 20px 30px;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      position: relative;
+      z-index: 1000;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: relative;
+    }
+    
+    .header-top h1 {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: auto;
+    }
+    
+    .header-top .back-button {
+      margin-right: auto;
+    }
+    
+    .header-top .driver-link-btn {
+      margin-left: auto;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .back-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 16px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0.95;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filter-group input,
+    .filter-group select {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      min-width: 180px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+      outline: none;
+      background: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+
+    #showRouteBtn {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #ef4444;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    #showRouteBtn:hover {
+      background: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    #showRouteBtn:active {
+      transform: translateY(0);
+    }
+
+    #map {
+      width: 100%;
+      height: calc(100vh - 180px);
+    }
+
+    .info-dropdown-wrapper {
+      position: absolute;
+      top: 200px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .info-dropdown-btn {
+      background: white;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #ef4444;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .info-dropdown-btn:hover {
+      background: #fee2e2;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .info-dropdown-btn.active {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+
+    .info-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      min-width: 240px;
+      display: none;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .info-dropdown.visible {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .info-dropdown h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: #ef4444;
+      font-weight: 700;
+      border-bottom: 2px solid #ef4444;
+      padding-bottom: 8px;
+    }
+
+    .info-dropdown p {
+      font-size: 14px;
+      color: #4b5563;
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+
+    .info-dropdown p strong {
+      color: #1f2937;
+      font-weight: 600;
+    }
+
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 30px 50px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      display: none;
+      z-index: 2000;
+      border: 2px solid #ef4444;
+    }
+
+    .loading.visible {
+      display: block;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #fee2e2;
+      border-top-color: #ef4444;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Page Transition Overlay */
+    .page-transition-overlay {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      z-index: 99999 !important;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease-out;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .page-transition-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .page-transition-overlay .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Driver Link Button */
+    .driver-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      margin-left: 12px;
+    }
+
+    .driver-link-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Login Screen */
+    #loginScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .login-container h2 {
+      margin: 0 0 20px 0;
+      text-align: center;
+      color: #ef4444;
+      font-size: 24px;
+    }
+
+    .login-error {
+      padding: 12px 16px;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 2px solid #ef4444;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .admin-form-group {
+      margin-bottom: 20px;
+    }
+    
+    .admin-form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #1a1a1a;
+      font-size: 14px;
+    }
+    
+    .admin-form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: "Montserrat", Arial, sans-serif;
+      transition: border-color 0.3s;
+    }
+    
+    .admin-form-group input:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+
+    .login-input:focus {
+      outline: none;
+      border-color: #ef4444;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #gpsContent {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 16px 20px;
+      }
+
+      .header-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      
+      .header-top h1 {
+        position: static;
+        transform: none;
+        text-align: center;
+        order: 2;
+      }
+      
+      .header-top .back-button {
+        order: 1;
+        margin-right: 0;
+      }
+      
+      .header-top .driver-link-btn {
+        order: 3;
+        margin-left: 0;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-group input,
+      .filter-group select {
+        min-width: 100%;
+      }
+      
+      .filter-group > div {
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch !important;
+      }
+      
+      .filter-group > div > select {
+        width: 100% !important;
+        min-width: 100% !important;
+      }
+      
+      #refreshDevicesBtn,
+      #deleteDeviceBtn {
+        width: 100% !important;
+        min-width: 100% !important;
+        margin: 0 !important;
+      }
+
+      #map {
+        height: calc(100vh - 220px);
+      }
+
+      .info-dropdown-wrapper {
+        top: 240px;
+        right: 10px;
+        left: auto;
+      }
+
+      .info-dropdown {
+        left: 0;
+        right: 0;
+        min-width: auto;
+      }
+
+      .driver-link-btn {
+        margin-left: 0;
+        margin-top: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="loginScreen">
+    <div class="login-container">
+      <h2>🔒 GPS Panel</h2>
+      <div class="login-error" id="loginError"></div>
+      <div class="admin-form-group">
+        <label>Şifre</label>
+        <input type="password" id="adminPassword" placeholder="Admin şifresini gir...">
+      </div>
+      <button onclick="checkPassword()" class="login-btn" id="loginBtn" style="width: 100%; margin-top: 15px;">Giriş Yap</button>
+    </div>
+  </div>
+
+  <!-- GPS Content -->
+  <div id="gpsContent">
+  <header>
+    <div class="header-top">
+      <a href="/admin.html" class="back-button" id="backToAdmin">← Admin Paneli</a>
+      <h1 style="flex: 1; text-align: center; margin: 0;">GPS Takip</h1>
+      <a href="/gps-driver.html" class="driver-link-btn">🚗 Sürücü</a>
+    </div>
+    <div class="filters">
+      <div class="filter-group">
+        <label for="routeSelect">Güzergah Seç</label>
+        <select id="routeSelect" style="padding: 12px 16px; border: none; border-radius: 8px; font-size: 14px; min-width: 200px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+          <option value="">Güzergah seçin...</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="deviceId">Cihaz ID</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <select id="deviceId" style="padding: 12px 16px; border: none; border-radius: 8px; font-size: 14px; min-width: 180px; background: rgba(255, 255, 255, 0.95); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <option value="">Cihaz seçin...</option>
+          </select>
+          <button id="refreshDevicesBtn" style="padding: 12px 16px; border: none; border-radius: 8px; background: rgba(255, 255, 255, 0.95); color: #ef4444; cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);" title="Cihazları Yenile">🔄</button>
+          <button id="deleteDeviceBtn" style="padding: 12px 16px; border: none; border-radius: 8px; background: rgba(239, 68, 68, 0.9); color: white; cursor: pointer; font-size: 14px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); display: none;" title="Cihazı Sil">🗑️ Sil</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label for="dateInput">Tarih (Opsiyonel)</label>
+        <input type="date" id="dateInput" placeholder="Tüm geçmiş">
+      </div>
+      <button id="showRouteBtn">📍 Güzergahı Göster</button>
+    </div>
+  </header>
+
+  <div id="map"></div>
+
+  <div class="info-dropdown-wrapper">
+    <button class="info-dropdown-btn" id="infoDropdownBtn" title="Güzergah Bilgisi">
+      <span>ℹ️</span> Bilgi
+    </button>
+    <div class="info-dropdown" id="infoPanel">
+      <h3>Güzergah Bilgisi</h3>
+      <p><strong>Cihaz:</strong> <span id="infoDevice">-</span></p>
+      <p><strong>Tarih:</strong> <span id="infoDate">-</span></p>
+      <p><strong>Nokta Sayısı:</strong> <span id="infoPoints">-</span></p>
+    </div>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+  </div>
+  </div>
+
+  <!-- jQuery (for AJAX) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Page Transition Overlay -->
+  <div id="pageTransition" class="page-transition-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Panel App Logic -->
+  <script src="/js/gps-panel.js"></script>
+  <script>
+    // BACKEND SESSION KULLANIYOR - localStorage/sessionStorage yok
+    var MAX_LOGIN_ATTEMPTS = 5;
+    var LOGIN_ATTEMPTS_KEY = 'adminLoginAttempts';
+    var LOCKOUT_TIME_KEY = 'adminLockoutUntil';
+    var LOCKOUT_DURATION = 15 * 60 * 1000;
+
+    function checkLogin() {
+      // kilitleme kontrolü
+      checkLockout();
+      
+      // Backend'e session kontrolü için istek at
+      fetch('/api/admin/check-session', {
+        method: 'GET',
+        credentials: 'include' // Cookie'leri gönder
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.authenticated) {
+          // Session var - içeriği göster
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('gpsContent').style.display = 'block';
+        } else {
+          // Session yok veya süresi dolmuş
+          if (data.expired) {
+            alert('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+          }
+          document.getElementById('loginScreen').style.display = 'flex';
+          document.getElementById('gpsContent').style.display = 'none';
+        }
+      })
+      .catch(error => {
+        // Hata durumunda login ekranını göster
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('gpsContent').style.display = 'none';
+      });
+    }
+
+    function checkLockout() {
+      var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+      if (lockoutUntil) {
+        var now = Date.now();
+        var unlockTime = parseInt(lockoutUntil);
+        
+        if (now < unlockTime) {
+          var remainingMinutes = Math.ceil((unlockTime - now) / (60 * 1000));
+          document.getElementById('loginError').textContent = '⛔ Çok fazla yanlış deneme! Lütfen ' + remainingMinutes + ' dakika sonra tekrar deneyin.';
+          document.getElementById('loginError').style.display = 'block';
+          document.getElementById('adminPassword').disabled = true;
+          document.getElementById('loginBtn').disabled = true;
+          return true;
+        } else {
+          localStorage.removeItem(LOCKOUT_TIME_KEY);
+          localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+          document.getElementById('adminPassword').disabled = false;
+          document.getElementById('loginBtn').disabled = false;
+        }
+      }
+      return false;
+    }
+
+    function checkPassword() {
+      if (checkLockout()) {
+        return;
+      }
+      
+      var password = document.getElementById('adminPassword').value;
+      
+      if (!password) {
+        document.getElementById('loginError').textContent = '⚠️ Şifre gerekli!';
+        document.getElementById('loginError').style.display = 'block';
+        return;
+      }
+      
+      $.ajax({
+        url: '/api/admin/check-password',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ password: password }),
+        success: function(response) {
+          if (response.success) {
+            // başarılı giriş - deneme sayısını resetle
+            localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+            localStorage.removeItem(LOCKOUT_TIME_KEY);
+            
+            // Backend session oluşturuldu - frontend'de bir şey yapmaya gerek yok
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('gpsContent').style.display = 'block';
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('adminPassword').disabled = false;
+            document.getElementById('loginBtn').disabled = false;
+          }
+        },
+        error: function(xhr) {
+          // yanlış şifre - deneme sayısını artır
+          var attempts = parseInt(localStorage.getItem(LOGIN_ATTEMPTS_KEY) || '0');
+          attempts++;
+          localStorage.setItem(LOGIN_ATTEMPTS_KEY, attempts.toString());
+          
+          var remainingAttempts = MAX_LOGIN_ATTEMPTS - attempts;
+          
+          if (attempts >= MAX_LOGIN_ATTEMPTS) {
+            // limit aşıldı - kilitle
+            var lockoutUntil = Date.now() + LOCKOUT_DURATION;
+            localStorage.setItem(LOCKOUT_TIME_KEY, lockoutUntil.toString());
+            
+            document.getElementById('loginError').textContent = '⛔ Çok fazla yanlış deneme! Hesap 15 dakika süreyle kilitlendi.';
+            document.getElementById('loginError').style.display = 'block';
+            document.getElementById('adminPassword').disabled = true;
+            document.getElementById('loginBtn').disabled = true;
+            
+            setTimeout(function() {
+              localStorage.removeItem(LOCKOUT_TIME_KEY);
+              localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+              document.getElementById('loginError').style.display = 'none';
+              document.getElementById('adminPassword').disabled = false;
+              document.getElementById('loginBtn').disabled = false;
+              document.getElementById('adminPassword').value = '';
+              document.getElementById('adminPassword').focus();
+            }, LOCKOUT_DURATION);
+          } else {
+            var errorMsg = '❌ Yanlış şifre! Kalan deneme hakkı: ' + remainingAttempts;
+            document.getElementById('loginError').textContent = errorMsg;
+            document.getElementById('loginError').style.display = 'block';
+          }
+          
+          document.getElementById('adminPassword').value = '';
+          document.getElementById('adminPassword').focus();
+        }
+      });
+    }
+
+    document.getElementById('adminPassword').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        checkPassword();
+      }
+    });
+
+    // Sayfa yüklendiğinde kontrol et
+    checkLogin();
+    
+    // Her dakika timeout kontrolü yap (admin.html ile aynı)
+    setInterval(function() {
+      // kilitleme kontrolü
+      var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+      if (lockoutUntil) {
+        var now = Date.now();
+        var unlockTime = parseInt(lockoutUntil);
+        if (now >= unlockTime) {
+          localStorage.removeItem(LOCKOUT_TIME_KEY);
+          localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+          if (document.getElementById('adminPassword')) {
+            document.getElementById('adminPassword').disabled = false;
+            document.getElementById('loginBtn').disabled = false;
+          }
+        }
+      }
+      
+      // Backend session kontrolü checkLogin() içinde yapılıyor
+      // Eski sessionStorage kodları kaldırıldı
+    }, 60000); // her 1 dakikada bir kontrol et
+
+    // Page transition for navigation to admin panel
+    document.addEventListener('DOMContentLoaded', function() {
+      var backButton = document.getElementById('backToAdmin');
+      var driverLink = document.querySelector('.driver-link-btn');
+      var pageTransition = document.getElementById('pageTransition');
+      
+      if (backButton) {
+        backButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          pageTransition.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+          pageTransition.classList.add('show');
+          
+          setTimeout(function() {
+            window.location.href = '/admin.html';
+          }, 300);
+        });
+      }
+      
+      if (driverLink) {
+        driverLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          pageTransition.style.background = 'linear-gradient(135deg, #2c3e50 0%, #34495e 100%)';
+          pageTransition.classList.add('show');
+          
+          setTimeout(function() {
+            window.location.href = '/gps-driver.html';
+          }, 300);
+        });
+      }
+      
+      window.addEventListener('load', function() {
+        pageTransition.classList.remove('show');
+        pageTransition.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+      });
+    });
+  </script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "about": "About",
+    "services": "Services",
+    "partners": "Partners",
+    "contact": "Contact"
+  },
+  "index": {
+    "services": {
+      "creditCard": {
+        "title": "Credit Card",
+        "description": "Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove",
+        "button": "Learn More"
+      },
+      "saveMoney": {
+        "title": "Save Money",
+        "description": "Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove",
+        "button": "Learn More"
+      },
+      "freeDelivery": {
+        "title": "Free Delivery",
+        "description": "Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove",
+        "button": "Learn More"
+      }
+    },
+    "testimonial": {
+      "title": "Testimony",
+      "subtitle": "Happy Clients"
+    },
+    "counter": {
+      "creativityFuel": "Creativity Fuel",
+      "happyClients": "Happy Clients",
+      "allProducts": "All Products",
+      "hoursSpent": "Hours Spent"
+    }
+  },
+  "product": {
+    "title": "Products",
+    "subtitle": "Dignissimos asperiores vitae velit veniam totam fuga molestias accusamus alias autem provident. Odit ab aliquam dolor eius.",
+    "coolStuff": "Cool Stuff",
+    "modal": {
+      "description": "Description",
+      "specs": "Specifications",
+      "shipping": "Shipping"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "Some random shit by"
+  },
+  "services": {
+    "title": "Services",
+    "subtitle": "Some random shit by"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Some random shit by",
+    "phone": "+ 1235 2355 98"
+  },
+  "partners": {
+    "title": "Our Partners",
+    "subtitle": "by",
+    "heading": "Trusted Business Partners",
+    "description": "We are proud to work with our valuable business partners who provide quality services and products.",
+    "loading": "Loading partners...",
+    "noPartners": "No partners added yet.",
+    "noImage": "No Image"
+  },
+  "footer": {
+    "description": "Facilis ipsum reprehenderit nemo molestias. Aut cum mollitia reprehenderit. Eos cumque dicta adipisci architecto culpa amet.",
+    "links": {
+      "about": "About",
+      "help": "Help",
+      "contact": "Contact",
+      "terms": "Terms",
+      "meetups": "Meetups",
+      "shop": "Shop",
+      "privacy": "Privacy",
+      "testimonials": "Testimonials",
+      "handbook": "Handbook",
+      "heldDesk": "Held Desk",
+      "findDesigners": "Find Designers",
+      "findDevelopers": "Find Developers",
+      "teams": "Teams",
+      "advertise": "Advertise",
+      "api": "API"
+    },
+    "copyright": "All Rights Reserved.",
+    "designedBy": "Designed by"
+  }
+}
+

@@ -1,0 +1,3045 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Carousel Yönetimi</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<link rel="stylesheet" href="css/bootstrap.css">
+	<link rel="stylesheet" href="css/style.css">
+	
+	<style>
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: "Montserrat", Arial, sans-serif;
+			background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 25%, #6d28d9 50%, #5b21b6 75%, #4c1d95 100%);
+			background-size: 400% 400%;
+			animation: gradientShift 15s ease infinite, fadeIn 0.4s ease-in;
+			min-height: 100vh;
+		}
+		
+		@keyframes gradientShift {
+			0% { background-position: 0% 50%; }
+			50% { background-position: 100% 50%; }
+			100% { background-position: 0% 50%; }
+		}
+		
+		@keyframes fadeIn {
+			from {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		/* Geçiş Overlay */
+		.page-transition-overlay {
+			position: fixed !important;
+			top: 0 !important;
+			left: 0 !important;
+			right: 0 !important;
+			bottom: 0 !important;
+			width: 100vw !important;
+			height: 100vh !important;
+			background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+			z-index: 99999 !important;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.3s ease-out;
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			margin: 0 !important;
+			padding: 0 !important;
+		}
+		
+		.page-transition-overlay.hide {
+			opacity: 0;
+			pointer-events: none;
+		}
+		
+		.page-transition-overlay.show {
+			opacity: 1;
+			pointer-events: all;
+		}
+		
+		.page-transition-overlay .spinner {
+			width: 60px;
+			height: 60px;
+			border: 4px solid rgba(255, 255, 255, 0.3);
+			border-top-color: #fff;
+			border-radius: 50%;
+			animation: spin 0.8s linear infinite;
+			margin: 0 auto;
+			flex-shrink: 0;
+		}
+		
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
+		
+		.carousel-header {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			color: #fff;
+			padding: 24px 32px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+			position: sticky;
+			top: 0;
+			z-index: 100;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.carousel-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+			animation: shimmer 3s infinite;
+		}
+		
+		@keyframes shimmer {
+			0% { left: -100%; }
+			100% { left: 100%; }
+		}
+		
+		.carousel-header-content {
+			max-width: 1400px;
+			margin: 0 auto;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 20px;
+			position: relative;
+			z-index: 1;
+		}
+		
+		.carousel-header h1 {
+			margin: 0;
+			font-size: 32px;
+			font-weight: 700;
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			background-clip: text;
+			text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+			letter-spacing: -0.5px;
+		}
+		
+		.btn-back {
+			background: rgba(255, 255, 255, 0.2);
+			color: #fff;
+			padding: 12px 24px;
+			border: 1.5px solid rgba(255, 255, 255, 0.3);
+			border-radius: 12px;
+			text-decoration: none;
+			font-size: 14px;
+			font-weight: 600;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.btn-back::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.btn-back:hover::before {
+			left: 100%;
+		}
+		
+		.btn-back:hover {
+			background: rgba(255, 255, 255, 0.3);
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+			border-color: rgba(255, 255, 255, 0.5);
+		}
+		
+		.carousel-container {
+			max-width: 1400px;
+			margin: 0 auto;
+			padding: 30px 20px;
+		}
+		
+		.btn-admin {
+			background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+			color: #fff;
+			padding: 12px 30px;
+			border: none;
+			border-radius: 12px;
+			font-size: 16px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.btn-admin::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.btn-admin:hover::before {
+			left: 100%;
+		}
+		
+		.btn-admin:hover {
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 12px 32px rgba(139, 92, 246, 0.45),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		}
+		
+		.btn-admin:active {
+			transform: translateY(0) scale(0.98);
+		}
+		
+		.carousel-card {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			border-radius: 20px;
+			padding: 30px;
+			margin-bottom: 30px;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+		
+		.carousel-card:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15),
+			            0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+			border-color: rgba(255, 255, 255, 0.4);
+		}
+		
+		.carousel-list {
+			display: flex;
+			flex-direction: column;
+			gap: 15px;
+			margin-top: 20px;
+		}
+		
+		@media (max-width: 768px) {
+			.carousel-header {
+				padding: 16px 20px;
+			}
+			.carousel-header h1 { 
+				font-size: 22px; 
+			}
+			.carousel-container { 
+				padding: 20px 15px; 
+			}
+			.btn-back {
+				padding: 10px 16px;
+				font-size: 13px;
+			}
+		}
+		
+		/* Modern Popup Modal */
+		.popup-modal-overlay {
+			position: fixed !important;
+			top: 0 !important;
+			left: 0 !important;
+			right: 0 !important;
+			bottom: 0 !important;
+			background: rgba(0, 0, 0, 0.6);
+			backdrop-filter: blur(8px);
+			-webkit-backdrop-filter: blur(8px);
+			z-index: 99999 !important;
+			display: none;
+			align-items: center;
+			justify-content: center;
+			padding: 20px;
+			animation: fadeIn 0.2s ease-out;
+		}
+		
+		.popup-modal-overlay.show {
+			display: flex;
+		}
+		
+		@keyframes fadeIn {
+			from { opacity: 0; }
+			to { opacity: 1; }
+		}
+		
+		.popup-modal {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(24px);
+			-webkit-backdrop-filter: blur(24px);
+			border-radius: 24px;
+			width: 100%;
+			max-width: 450px;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			overflow: hidden;
+			animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			transform-origin: center;
+			position: relative;
+			margin: auto;
+		}
+		
+		@keyframes slideUp {
+			from {
+				transform: translateY(30px) scale(0.95);
+				opacity: 0;
+			}
+			to {
+				transform: translateY(0) scale(1);
+				opacity: 1;
+			}
+		}
+		
+		.popup-modal-header {
+			padding: 24px 30px 20px;
+			background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+			color: #fff;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 15px;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.popup-modal-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 2px;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+		}
+		
+		.popup-modal-header h3 {
+			margin: 0;
+			font-size: 20px;
+			font-weight: 700;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+		}
+		
+		.popup-modal-header .popup-icon {
+			font-size: 24px;
+			width: 36px;
+			height: 36px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: rgba(255, 255, 255, 0.2);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			border-radius: 10px;
+			border: 1px solid rgba(255, 255, 255, 0.3);
+		}
+		
+		.popup-modal-body {
+			padding: 30px;
+			color: #fff;
+			font-size: 15px;
+			line-height: 1.6;
+			background: rgba(255, 255, 255, 0.1);
+		}
+		
+		.popup-modal-body p {
+			margin: 0 0 15px 0;
+			color: #fff;
+		}
+		
+		.popup-modal-body strong {
+			color: rgba(255, 255, 255, 0.9);
+			font-weight: 600;
+		}
+		
+		.popup-modal-footer {
+			padding: 20px 30px;
+			background: rgba(255, 255, 255, 0.1);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			display: flex;
+			justify-content: flex-end;
+			gap: 12px;
+			border-top: 1px solid rgba(255, 255, 255, 0.2);
+		}
+		
+		.popup-btn {
+			padding: 12px 24px;
+			border: none;
+			border-radius: 12px;
+			font-size: 15px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			min-width: 100px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.popup-btn::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.popup-btn:hover::before {
+			left: 100%;
+		}
+		
+		.popup-btn-primary {
+			background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+			color: #fff;
+			box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		}
+		
+		.popup-btn-primary:hover {
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 12px 32px rgba(139, 92, 246, 0.45),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+		}
+		
+		.popup-btn-secondary {
+			background: rgba(255, 255, 255, 0.2);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			color: #1a1a1a;
+			border: 1.5px solid rgba(255, 255, 255, 0.3);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		}
+		
+		.popup-btn-secondary:hover {
+			background: rgba(255, 255, 255, 0.3);
+			border-color: rgba(255, 255, 255, 0.5);
+			transform: translateY(-2px) scale(1.02);
+		}
+		
+		.popup-btn-danger {
+			background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
+			color: #fff;
+			box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		}
+		
+		.popup-btn-danger:hover {
+			transform: translateY(-2px) scale(1.02);
+			box-shadow: 0 12px 32px rgba(239, 68, 68, 0.45),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+			box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+		}
+		
+		.popup-btn-success {
+			background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+			color: #fff;
+			box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+		}
+		
+		.popup-btn-success:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+		}
+		
+		/* Image Upload Container */
+		.image-upload-container {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+		
+		.upload-buttons-row {
+			display: flex;
+			gap: 10px;
+			align-items: center;
+		}
+		
+		.btn-upload, .btn-url-add {
+			white-space: nowrap;
+			padding: 12px 20px;
+		}
+		
+		.url-input {
+			width: 100%;
+			padding: 12px 16px;
+			border: 2px solid #e5e7eb;
+			border-radius: 8px;
+			font-size: 14px;
+		}
+		
+		@media (max-width: 768px) {
+			.popup-modal {
+				max-width: 90%;
+				margin: 20px;
+			}
+			
+			.popup-modal-header {
+				padding: 20px 24px 16px;
+			}
+			
+			.popup-modal-header h3 {
+				font-size: 18px;
+			}
+			
+			.popup-modal-body {
+				padding: 24px;
+				font-size: 14px;
+			}
+			
+			.popup-modal-footer {
+				padding: 16px 24px;
+				flex-direction: column-reverse;
+			}
+			
+			.popup-btn {
+				width: 100%;
+			}
+			
+			/* Mobil için URL input ve butonlar */
+			.image-upload-container {
+				gap: 12px;
+			}
+			
+			.upload-buttons-row {
+				flex-direction: column;
+				width: 100%;
+				gap: 10px;
+			}
+			
+			.btn-upload, .btn-url-add {
+				width: 100%;
+				padding: 14px 20px;
+				font-size: 14px;
+			}
+			
+			.url-input {
+				width: 100%;
+				padding: 14px 16px;
+				font-size: 16px; /* iOS zoom önleme için */
+			}
+		}
+		
+		/* Modal Stilleri */
+		.admin-modal-overlay {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.6);
+			backdrop-filter: blur(8px);
+			-webkit-backdrop-filter: blur(8px);
+			z-index: 10001;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 20px;
+			overflow-y: auto;
+			overflow-x: hidden;
+		}
+		
+		.admin-modal {
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(24px);
+			-webkit-backdrop-filter: blur(24px);
+			border-radius: 24px;
+			width: 100%;
+			max-width: 900px;
+			max-height: 90vh;
+			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			display: flex;
+			flex-direction: column;
+			overflow: hidden;
+			overflow-x: hidden;
+		}
+		
+		.admin-modal-header {
+			padding: 20px 30px;
+			border-bottom: 1.5px solid rgba(255, 255, 255, 0.2);
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+			color: #fff;
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.admin-modal-header::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+			animation: shimmer 3s infinite;
+		}
+		
+		.admin-modal-header h2 {
+			margin: 0;
+			font-size: 24px;
+			color: #fff;
+		}
+		
+		.admin-modal-close {
+			background: rgba(255, 255, 255, 0.2);
+			border: none;
+			color: #fff;
+			font-size: 32px;
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			line-height: 1;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+		}
+		
+		.admin-modal-close:hover {
+			background: rgba(255, 255, 255, 0.3);
+			transform: scale(1.1) rotate(90deg);
+			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+		}
+		
+		.admin-modal-body {
+			padding: 30px;
+			overflow-y: auto;
+			overflow-x: hidden;
+			flex: 1;
+			background: rgba(255, 255, 255, 0.1);
+			box-sizing: border-box;
+		}
+		
+		@media (max-width: 768px) {
+			.admin-modal-body {
+				padding: 20px;
+			}
+		}
+		
+		@media (max-width: 480px) {
+			.admin-modal-body {
+				padding: 16px;
+			}
+		}
+		
+		.admin-form-group {
+			margin-bottom: 20px;
+		}
+		
+		.admin-form-group label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 600;
+			color: #fff;
+			font-size: 14px;
+			text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+		}
+		
+		.admin-form-group input,
+		.admin-form-group textarea {
+			width: 100%;
+			padding: 12px 16px;
+			border: 2px solid rgba(255, 255, 255, 0.3);
+			border-radius: 12px;
+			background: rgba(255, 255, 255, 0.95);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			color: #1a1a1a;
+			font-size: 14px;
+			font-family: "Montserrat", Arial, sans-serif;
+			transition: all 0.3s;
+		}
+		
+		.admin-form-group input:focus,
+		.admin-form-group textarea:focus {
+			outline: none;
+			border-color: #8b5cf6;
+			box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+		}
+		
+		.admin-form-group textarea {
+			min-height: 100px;
+			resize: vertical;
+		}
+		
+		.btn-admin-secondary {
+			background: #6b7280;
+		}
+		
+		.lang-tabs {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-bottom: 20px;
+		}
+		
+		.lang-tab {
+			padding: 8px 20px;
+			background: rgba(255, 255, 255, 0.2);
+			backdrop-filter: blur(10px);
+			-webkit-backdrop-filter: blur(10px);
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			border-radius: 10px;
+			cursor: pointer;
+			font-weight: 600;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			color: #fff;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+			white-space: nowrap;
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+		
+		.lang-tab:hover {
+			background: rgba(255, 255, 255, 0.3);
+			border-color: rgba(255, 255, 255, 0.4);
+			transform: translateY(-2px);
+		}
+		
+		.lang-tab.active {
+			background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+			color: #fff;
+			border-color: rgba(255, 255, 255, 0.3);
+			box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+		}
+		
+		@media (max-width: 768px) {
+			.lang-tabs {
+				gap: 6px;
+				margin-bottom: 16px;
+			}
+			
+			.lang-tab {
+				padding: 8px 16px;
+				font-size: 13px;
+				flex: 1 1 calc(50% - 3px);
+				min-width: calc(50% - 3px);
+			}
+		}
+		
+		@media (max-width: 480px) {
+			.lang-tabs {
+				gap: 6px;
+				margin-bottom: 14px;
+			}
+			
+			.lang-tab {
+				padding: 8px 12px;
+				font-size: 12px;
+				flex: 1 1 calc(50% - 3px);
+				min-width: calc(50% - 3px);
+			}
+		}
+		
+		.lang-content {
+			display: none;
+		}
+		
+		.lang-content.active {
+			display: block;
+		}
+		
+		.carousel-item {
+			display: flex;
+			gap: 15px;
+			background: rgba(255, 255, 255, 0.15);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			border: 1.5px solid rgba(255, 255, 255, 0.2);
+			border-radius: 16px;
+			padding: 20px;
+			margin-bottom: 0;
+			align-items: flex-start;
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1),
+			            0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+		}
+		
+		.carousel-item:hover {
+			border-color: rgba(255, 255, 255, 0.4);
+			box-shadow: 0 8px 24px rgba(139, 92, 246, 0.25),
+			            0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+			transform: translateY(-2px);
+			background: rgba(255, 255, 255, 0.2);
+		}
+		
+		.carousel-item-image {
+			width: 180px;
+			height: 120px;
+			object-fit: cover;
+			border-radius: 12px;
+			flex-shrink: 0;
+			border: 2px solid rgba(255, 255, 255, 0.2);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		}
+		
+		.carousel-item-content {
+			flex: 1;
+			min-width: 0;
+			overflow: visible;
+			padding-right: 15px;
+		}
+		
+		.carousel-item-content h3 {
+			word-wrap: break-word;
+			overflow-wrap: break-word;
+			line-height: 1.4;
+			margin: 0 0 8px 0;
+			font-size: 18px;
+			color: #fff;
+			font-weight: 600;
+			text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+		}
+		
+		.carousel-item-content p {
+			word-wrap: break-word;
+			overflow-wrap: break-word;
+			line-height: 1.6;
+			margin: 6px 0;
+			font-size: 14px;
+			color: rgba(255, 255, 255, 0.9);
+			max-height: none;
+			overflow: visible;
+			text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+		}
+		
+		.carousel-item-content p.description {
+			max-height: 4.8em;
+			overflow: hidden;
+			display: -webkit-box;
+			-webkit-line-clamp: 3;
+			-webkit-box-orient: vertical;
+			line-clamp: 3;
+		}
+		
+		.carousel-item-actions {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			align-items: flex-end;
+			flex-shrink: 0;
+		}
+		
+		.carousel-item-actions button {
+			white-space: nowrap;
+			min-width: 130px;
+			padding: 10px 16px;
+		}
+		
+		@media (max-width: 768px) {
+			.carousel-item {
+				flex-direction: column;
+				padding: 15px;
+			}
+			
+			.carousel-item-image {
+				width: 100%;
+				height: 180px;
+			}
+			
+			.carousel-item-content {
+				padding-right: 0;
+				margin-bottom: 15px;
+			}
+			
+			.carousel-item-actions {
+				flex-direction: row;
+				width: 100%;
+				justify-content: flex-start;
+			}
+			
+			.carousel-item-actions button {
+				flex: 1;
+				min-width: auto;
+				padding: 10px;
+				font-size: 13px;
+			}
+		}
+		
+		.btn-edit {
+			background: #10b981;
+			color: #fff;
+			padding: 8px 16px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 14px;
+			font-weight: 600;
+		}
+		
+		.btn-delete {
+			background: #ef4444;
+			color: #fff;
+			padding: 8px 16px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 14px;
+			font-weight: 600;
+		}
+		
+		.btn-activate {
+			background: #10b981;
+			color: #fff;
+			padding: 8px 16px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 14px;
+			font-weight: 600;
+		}
+		
+		.btn-deactivate {
+			background: #f59e0b;
+			color: #fff;
+			padding: 8px 16px;
+			border: none;
+			border-radius: 6px;
+			cursor: pointer;
+			font-size: 14px;
+			font-weight: 600;
+		}
+		
+		/* Category Dropdown Styles - Language dropdown gibi */
+		.category-dropdown {
+			position: relative;
+			width: 100%;
+			margin-bottom: 10px;
+		}
+		
+		.category-dropdown-trigger {
+			display: inline-flex;
+			align-items: center;
+			justify-content: space-between;
+			width: 100%;
+			gap: 7px;
+			border: none;
+			border-radius: 999px;
+			padding: 8px 12px 8px 14px;
+			background: rgba(248, 250, 255, 0.8);
+			color: #1f2937;
+			font-size: 13px;
+			font-weight: 600;
+			cursor: pointer;
+			box-shadow: 0 2px 12px rgba(124, 93, 255, 0.08),
+			            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+			border: 1.5px solid rgba(124, 93, 255, 0.15);
+			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			position: relative;
+			overflow: hidden;
+		}
+		
+		.category-dropdown-trigger::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+			transition: left 0.5s ease;
+		}
+		
+		.category-dropdown-trigger:hover {
+			background: rgba(255, 255, 255, 0.95);
+			box-shadow: 0 4px 16px rgba(124, 93, 255, 0.12),
+			            inset 0 1px 0 rgba(255, 255, 255, 1);
+			border-color: rgba(124, 93, 255, 0.25);
+			transform: translateY(-1px);
+		}
+		
+		.category-dropdown-trigger:hover::before {
+			left: 100%;
+		}
+		
+		.category-dropdown-label {
+			flex: 1;
+			text-align: left;
+		}
+		
+		.category-dropdown-arrow {
+			font-size: 10px;
+			opacity: 0.6;
+			transition: transform 0.3s ease, opacity 0.3s ease;
+			margin-left: 2px;
+		}
+		
+		.category-dropdown-trigger:hover .category-dropdown-arrow {
+			opacity: 1;
+		}
+		
+		.category-dropdown-menu {
+			position: absolute;
+			top: calc(100% + 8px);
+			bottom: auto;
+			left: 0;
+			right: 0;
+			background: rgba(255, 255, 255, 0.98);
+			backdrop-filter: blur(24px);
+			-webkit-backdrop-filter: blur(24px);
+			border-radius: 16px;
+			border: 1.5px solid rgba(124, 93, 255, 0.15);
+			box-shadow: 0 20px 40px rgba(124, 93, 255, 0.15),
+			           0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+			display: none;
+			flex-direction: column;
+			min-width: 100%;
+			max-height: 400px;
+			overflow-y: auto;
+			overflow-x: hidden;
+			padding: 8px;
+			z-index: 100002 !important;
+		}
+		
+		.category-dropdown-menu.open-up {
+			top: auto;
+			bottom: calc(100% + 8px);
+		}
+		
+		.category-dropdown-menu.open {
+			display: flex;
+			animation: dropdownFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		}
+		
+		@keyframes dropdownFadeIn {
+			from {
+				opacity: 0;
+				transform: translateY(-8px);
+			}
+			to {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+		
+		.category-dropdown-menu .category-item {
+			padding: 10px 14px;
+			text-align: left;
+			display: inline-flex !important;
+			align-items: center !important;
+			gap: 8px;
+			background: transparent !important;
+			border: none !important;
+			border-radius: 10px;
+			color: #1f2937 !important;
+			font-weight: 600 !important;
+			font-size: 13px !important;
+			letter-spacing: 0.2px;
+			transition: all 0.2s ease;
+			position: relative;
+			cursor: pointer;
+			width: 100%;
+			justify-content: flex-start;
+		}
+		
+		.category-dropdown-menu .category-item:hover {
+			background: rgba(124, 93, 255, 0.08) !important;
+			color: #7c5dff !important;
+			transform: translateX(4px);
+		}
+		
+		.category-dropdown-menu .category-item.active {
+			background: linear-gradient(135deg, rgba(124, 93, 255, 0.15), rgba(100, 71, 255, 0.12)) !important;
+			color: #7c5dff !important;
+			font-weight: 700 !important;
+		}
+		
+		.category-dropdown-menu .category-item.active::after {
+			content: '✓';
+			position: absolute;
+			right: 12px;
+			font-size: 12px;
+			color: #7c5dff;
+			font-weight: bold;
+		}
+	</style>
+</head>
+<body>
+	<!-- Şifre Giriş Ekranı -->
+	<div id="loginScreen" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 25%, #6d28d9 50%, #5b21b6 75%, #4c1d95 100%); background-size: 400% 400%; animation: gradientShift 15s ease infinite; z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;">
+		<div style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); padding: 50px 40px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.2) inset; max-width: 450px; width: 100%; border: 1.5px solid rgba(255, 255, 255, 0.2); position: relative; overflow: hidden;">
+			<div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #8b5cf6, #7c3aed, #6d28d9);"></div>
+			<h2 style="margin: 0 0 30px 0; text-align: center; color: #fff; font-size: 28px; font-weight: 700; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);">🔒 Carousel Yönetimi</h2>
+			<div class="alert alert-error" id="loginError" style="display: none; margin-bottom: 20px; padding: 15px 20px; border-radius: 12px; background: rgba(254, 226, 226, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: #991b1b; border: 1.5px solid rgba(239, 68, 68, 0.3); box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);"></div>
+			<div style="margin-bottom:20px;">
+				<label style="display: block; margin-bottom: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.95); font-size: 14px;">Şifre</label>
+				<input type="password" id="adminPassword" placeholder="Admin şifresini gir..." style="width: 100%; padding: 14px 18px; border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 12px; font-size: 16px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); outline: none; transition: all 0.3s;">
+			</div>
+			<style>
+				#adminPassword:focus {
+					border-color: #8b5cf6 !important;
+					box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1), 0 4px 16px rgba(139, 92, 246, 0.15) !important;
+					background: rgba(255, 255, 255, 1) !important;
+				}
+			</style>
+			<button onclick="checkPassword()" class="btn-admin" style="width: 100%; margin-top: 20px; padding: 16px 30px; font-size: 16px;">Giriş Yap</button>
+		</div>
+	</div>
+
+	<div id="pageContent" style="display: none;">
+	<!-- Modern Popup Modal -->
+	<div id="popupModal" class="popup-modal-overlay">
+		<div class="popup-modal">
+			<div class="popup-modal-header">
+				<h3>
+					<span class="popup-icon" id="popupIcon">ℹ</span>
+					<span id="popupTitle">Bilgi</span>
+				</h3>
+			</div>
+			<div class="popup-modal-body">
+				<p id="popupMessage"></p>
+			</div>
+			<div class="popup-modal-footer" id="popupFooter">
+				<!-- Butonlar JavaScript ile eklenecek -->
+			</div>
+		</div>
+	</div>
+	
+	<header class="carousel-header">
+		<div class="carousel-header-content">
+			<h1>🎠 Carousel Yönetimi</h1>
+			<div style="display: flex; gap: 10px;">
+				<a href="admin.html" class="btn-back">← Admin Paneli</a>
+			</div>
+		</div>
+	</header>
+	
+	<div class="carousel-container">
+		<div class="carousel-card">
+			<div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+				<button class="btn-admin" onclick="openAddSlideModal()">➕ Yeni Slide Ekle</button>
+				<button class="btn-admin" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" onclick="saveCarouselToServer()">💾 Sunucuya Kaydet</button>
+			</div>
+			
+			<h2 style="margin: 20px 0 15px 0; font-size: 20px; color: #1a1a1a;">Manuel Slide'lar</h2>
+			
+			<!-- İstatistikler -->
+			<div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+				<div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 15px 20px; border-radius: 8px; flex: 1; min-width: 150px;">
+					<div style="font-size: 24px; font-weight: 700;" id="activeSlidesCount">0</div>
+					<div style="font-size: 14px; opacity: 0.9;">Aktif Slide</div>
+				</div>
+				<div style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); color: #fff; padding: 15px 20px; border-radius: 8px; flex: 1; min-width: 150px;">
+					<div style="font-size: 24px; font-weight: 700;" id="inactiveSlidesCount">0</div>
+					<div style="font-size: 14px; opacity: 0.9;">Pasif Slide</div>
+				</div>
+				<div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: #fff; padding: 15px 20px; border-radius: 8px; flex: 1; min-width: 150px;">
+					<div style="font-size: 24px; font-weight: 700;" id="totalSlidesCount">0</div>
+					<div style="font-size: 14px; opacity: 0.9;">Toplam Slide</div>
+				</div>
+			</div>
+			
+			<div id="carouselList" class="carousel-list">
+				<p style="color: #6b7280; text-align: center; padding: 40px;">Carousel slide'ları yükleniyor...</p>
+			</div>
+			
+		</div>
+	</div>
+	
+	<!-- Slide Ekleme/Düzenleme Modal -->
+	<div id="slideModal" class="admin-modal-overlay" style="display: none;">
+		<div class="admin-modal" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+			<div class="admin-modal-header">
+				<h2 id="slideModalTitle">Yeni Slide Ekle</h2>
+				<button type="button" class="admin-modal-close" onclick="closeSlideModal()">&times;</button>
+			</div>
+			<div class="admin-modal-body">
+				<form id="slideForm">
+					<input type="hidden" id="slideIndex" value="-1">
+					
+					<div class="lang-tabs">
+						<button type="button" class="lang-tab active" onclick="switchLang('tr')">Türkçe</button>
+						<button type="button" class="lang-tab" onclick="switchLang('en')">English</button>
+						<button type="button" class="lang-tab" onclick="switchLang('ka')">ქართული</button>
+						<button type="button" class="lang-tab" onclick="switchLang('ru')">Русский</button>
+					</div>
+					
+					<div id="lang-tr" class="lang-content active">
+						<div class="admin-form-group">
+							<label>Başlık (TR)</label>
+							<input type="text" id="titleTr">
+						</div>
+						<div class="admin-form-group">
+							<label>Açıklama (TR)</label>
+							<textarea id="descriptionTr" rows="3"></textarea>
+						</div>
+					</div>
+					
+					<div id="lang-en" class="lang-content">
+						<div class="admin-form-group">
+							<label>Başlık (EN)</label>
+							<input type="text" id="titleEn">
+						</div>
+						<div class="admin-form-group">
+							<label>Açıklama (EN)</label>
+							<textarea id="descriptionEn" rows="3"></textarea>
+						</div>
+					</div>
+					
+					<div id="lang-ka" class="lang-content">
+						<div class="admin-form-group">
+							<label>Başlık (KA)</label>
+							<input type="text" id="titleKa">
+						</div>
+						<div class="admin-form-group">
+							<label>Açıklama (KA)</label>
+							<textarea id="descriptionKa" rows="3"></textarea>
+						</div>
+					</div>
+					
+					<div id="lang-ru" class="lang-content">
+						<div class="admin-form-group">
+							<label>Başlık (RU)</label>
+							<input type="text" id="titleRu">
+						</div>
+						<div class="admin-form-group">
+							<label>Açıklama (RU)</label>
+							<textarea id="descriptionRu" rows="3"></textarea>
+						</div>
+					</div>
+					
+					<div class="admin-form-group">
+						<label>Görsel</label>
+						<div id="slideImagePreview" style="margin-bottom: 10px; display: none;">
+							<img id="slideImagePreviewImg" src="" alt="Preview" style="max-width: 200px; max-height: 150px; border-radius: 8px; border: 2px solid #e5e7eb; object-fit: cover; display: block;">
+						</div>
+						<div class="image-upload-container">
+							<input type="file" id="imageFile" accept="image/*" style="display: none;" onchange="uploadSlideImage()">
+							<div class="upload-buttons-row">
+								<button type="button" id="uploadSlideBtn" class="btn-admin btn-upload" onclick="document.getElementById('imageFile').click()">📁 Bilgisayardan Yükle</button>
+								<button type="button" class="btn-admin btn-url-add" onclick="addSlideImageUrl()">+ URL Ekle</button>
+							</div>
+							<input type="text" id="image" placeholder="Veya URL ekle" class="url-input">
+						</div>
+					</div>
+					
+					<div class="admin-form-group">
+						<label>Link (Opsiyonel)</label>
+						<div class="category-dropdown">
+							<button type="button" class="category-dropdown-trigger" id="linkCategoryTrigger" aria-haspopup="true" aria-expanded="false">
+								<span class="category-dropdown-label">Kategori seçin (otomatik link oluşturur)...</span>
+								<span class="category-dropdown-arrow">▾</span>
+							</button>
+							<div class="category-dropdown-menu" id="linkCategoryMenu" role="menu"></div>
+							<input type="hidden" id="linkCategory">
+						</div>
+						<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+							<span style="color: #6b7280; font-size: 13px;">veya</span>
+						</div>
+						<input type="text" id="link" placeholder="Manuel URL girin (örn: /category/slug veya https://...)" style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px;" onchange="onManualLinkChange()">
+					</div>
+					
+					<div class="admin-form-group">
+						<label>
+							<input type="checkbox" id="isCategory" style="width: auto; margin-right: 8px;" disabled>
+							Kategori Slide'ı mı? (Otomatik - Kategori seçildiğinde aktif olur)
+						</label>
+					</div>
+					
+					<div class="admin-form-group">
+						<label>
+							<input type="checkbox" id="isActive" checked style="width: auto; margin-right: 8px;">
+							Aktif (Carousel'da gösterilsin mi?)
+						</label>
+					</div>
+					
+					<div style="display: flex; gap: 10px; margin-top: 20px;">
+						<button type="button" class="btn-admin" onclick="saveSlide()">Kaydet</button>
+						<button type="button" class="btn-admin btn-admin-secondary" onclick="closeSlideModal()">İptal</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script src="js/jquery.min.js"></script>
+	<script src="js/data-slider.js"></script>
+	<script src="js/data-products.js"></script>
+	<script>
+		var carouselData = [];
+		var autoCategoryExcluded = []; // Gizlenmiş otomatik kategoriler
+		
+		// Modern Popup Modal Fonksiyonları
+		var popupResolve = null;
+		
+		function showAlert(type, message) {
+			return new Promise(function(resolve) {
+				var $modal = $('#popupModal');
+				var $icon = $('#popupIcon');
+				var $title = $('#popupTitle');
+				var $message = $('#popupMessage');
+				var $footer = $('#popupFooter');
+				
+				var icon = 'ℹ', title = 'Bilgi';
+				switch(type) {
+					case 'success': icon = '✓'; title = 'Başarılı'; break;
+					case 'error': icon = '✕'; title = 'Hata'; break;
+					case 'warning': icon = '⚠'; title = 'Uyarı'; break;
+				}
+				
+				$icon.text(icon);
+				$title.text(title);
+				$message.html((message || '').replace(/\n/g, '<br>'));
+				$footer.html('<button class="popup-btn popup-btn-primary" onclick="closePopup()">Tamam</button>');
+				
+				popupResolve = resolve;
+				$modal.addClass('show');
+				$(document).off('keydown.popup').on('keydown.popup', function(e) {
+					if (e.key === 'Enter' || e.key === 'Escape') closePopup();
+				});
+			});
+		}
+		
+		function showConfirm(message, title) {
+			if (!title) title = 'Onay';
+			return new Promise(function(resolve) {
+				var $modal = $('#popupModal');
+				$('#popupIcon').text('❓');
+				$('#popupTitle').text(title);
+				$('#popupMessage').html((message || '').replace(/\n/g, '<br>'));
+				$('#popupFooter').html(
+					'<button class="popup-btn popup-btn-secondary" onclick="closePopup(false)">İptal</button>' +
+					'<button class="popup-btn popup-btn-primary" onclick="closePopup(true)">Tamam</button>'
+				);
+				popupResolve = resolve;
+				$modal.addClass('show');
+				$(document).off('keydown.popup').on('keydown.popup', function(e) {
+					if (e.key === 'Enter') closePopup(true);
+					else if (e.key === 'Escape') closePopup(false);
+				});
+			});
+		}
+		
+		function closePopup(result) {
+			$('#popupModal').removeClass('show');
+			$(document).off('keydown.popup');
+			if (popupResolve) {
+				popupResolve(result !== false);
+				popupResolve = null;
+			}
+		}
+		
+		$(document).on('click', '.popup-modal-overlay', function(e) {
+			if (e.target === this) closePopup(false);
+		});
+		var combinedSlideOrder = []; // Birleşik slide sıralaması: [{type: 'manual', index: 0}, {type: 'auto', slug: 'category-slug'}]
+		
+		// Carousel'ı yükle - backend'den
+		function loadCarousel() {
+			// Backend'den carousel verilerini yükle
+			$.ajax({
+				url: '/api/products',
+				method: 'GET',
+				success: function(response) {
+					if (response && response.carousel) {
+						var carousel = response.carousel;
+						
+						// Carousel slides'ı yükle
+						if (carousel.slides && Array.isArray(carousel.slides)) {
+							carouselData = carousel.slides.map(function(slide) {
+								// active özelliği varsa koru, yoksa varsayılan olarak true
+								if (slide.active === false) {
+									return slide;
+								} else if (slide.active === undefined) {
+									return Object.assign({}, slide, { active: true });
+								}
+								return slide;
+							});
+						} else {
+							carouselData = [];
+						}
+						
+						// slideOrder'ı yükle
+						if (carousel.slideOrder && Array.isArray(carousel.slideOrder) && carousel.slideOrder.length > 0) {
+							combinedSlideOrder = carousel.slideOrder;
+							console.log('✅ Backend\'den slideOrder yüklendi:', combinedSlideOrder);
+						}
+						
+						// excludedAutoCategories'ı yükle
+						if (carousel.excludedAutoCategories && Array.isArray(carousel.excludedAutoCategories)) {
+							autoCategoryExcluded = carousel.excludedAutoCategories;
+						}
+						
+						// mainCategories'ı da yükle (eğer varsa)
+						if (response.mainCategories && Array.isArray(response.mainCategories)) {
+							window.mainCategories = response.mainCategories;
+						}
+					} else {
+						carouselData = [];
+						combinedSlideOrder = [];
+						autoCategoryExcluded = [];
+					}
+					
+					// Önce kategorileri yükle, sonra sıralamayı oluştur
+					// loadAutoCategorySlides() içinde kategoriler yüklendikten sonra loadOrInitSlideOrder() çağrılacak
+					loadAutoCategorySlides();
+				},
+				error: function(xhr, status, error) {
+					console.error('❌ Carousel yüklenemedi:', error);
+					carouselData = [];
+					combinedSlideOrder = [];
+					autoCategoryExcluded = [];
+					loadAutoCategorySlides();
+				}
+			});
+		}
+		
+		// İstatistikleri güncelle
+		function updateStatistics() {
+			// Birleşik slide listesini al (manuel + otomatik)
+			var combinedSlides = getCombinedSlides();
+			
+			// Aktif ve pasif slide'ları say
+			var activeCount = 0;
+			var inactiveCount = 0;
+			
+			combinedSlides.forEach(function(item) {
+				var slide = item.data;
+				var isActive = slide.active !== false; // Varsayılan olarak aktif
+				
+				if (isActive) {
+					activeCount++;
+				} else {
+					inactiveCount++;
+				}
+			});
+			
+			var totalSlides = combinedSlides.length;
+			
+			$('#activeSlidesCount').text(activeCount);
+			$('#inactiveSlidesCount').text(inactiveCount);
+			$('#totalSlidesCount').text(totalSlides);
+		}
+		
+		// Otomatik kategori slide'larını yükle
+		function loadAutoCategorySlides() {
+			// adminCarouselExcluded'ı yükle
+			if (typeof adminCarouselExcluded !== 'undefined') {
+				autoCategoryExcluded = adminCarouselExcluded;
+			} else {
+				// localStorage kullanımı kaldırıldı - backend'den yükleniyor
+				// autoCategoryExcluded zaten loadCarousel() içinde backend'den yüklendi
+			}
+			
+			renderAutoCategorySlides();
+		}
+		
+		// Otomatik kategori slide'larını listele
+		function renderAutoCategorySlides() {
+			var $list = $('#autoCategorySlidesList');
+			
+			// mainCategories'ı yükle - önce window'dan, sonra backend'den
+			var mainCategories = [];
+			if (typeof window.mainCategories !== 'undefined' && Array.isArray(window.mainCategories) && window.mainCategories.length > 0) {
+				mainCategories = window.mainCategories;
+				renderAutoCategorySlidesList(mainCategories);
+				// Kategoriler yüklendi, sıralamayı güncelle
+				loadOrInitSlideOrder();
+				renderCarousel();
+				updateStatistics();
+			} else {
+				// Backend'den yükle
+				$.ajax({
+					url: '/api/products',
+					method: 'GET',
+					success: function(response) {
+						if (response && response.mainCategories && Array.isArray(response.mainCategories) && response.mainCategories.length > 0) {
+							mainCategories = response.mainCategories;
+							window.mainCategories = mainCategories; // Cache'e al
+							// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+							renderAutoCategorySlidesList(mainCategories); // Listeyi render et
+							// Kategoriler yüklendi, sıralamayı güncelle
+							loadOrInitSlideOrder();
+							renderCarousel();
+							updateStatistics();
+						} else {
+							$list.html('<p style="color: #6b7280; text-align: center; padding: 40px;">Henüz kategori bulunamadı. Önce kategoriler ekleyin.</p>');
+						}
+					},
+					error: function() {
+						$list.html('<p style="color: #ef4444; text-align: center; padding: 40px;">Kategoriler yüklenirken hata oluştu.</p>');
+					}
+				});
+				return; // AJAX çağrısı yapıldı, renderAutoCategorySlidesList callback'te çağrılacak
+			}
+		}
+		
+		// Otomatik kategori slide'larını listele (helper fonksiyon)
+		function renderAutoCategorySlidesList(mainCategories) {
+			var $list = $('#autoCategorySlidesList');
+			
+			if (!mainCategories || mainCategories.length === 0) {
+				$list.html('<p style="color: #6b7280; text-align: center; padding: 40px;">Henüz kategori bulunamadı.</p>');
+				return;
+			}
+			
+			var html = '';
+			mainCategories.forEach(function(cat, index) {
+				var slug = cat.slug || '';
+				var titleTr = cat.title ? (cat.title.tr || '') : '';
+				var titleEn = cat.title ? (cat.title.en || '') : '';
+				var titleKa = cat.title ? (cat.title.ka || '') : '';
+				var descriptionTr = cat.description ? (cat.description.tr || '') : '';
+				var image = cat.headerImage || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80';
+				var isExcluded = autoCategoryExcluded.indexOf(slug) !== -1;
+				var isExcludedFromManual = false;
+				
+				var titleDisplay = titleTr;
+				if (titleEn) titleDisplay += ' / ' + escapeHtml(titleEn);
+				if (titleKa) titleDisplay += ' / ' + escapeHtml(titleKa);
+				
+				// Manuel slide'larda zaten var mı kontrol et
+				if (carouselData && carouselData.length > 0) {
+					isExcludedFromManual = carouselData.some(function(slide) {
+						return slide.categorySlug === slug || (slide.link && slide.link.includes(slug));
+					});
+				}
+				
+				html += '<div class="carousel-item" style="border-left: 4px solid ' + (isExcluded ? '#ef4444' : '#10b981') + ';">';
+				if (image) {
+					html += '<img src="' + escapeHtml(image) + '" class="carousel-item-image" alt="Kategori">';
+				} else {
+					html += '<div class="carousel-item-image" style="display: flex; align-items: center; justify-content: center; background: #ddd; width: 150px; height: 100px;">Görsel Yok</div>';
+				}
+				html += '<div class="carousel-item-content">';
+				html += '<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px;">';
+				html += '<span style="background: #f59e0b; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; min-width: 35px; text-align: center;">#' + (index + 1) + '</span>';
+				html += '<h3 style="margin: 0; font-size: 18px; color: #1a1a1a; flex: 1; min-width: 200px;">' + escapeHtml(titleDisplay) + '</h3>';
+				if (isExcluded) {
+					html += '<span style="background: #ef4444; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap;">✗ GİZLENMİŞ</span>';
+				} else {
+					html += '<span style="background: #10b981; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap;">✓ AKTİF</span>';
+				}
+				if (isExcludedFromManual) {
+					html += '<span style="background: #8b5cf6; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap;">📝 MANUEL</span>';
+				}
+				html += '</div>';
+				if (descriptionTr) {
+					html += '<p class="description" style="margin: 4px 0; font-size: 14px; color: #6b7280; line-height: 1.6;">' + escapeHtml(descriptionTr) + '</p>';
+				}
+				html += '<p style="margin: 4px 0; font-size: 12px; color: #8b5cf6; word-break: break-all;">🔗 /' + escapeHtml(slug) + '.html</p>';
+				html += '</div>';
+				html += '<div class="carousel-item-actions">';
+				html += '<div style="display: flex; flex-direction: column; gap: 5px;">';
+				if (index > 0) {
+					html += '<button class="btn-admin" onclick="moveAutoCategorySlide(\'' + slug + '\', -1)" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">⬆️ Yukarı</button>';
+				}
+				if (index < mainCategories.length - 1) {
+					html += '<button class="btn-admin" onclick="moveAutoCategorySlide(\'' + slug + '\', 1)" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">⬇️ Aşağı</button>';
+				}
+				html += '</div>';
+				html += '<div style="display: flex; flex-direction: column; gap: 5px;">';
+				if (isExcluded) {
+					html += '<button class="btn-activate" onclick="toggleAutoCategorySlide(\'' + slug + '\')">▶️ Göster</button>';
+				} else {
+					html += '<button class="btn-deactivate" onclick="toggleAutoCategorySlide(\'' + slug + '\')">⏸️ Gizle</button>';
+				}
+				html += '</div>';
+				html += '</div>';
+				html += '</div>';
+			});
+			
+			$list.html(html);
+			
+			// İstatistikleri güncelle
+			updateStatistics();
+		}
+		
+			// Otomatik kategori slide'ını göster/gizle
+		function toggleAutoCategorySlide(slug) {
+			var index = autoCategoryExcluded.indexOf(slug);
+			
+			if (index === -1) {
+				// Gizle
+				autoCategoryExcluded.push(slug);
+			} else {
+				// Göster
+				autoCategoryExcluded.splice(index, 1);
+			}
+			
+			// LocalStorage'a kaydet
+			// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+			
+			// Güncelle
+			renderCarousel(); // İstatistikleri güncellemek için
+			
+		}
+		
+		// Otomatik kategori slide'ını sırala
+		function moveAutoCategorySlide(slug, direction) {
+			if (typeof window.mainCategories === 'undefined' || !window.mainCategories.length) return;
+			
+			var currentIndex = window.mainCategories.findIndex(function(cat) {
+				return cat.slug === slug;
+			});
+			
+			if (currentIndex === -1) return;
+			
+			var newIndex = currentIndex + direction;
+			if (newIndex < 0 || newIndex >= window.mainCategories.length) return;
+			
+			// Sıralamayı değiştir
+			var temp = window.mainCategories[currentIndex];
+			window.mainCategories[currentIndex] = window.mainCategories[newIndex];
+			window.mainCategories[newIndex] = temp;
+			
+			// LocalStorage'a kaydet
+			localStorage.setItem('adminMainCategories', JSON.stringify(window.mainCategories));
+			
+			// Render et
+			renderCarousel();
+		}
+		
+		// Otomatik kategori slide'ını düzenle
+		function editAutoCategorySlide(slug) {
+			// mainCategories'dan kategoriyi bul
+			var category = null;
+			if (typeof window.mainCategories !== 'undefined' && window.mainCategories.length > 0) {
+				category = window.mainCategories.find(function(cat) {
+					return cat.slug === slug;
+				});
+			}
+			
+			if (!category) {
+				return;
+			}
+			
+			// Modal'ı aç ve kategori bilgilerini doldur
+			$('#slideIndex').val('auto_' + slug); // Özel index
+			$('#slideModalTitle').text('Otomatik Kategori Slide Düzenle');
+			
+			$('#titleTr').val(category.title ? category.title.tr || '' : '');
+			$('#titleEn').val(category.title ? category.title.en || '' : '');
+			$('#descriptionTr').val(category.description ? category.description.tr || '' : '');
+			$('#descriptionEn').val(category.description ? category.description.en || '' : '');
+			var categoryImage = category.headerImage || '';
+			$('#image').val(categoryImage);
+			$('#link').val('/' + slug + '.html');
+			$('#isCategory').prop('checked', true);
+			$('#isActive').prop('checked', autoCategoryExcluded.indexOf(slug) === -1);
+			
+			// Preview göster - var olan resmi göster
+			var $previewImg = $('#slideImagePreviewImg');
+			var $preview = $('#slideImagePreview');
+			
+			// image değişkenini string'e çevir
+			var imageUrl = (categoryImage && typeof categoryImage === 'string') ? categoryImage.trim() : (categoryImage || '');
+			
+			if (imageUrl && imageUrl.length > 0) {
+				$previewImg.attr('src', imageUrl).off('error load').on('error', function() {
+					$preview.hide();
+				}).on('load', function() {
+					$preview.show();
+				});
+				
+				// Eğer resim zaten yüklenmişse (cache'den) direkt göster
+				setTimeout(function() {
+					if ($previewImg[0].complete && $previewImg[0].naturalWidth > 0) {
+						$preview.show();
+					} else if ($previewImg[0].complete) {
+						$preview.hide();
+					}
+				}, 100);
+			} else {
+				$preview.hide();
+			}
+			$('#imageFile').val('');
+			
+			$('#slideModal').css('display', 'flex');
+			switchLang('tr');
+		}
+		
+		// Sıralama bilgisini yükle veya oluştur
+		function loadOrInitSlideOrder() {
+			// localStorage kullanımı kaldırıldı - backend'den yükleniyor
+			// combinedSlideOrder zaten loadCarousel() içinde backend'den yüklendi
+			if (combinedSlideOrder && combinedSlideOrder.length > 0) {
+				// Mevcut sıralamayı koru, sadece geçersiz index'leri temizle
+				combinedSlideOrder = combinedSlideOrder.filter(function(item) {
+					if (item.type === 'manual') {
+						// Manuel slide index'i geçerli mi kontrol et
+						return item.index >= 0 && item.index < carouselData.length;
+					}
+					// Otomatik kategori slide'ları her zaman geçerli (kategori silinmiş olsa bile, sıralamada kalabilir)
+					return true;
+				});
+			}
+			
+			// mainCategories'ı yükle
+			var mainCategoriesToUse = [];
+			if (typeof window.mainCategories !== 'undefined' && Array.isArray(window.mainCategories) && window.mainCategories.length > 0) {
+				mainCategoriesToUse = window.mainCategories;
+			} else {
+				// localStorage kullanımı kaldırıldı - backend'den yükleniyor
+				// mainCategories zaten loadCarousel() içinde backend'den yüklendi
+				console.warn('⚠️ mainCategories backend\'den yüklenmemiş');
+			}
+			
+			// Eğer sıralama yoksa veya boşsa, sıfırdan oluştur
+			if (!combinedSlideOrder || combinedSlideOrder.length === 0) {
+				combinedSlideOrder = [];
+				
+				// Önce manuel slide'ları ekle
+				if (carouselData && carouselData.length > 0) {
+					carouselData.forEach(function(slide, index) {
+						combinedSlideOrder.push({type: 'manual', index: index});
+					});
+				}
+			} else {
+				// Mevcut sıralama var - sadece yeni eklenen manuel slide'ları kontrol et
+				var existingManualIndexes = [];
+				combinedSlideOrder.forEach(function(item) {
+					if (item.type === 'manual') {
+						existingManualIndexes.push(item.index);
+					}
+				});
+				
+				// Yeni eklenen manuel slide'ları bul (sıralamada olmayanlar)
+				if (carouselData && carouselData.length > 0) {
+					carouselData.forEach(function(slide, index) {
+						if (existingManualIndexes.indexOf(index) === -1) {
+							// Yeni slide - sıralamanın sonuna ekle
+							combinedSlideOrder.push({type: 'manual', index: index});
+						}
+					});
+				}
+			}
+			
+			// Her zaman tüm otomatik kategorileri ekle (gizlenmiş olsa bile, yeni eklenenler için)
+			if (mainCategoriesToUse && mainCategoriesToUse.length > 0) {
+				mainCategoriesToUse.forEach(function(cat) {
+					var slug = cat.slug || '';
+					if (!slug) return;
+					
+					// Bu kategori zaten sıralamada var mı?
+					var existsInOrder = combinedSlideOrder.some(function(item) {
+						return item.type === 'auto' && item.slug === slug;
+					});
+					
+					// Manuel slide'da var mı?
+					var isInManual = carouselData && carouselData.some(function(slide) {
+						return slide.categorySlug === slug || (slide.link && slide.link.includes(slug));
+					});
+					
+					// Eğer sıralamada yoksa ve manuel slide'da da yoksa, ekle
+					if (!existsInOrder && !isInManual) {
+						combinedSlideOrder.push({type: 'auto', slug: slug});
+					}
+				});
+			}
+			
+			// Sıralamayı kaydet
+			// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+		}
+		
+		// Tüm slide'ları birleştir (manuel + otomatik kategoriler) - sıralamaya göre
+		function getCombinedSlides() {
+			// Sıralama yoksa yükle, varsa mevcut sıralamayı kullan (localStorage'dan güncel değeri al)
+			if (!combinedSlideOrder || combinedSlideOrder.length === 0) {
+				loadOrInitSlideOrder();
+			} else {
+				// localStorage kullanımı kaldırıldı - backend'den yükleniyor
+				// combinedSlideOrder zaten loadCarousel() içinde backend'den yüklendi
+				// Mevcut sıralamayı kullan
+			}
+			
+			var combined = [];
+			var cleanedOrder = []; // Temizlenmiş sıralama (var olmayan item'lar kaldırıldı)
+			
+			if (!combinedSlideOrder || combinedSlideOrder.length === 0) {
+				return combined;
+			}
+			
+			combinedSlideOrder.forEach(function(orderItem) {
+				if (orderItem.type === 'manual') {
+					// Manuel slide - index geçerli mi kontrol et
+					var slide = carouselData[orderItem.index];
+					if (slide) {
+						combined.push({
+							type: 'manual',
+							data: slide,
+							originalIndex: orderItem.index,
+							orderItem: orderItem // Sıralama referansı için
+						});
+						cleanedOrder.push(orderItem); // Geçerli item'ı temizlenmiş sıralamaya ekle
+					}
+				} else if (orderItem.type === 'auto') {
+					// Otomatik kategori slide - kategori var mı kontrol et
+					var slug = orderItem.slug;
+					var cat = null;
+					// mainCategories'ı yükle
+					var mainCategoriesToUse = [];
+					if (typeof window.mainCategories !== 'undefined' && Array.isArray(window.mainCategories) && window.mainCategories.length > 0) {
+						mainCategoriesToUse = window.mainCategories;
+					} else {
+						// localStorage kullanımı kaldırıldı - backend'den yükleniyor
+						if (typeof window.mainCategories !== 'undefined' && Array.isArray(window.mainCategories)) {
+							mainCategoriesToUse = window.mainCategories;
+						}
+					}
+					if (mainCategoriesToUse && mainCategoriesToUse.length > 0) {
+						cat = mainCategoriesToUse.find(function(c) { return c.slug === slug; });
+					}
+					if (cat) {
+						var isExcluded = autoCategoryExcluded.indexOf(slug) !== -1;
+						// Gizlenmiş olsa bile göster (pasif durumda)
+						combined.push({
+							type: 'auto',
+							data: {
+								title: cat.title || { tr: '', en: '', ka: '', ru: '' },
+								description: cat.description || { tr: '', en: '', ka: '', ru: '' },
+								image: cat.headerImage || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=1920&q=80',
+								link: '/' + slug + '.html',
+								isCategory: true,
+								active: !isExcluded, // Gizlenmişse pasif
+								categorySlug: slug
+							},
+							categorySlug: slug,
+							orderItem: orderItem // Sıralama referansı için
+						});
+						cleanedOrder.push(orderItem); // Geçerli item'ı temizlenmiş sıralamaya ekle
+					}
+				}
+			});
+			
+			// Eğer temizlenmiş sıralama farklıysa, güncelle
+			if (cleanedOrder.length !== combinedSlideOrder.length) {
+				combinedSlideOrder = cleanedOrder;
+				// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+			}
+			
+			return combined;
+		}
+		
+		// Carousel'ı listele (birleşik: manuel + otomatik)
+		function renderCarousel() {
+			var $list = $('#carouselList');
+			var combinedSlides = getCombinedSlides();
+			
+			if (combinedSlides.length === 0) {
+				$list.html('<p style="color: #6b7280; text-align: center; padding: 40px;">Henüz slide eklenmemiş.</p>');
+				updateStatistics();
+				return;
+			}
+			
+			var html = '';
+			combinedSlides.forEach(function(item, index) {
+				var slide = item.data;
+				var titleTr = slide.title ? (slide.title.tr || '') : '';
+				var titleEn = slide.title ? (slide.title.en || '') : '';
+				var titleKa = slide.title ? (slide.title.ka || '') : '';
+				var descTr = slide.description ? (slide.description.tr || '') : '';
+				var image = slide.image || '';
+				var isCategory = slide.isCategory || false;
+				var link = slide.link || '';
+				var isActive = slide.active !== false;
+				var isAuto = item.type === 'auto';
+				var badgeColor = isAuto ? '#f59e0b' : '#8b5cf6';
+				var badgeText = isAuto ? '🔄 OTOMATİK' : '✏️ MANUEL';
+				
+				var titleDisplay = titleTr;
+				if (titleEn) titleDisplay += ' / ' + escapeHtml(titleEn);
+				if (titleKa) titleDisplay += ' / ' + escapeHtml(titleKa);
+				
+				html += '<div class="carousel-item" style="border-left: 4px solid ' + (isActive ? '#10b981' : '#6b7280') + ';">';
+				if (image) {
+					html += '<img src="' + escapeHtml(image) + '" class="carousel-item-image" alt="Slide">';
+				} else {
+					html += '<div class="carousel-item-image" style="display: flex; align-items: center; justify-content: center; background: #ddd; width: 150px; height: 100px;">Görsel Yok</div>';
+				}
+				html += '<div class="carousel-item-content">';
+				html += '<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px;">';
+				html += '<span style="background: ' + badgeColor + '; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap;">' + badgeText + '</span>';
+				html += '<span style="background: #8b5cf6; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; min-width: 35px; text-align: center;">#' + (index + 1) + '</span>';
+				html += '<h3 style="margin: 0; font-size: 18px; color: #1a1a1a; flex: 1; min-width: 200px;">' + escapeHtml(titleDisplay) + '</h3>';
+				if (isActive) {
+					html += '<span style="background: #10b981; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap;">✓ AKTİF</span>';
+				} else {
+					html += '<span style="background: #6b7280; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap;">✗ PASİF</span>';
+				}
+				html += '</div>';
+				if (descTr) {
+					html += '<p class="description" style="margin: 4px 0; font-size: 14px; color: #6b7280; line-height: 1.6;">' + escapeHtml(descTr) + '</p>';
+				}
+				if (link) {
+					html += '<p style="margin: 4px 0; font-size: 12px; color: #8b5cf6; word-break: break-all;">🔗 ' + escapeHtml(link) + '</p>';
+				}
+				if (isCategory) {
+					html += '<p style="font-size: 12px; color: #8b5cf6; font-weight: 600; margin: 4px 0;">🏷️ Kategori Slide</p>';
+				}
+				html += '</div>';
+				html += '<div class="carousel-item-actions">';
+				html += '<div style="display: flex; flex-direction: column; gap: 5px;">';
+				if (index > 0) {
+					html += '<button class="btn-admin" onclick="moveCombinedSlide(' + index + ', -1)" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">⬆️ Yukarı</button>';
+				}
+				if (index < combinedSlides.length - 1) {
+					html += '<button class="btn-admin" onclick="moveCombinedSlide(' + index + ', 1)" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">⬇️ Aşağı</button>';
+				}
+				html += '</div>';
+				html += '<div style="display: flex; flex-direction: column; gap: 5px;">';
+				if (isAuto) {
+					// Otomatik kategori için göster/gizle butonu
+					if (isActive) {
+						html += '<button class="btn-deactivate" onclick="toggleAutoCategorySlide(\'' + item.categorySlug + '\')">⏸️ Gizle</button>';
+					} else {
+						html += '<button class="btn-activate" onclick="toggleAutoCategorySlide(\'' + item.categorySlug + '\')">▶️ Göster</button>';
+					}
+				} else {
+					// Manuel slide için düzenle, aktif/pasif, sil butonları
+					html += '<button class="btn-edit" onclick="editSlide(' + item.originalIndex + ')">✏️ Düzenle</button>';
+					if (isActive) {
+						html += '<button class="btn-deactivate" onclick="toggleSlideActive(' + item.originalIndex + ')">⏸️ Pasif</button>';
+					} else {
+						html += '<button class="btn-activate" onclick="toggleSlideActive(' + item.originalIndex + ')">▶️ Aktif</button>';
+					}
+					html += '<button class="btn-delete" onclick="deleteSlide(' + item.originalIndex + ')">🗑️ Sil</button>';
+				}
+				html += '</div>';
+				html += '</div>';
+				html += '</div>';
+			});
+			
+			$list.html(html);
+			
+			// İstatistikleri güncelle
+			updateStatistics();
+		}
+		
+		
+		// Modal açma/kapama
+		function openAddSlideModal() {
+			try {
+				var $modal = $('#slideModal');
+				if ($modal.length === 0) {
+					showAlert('error', 'Modal bulunamadı. Lütfen sayfayı yenileyin.');
+					return;
+				}
+				
+				$('#slideIndex').val('-1');
+				$('#slideModalTitle').text('Yeni Slide Ekle');
+				var slideForm = document.getElementById('slideForm');
+				if (slideForm) {
+					slideForm.reset();
+				}
+				$('#slideImagePreview').hide();
+				$('#imageFile').val('');
+				$('#image').val('');
+				$('#link').val('');
+				$('#linkCategory').val('');
+				$('#linkCategoryTrigger .category-dropdown-label').text('Kategori seçin (otomatik link oluşturur)...');
+				$('#linkCategoryMenu').find('.category-item').removeClass('active');
+				$('#titleTr').val('');
+				$('#titleEn').val('');
+				$('#descriptionTr').val('');
+				$('#descriptionEn').val('');
+				$('#isCategory').prop('checked', false);
+				$('#isActive').prop('checked', true);
+				$('#slideImagePreviewImg').attr('src', '');
+				
+				// Kategori dropdown'ını doldur
+				populateCategoryDropdown();
+				
+				$modal.css({
+					'display': 'flex',
+					'visibility': 'visible',
+					'opacity': '1'
+				}).show();
+				
+				// Modal içeriğinin de görünür olduğundan emin ol
+				$modal.find('.admin-modal').css({
+					'display': 'flex',
+					'visibility': 'visible',
+					'opacity': '1'
+				}).show();
+				if (typeof switchLang === 'function') {
+					switchLang('tr');
+				}
+			} catch(e) {
+				showAlert('error', 'Modal açılırken bir hata oluştu: ' + e.message);
+			}
+		}
+		
+		function closeSlideModal() {
+			$('#slideModal').hide();
+			$('#slideImagePreview').hide();
+			$('#imageFile').val('');
+			$('#image').val('');
+			$('#link').val('');
+			$('#linkCategory').val('');
+			$('#slideImagePreviewImg').attr('src', ''); // Resmi temizle
+		}
+		
+		// Slide görsel yükle
+		function uploadSlideImage() {
+			var fileInput = document.getElementById('imageFile');
+			if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
+			
+			var file = fileInput.files[0];
+			var formData = new FormData();
+			formData.append('image', file);
+			
+			// Backend session kullanılıyor, cookie'ler otomatik gönderiliyor
+			
+			// Yükleme başladı göster
+			var btn = document.getElementById('uploadSlideBtn');
+			if (!btn) {
+				btn = fileInput.nextElementSibling;
+			}
+			var isMobile = window.innerWidth <= 768;
+			var defaultText = isMobile ? '📁 Telefondan Yükle' : '📁 Bilgisayardan Yükle';
+			var originalText = btn ? (btn.innerHTML || defaultText) : defaultText;
+			if (btn) {
+				btn.innerHTML = '⏳ Yükleniyor...';
+				btn.disabled = true;
+			}
+			
+			$.ajax({
+				url: '/api/upload-image',
+				method: 'POST',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function(response) {
+					if (response && response.success && response.url) {
+						var imageUrl = response.url;
+						$('#image').val(imageUrl);
+						
+						// Preview'ı güncelle
+						var $previewImg = $('#slideImagePreviewImg');
+						var $preview = $('#slideImagePreview');
+						
+						// Önce preview'ı göster
+						$preview.show();
+						
+						// Resmi yükle
+						$previewImg.attr('src', imageUrl).off('error load').on('error', function() {
+							// Resim yüklenemedi, bir süre sonra tekrar dene (cache bypass ile)
+							var img = this;
+							var retryCount = 0;
+							var maxRetries = 3;
+							var retryLoad = function() {
+								if (retryCount < maxRetries) {
+									retryCount++;
+									setTimeout(function() {
+										img.src = imageUrl + '?t=' + Date.now();
+									}, 500 * retryCount);
+								} else {
+									// Son denemeden sonra da yüklenemezse, sadece console'a yaz (alert gösterme)
+								}
+							};
+							retryLoad();
+						}).on('load', function() {
+							$preview.show();
+						});
+						
+						// Eğer resim zaten yüklenmişse (cache'den) direkt göster
+						setTimeout(function() {
+							if ($previewImg[0].complete && $previewImg[0].naturalWidth > 0) {
+								$preview.show();
+							} else if ($previewImg[0].complete) {
+								// Yüklenemedi, cache bypass ile tekrar dene
+								$previewImg.attr('src', imageUrl + '?t=' + Date.now());
+							}
+						}, 100);
+						
+						if (btn) {
+							btn.innerHTML = originalText;
+							btn.disabled = false;
+						}
+						fileInput.value = ''; // Reset file input
+					} else {
+						showAlert('error', 'Resim yükleme başarısız!');
+						if (btn) {
+							btn.innerHTML = originalText;
+							btn.disabled = false;
+						}
+					}
+				},
+				error: function(xhr) {
+					showAlert('error', 'Resim yüklenirken hata oluştu!');
+					if (btn) {
+						btn.innerHTML = originalText;
+						btn.disabled = false;
+					}
+				}
+			});
+		}
+		
+		// URL'den resim ekle
+		function addSlideImageUrl() {
+			var url = $('#image').val().trim();
+			if (!url) return;
+			
+			// URL geçerli mi kontrol et
+			if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
+				var $previewImg = $('#slideImagePreviewImg');
+				var $preview = $('#slideImagePreview');
+				
+				// Önceki event listener'ları temizle
+				$previewImg.off('error load');
+				
+				$previewImg.attr('src', url).on('error', function() {
+					$preview.hide();
+					showAlert('error', 'Resim yüklenemedi! URL\'yi kontrol edin.');
+				}).on('load', function() {
+					$preview.show();
+				});
+				
+				// Eğer resim zaten yüklenmişse (cache'den) direkt göster
+				if ($previewImg[0].complete && $previewImg[0].naturalWidth > 0) {
+					$preview.show();
+				} else {
+					$preview.show(); // Önce göster, yüklenemezse error handler gizleyecek
+				}
+			} else {
+				showAlert('warning', 'Geçerli bir URL girin! (http://, https:// veya / ile başlamalı)');
+			}
+		}
+		
+		// Enter tuşuna basıldığında URL ekle
+		$(document).on('keypress', '#image', function(e) {
+			if (e.which === 13) { // Enter tuşu
+				e.preventDefault();
+				addSlideImageUrl();
+			}
+		});
+		
+		// Kategori dropdown'ını doldur
+		function populateCategoryDropdown() {
+			var $menu = $('#linkCategoryMenu');
+			var $trigger = $('#linkCategoryTrigger');
+			var $hiddenInput = $('#linkCategory');
+			
+			$menu.empty();
+			$menu.append('<button type="button" class="category-item" data-value="">Kategori seçin (otomatik link oluşturur)...</button>');
+			
+			// mainCategories'ı yükle
+			var mainCategories = [];
+			if (typeof window.mainCategories !== 'undefined' && window.mainCategories.length > 0) {
+				mainCategories = window.mainCategories;
+			} else {
+				// localStorage kullanımı kaldırıldı - backend'den yükleniyor
+				// mainCategories zaten loadCarousel() içinde backend'den yüklendi
+				if (typeof window.mainCategories !== 'undefined') {
+					mainCategories = window.mainCategories;
+				}
+			}
+			
+			if (mainCategories && mainCategories.length > 0) {
+				mainCategories.forEach(function(cat) {
+					var slug = cat.slug || '';
+					if (!slug) return;
+					
+					var titleTr = cat.title ? (cat.title.tr || '') : '';
+					var titleEn = cat.title ? (cat.title.en || '') : '';
+					var titleKa = cat.title ? (cat.title.ka || '') : '';
+					var displayTitle = titleTr;
+					if (titleEn) displayTitle += ' / ' + titleEn;
+					if (titleKa) displayTitle += ' / ' + titleKa;
+					
+					$menu.append('<button type="button" class="category-item" data-value="' + escapeHtml(slug) + '">' + escapeHtml(displayTitle) + '</button>');
+				});
+			}
+			
+			// Seçili değeri güncelle
+			var currentValue = $hiddenInput.val();
+			if (currentValue) {
+				var $selectedItem = $menu.find('.category-item[data-value="' + escapeHtml(currentValue) + '"]');
+				if ($selectedItem.length) {
+					$selectedItem.addClass('active');
+					$trigger.find('.category-dropdown-label').text($selectedItem.text());
+				}
+			} else {
+				$trigger.find('.category-dropdown-label').text('Kategori seçin (otomatik link oluşturur)...');
+			}
+		}
+		
+		// Kategori dropdown'ından seçim yapıldığında
+		function onCategoryLinkChange() {
+			var selectedSlug = $('#linkCategory').val();
+			if (selectedSlug) {
+				// Otomatik link oluştur
+				var link = '/' + selectedSlug + '.html';
+				$('#link').val(link);
+				$('#isCategory').prop('checked', true);
+			} else {
+				// Kategori seçimi kaldırıldıysa, manuel link'i temizleme (kullanıcı isterse kalsın)
+				// Sadece isCategory checkbox'ını kaldır
+				$('#isCategory').prop('checked', false);
+			}
+		}
+		
+		// Category dropdown event handlers
+		$(document).on('click', '.category-dropdown-trigger', function(e) {
+			e.stopPropagation();
+			var $menu = $(this).siblings('.category-dropdown-menu');
+			var isOpen = $menu.hasClass('open');
+			$('.category-dropdown-menu').removeClass('open open-up');
+			if (!isOpen) {
+				$menu.addClass('open');
+				
+				// Ekranın altında kalıp kalmadığını kontrol et
+				setTimeout(function() {
+					var menuRect = $menu[0].getBoundingClientRect();
+					var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+					var spaceBelow = viewportHeight - menuRect.bottom;
+					var spaceAbove = menuRect.top;
+					
+					// Eğer aşağıda yeterli alan yoksa ve yukarıda daha fazla alan varsa, yukarı doğru aç
+					if (spaceBelow < 50 && spaceAbove > spaceBelow) {
+						$menu.addClass('open-up');
+					} else {
+						$menu.removeClass('open-up');
+					}
+				}, 10);
+			}
+		});
+		
+		$(document).on('click', function(e) {
+			if (!$(e.target).closest('.category-dropdown').length) {
+				$('.category-dropdown-menu').removeClass('open open-up');
+			}
+		});
+		
+		// Category item seçimi
+		$(document).on('click', '.category-dropdown-menu .category-item', function(e) {
+			e.stopPropagation();
+			var $item = $(this);
+			if ($item.prop('disabled')) return;
+			var value = $item.data('value');
+			var $dropdown = $item.closest('.category-dropdown');
+			var $trigger = $dropdown.find('.category-dropdown-trigger');
+			var $hiddenInput = $dropdown.find('input[type="hidden"]');
+			var $menu = $dropdown.find('.category-dropdown-menu');
+			
+			// Tüm item'lardan active class'ını kaldır
+			$menu.find('.category-item').removeClass('active');
+			
+			// Seçili item'a active class'ı ekle
+			$item.addClass('active');
+			
+			// Hidden input'a değeri yaz
+			$hiddenInput.val(value || '');
+			
+			// Trigger label'ını güncelle
+			$trigger.find('.category-dropdown-label').text($item.text());
+			
+			// Menu'yu kapat
+			$menu.removeClass('open open-up');
+			
+			// Link dropdown'ı için özel işlem
+			if ($hiddenInput.attr('id') === 'linkCategory') {
+				onCategoryLinkChange();
+			}
+		});
+		
+		// Manuel link girildiğinde
+		function onManualLinkChange() {
+			var manualLink = $('#link').val().trim();
+			if (manualLink) {
+				// Manuel link girildi, kategori dropdown'ını temizle
+				$('#linkCategory').val('');
+				var $trigger = $('#linkCategoryTrigger');
+				var $menu = $('#linkCategoryMenu');
+				$menu.find('.category-item').removeClass('active');
+				$trigger.find('.category-dropdown-label').text('Kategori seçin (otomatik link oluşturur)...');
+				
+				// Eğer link bir kategori linki gibi görünüyorsa (/slug.html formatında), isCategory'yi işaretle
+				if (manualLink.match(/^\/[^\/]+\.html$/)) {
+					$('#isCategory').prop('checked', true);
+				} else {
+					$('#isCategory').prop('checked', false);
+				}
+			}
+		}
+		
+		// Dil değiştirme
+		function switchLang(lang) {
+			$('.lang-tab').removeClass('active');
+			$('.lang-content').removeClass('active');
+			$('.lang-tab').each(function() {
+				var btnLang = $(this).attr('onclick');
+				if (btnLang && btnLang.indexOf("'" + lang + "'") !== -1) {
+					$(this).addClass('active');
+				}
+			});
+			$('#lang-' + lang).addClass('active');
+		}
+		
+		// Slide düzenle
+		function editSlide(index) {
+			if (index < 0 || index >= carouselData.length) return;
+			
+			var slide = carouselData[index];
+			$('#slideIndex').val(index);
+			$('#slideModalTitle').text('Slide Düzenle');
+			
+			$('#titleTr').val(slide.title ? slide.title.tr || '' : '');
+			$('#titleEn').val(slide.title ? slide.title.en || '' : '');
+			$('#titleKa').val(slide.title ? slide.title.ka || '' : '');
+			$('#titleRu').val(slide.title ? slide.title.ru || '' : '');
+			$('#descriptionTr').val(slide.description ? slide.description.tr || '' : '');
+			$('#descriptionEn').val(slide.description ? slide.description.en || '' : '');
+			$('#descriptionKa').val(slide.description ? slide.description.ka || '' : '');
+			$('#descriptionRu').val(slide.description ? slide.description.ru || '' : '');
+			var slideImage = slide.image || '';
+			$('#image').val(slideImage);
+			$('#link').val(slide.link || '');
+			$('#isCategory').prop('checked', slide.isCategory || false);
+			$('#isActive').prop('checked', slide.active !== false); // Varsayılan olarak aktif
+			
+			// Preview göster - var olan resmi göster
+			var $previewImg = $('#slideImagePreviewImg');
+			var $preview = $('#slideImagePreview');
+			
+			var imageUrl = (slideImage && typeof slideImage === 'string') ? slideImage.trim() : (slideImage || '');
+			
+			if (imageUrl && imageUrl.length > 0) {
+				$previewImg.attr('src', imageUrl).off('error load').on('error', function() {
+					$preview.hide();
+				}).on('load', function() {
+					$preview.show();
+				});
+				
+				// Eğer resim zaten yüklenmişse (cache'den) direkt göster
+				setTimeout(function() {
+					if ($previewImg[0].complete && $previewImg[0].naturalWidth > 0) {
+						$preview.show();
+					} else if ($previewImg[0].complete) {
+						$preview.hide();
+					}
+				}, 100);
+			} else {
+				$preview.hide();
+			}
+			$('#imageFile').val('');
+			
+			// Link varsa göster, yoksa boş bırak
+			var link = slide.link || '';
+			$('#link').val(link);
+			
+			// Eğer link bir kategori linkiyse (/slug.html formatında), dropdown'da göster
+			$('#linkCategory').val('');
+			var $trigger = $('#linkCategoryTrigger');
+			var $menu = $('#linkCategoryMenu');
+			$menu.find('.category-item').removeClass('active');
+			$trigger.find('.category-dropdown-label').text('Kategori seçin (otomatik link oluşturur)...');
+			
+			if (link && link.match(/^\/[^\/]+\.html$/)) {
+				var slug = link.replace(/^\/|\.[^\.]+$/g, ''); // /slug.html -> slug
+				// Kategori dropdown'ını doldur ve seçimi yap
+				populateCategoryDropdown();
+				setTimeout(function() {
+					$('#linkCategory').val(slug);
+					var $selectedItem = $menu.find('.category-item[data-value="' + escapeHtml(slug) + '"]');
+					if ($selectedItem.length) {
+						$menu.find('.category-item').removeClass('active');
+						$selectedItem.addClass('active');
+						$trigger.find('.category-dropdown-label').text($selectedItem.text());
+					}
+				}, 100);
+			} else {
+				// Kategori dropdown'ını doldur ama seçim yapma
+				populateCategoryDropdown();
+			}
+			
+			$('#slideModal').css('display', 'flex');
+			switchLang('tr');
+		}
+		
+		// Slide kaydet
+		function saveSlide() {
+			var index = $('#slideIndex').val();
+			var image = $('#image').val().trim();
+			
+			if (!image) {
+				showAlert('warning', 'Görsel URL gerekli!');
+				return;
+			}
+			
+			// Link'i al (dropdown'dan veya manuel input'tan)
+			var link = '';
+			var categorySlug = $('#linkCategory').val();
+			if (categorySlug) {
+				// Dropdown'dan seçildiyse otomatik link oluştur
+				link = '/' + categorySlug + '.html';
+			} else {
+				// Manuel link
+				link = $('#link').val().trim();
+			}
+			
+			// isCategory: Dropdown'dan seçildiyse veya link bir kategori linki formatındaysa true
+			var isCategory = false;
+			if (categorySlug) {
+				isCategory = true;
+			} else if (link && link.match(/^\/[^\/]+\.html$/)) {
+				isCategory = true;
+			} else {
+				isCategory = $('#isCategory').is(':checked');
+			}
+			
+			var slide = {
+				title: {
+					tr: $('#titleTr').val(),
+					en: $('#titleEn').val(),
+					ka: $('#titleKa').val(),
+					ru: $('#titleRu').val()
+				},
+				description: {
+					tr: $('#descriptionTr').val(),
+					en: $('#descriptionEn').val(),
+					ka: $('#descriptionKa').val(),
+					ru: $('#descriptionRu').val()
+				},
+				image: image,
+				link: link || undefined,
+				isCategory: isCategory,
+				active: $('#isActive').is(':checked')
+			};
+			
+			// Otomatik kategori slide'ı mı?
+			if (typeof index === 'string' && index.startsWith('auto_')) {
+				var slug = index.replace('auto_', '');
+				
+				// mainCategories'ı güncelle
+				if (typeof window.mainCategories !== 'undefined' && window.mainCategories.length > 0) {
+					var category = window.mainCategories.find(function(cat) {
+						return cat.slug === slug;
+					});
+					
+					if (category) {
+						// Kategori bilgilerini güncelle
+						category.title = slide.title;
+						category.description = slide.description;
+						category.headerImage = slide.image;
+						
+						// LocalStorage'a kaydet (mainCategories)
+						localStorage.setItem('adminMainCategories', JSON.stringify(window.mainCategories));
+						
+						// Aktif/pasif durumunu güncelle
+						var isExcluded = !slide.active;
+						var excludedIndex = autoCategoryExcluded.indexOf(slug);
+						if (isExcluded && excludedIndex === -1) {
+							autoCategoryExcluded.push(slug);
+						} else if (!isExcluded && excludedIndex !== -1) {
+							autoCategoryExcluded.splice(excludedIndex, 1);
+						}
+						// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+						
+						renderCarousel();
+						closeSlideModal();
+						return;
+					}
+				}
+			}
+			
+			// Manuel slide
+			var numericIndex = parseInt(index);
+			if (isNaN(numericIndex) || numericIndex === -1) {
+				// Yeni slide ekle - duplicate kontrolü yap
+				// Aynı image URL'ine sahip slide var mı kontrol et
+				var isDuplicate = carouselData.some(function(existingSlide) {
+					return existingSlide.image === slide.image && 
+					       existingSlide.link === slide.link;
+				});
+				
+				if (isDuplicate) {
+					showAlert('warning', 'Bu slide zaten mevcut!');
+					return;
+				}
+				
+				carouselData.push(slide);
+				var newSlideIndex = carouselData.length - 1;
+				
+				// combinedSlideOrder'a da ekle
+				loadOrInitSlideOrder();
+				combinedSlideOrder.push({type: 'manual', index: newSlideIndex});
+				// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+			} else {
+				// Mevcut slide'ı güncelle
+				if (numericIndex >= 0 && numericIndex < carouselData.length) {
+					carouselData[numericIndex] = slide;
+					
+					// combinedSlideOrder'da index'i güncelle (eğer yoksa ekle)
+					loadOrInitSlideOrder();
+					var orderIndex = combinedSlideOrder.findIndex(function(item) {
+						return item.type === 'manual' && item.index === numericIndex;
+					});
+					if (orderIndex === -1) {
+						// Sıralamada yoksa ekle
+						combinedSlideOrder.push({type: 'manual', index: numericIndex});
+						// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+					}
+				} else {
+					showAlert('error', 'Geçersiz slide index!');
+					return;
+				}
+			}
+			
+			// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+			renderCarousel();
+			closeSlideModal();
+			
+			// Backend'e kaydet
+			saveCarouselToServer();
+		}
+		
+		// Slide aktif/pasif yap
+		function toggleSlideActive(index) {
+			if (index < 0 || index >= carouselData.length) return;
+			
+			var slide = carouselData[index];
+			// active özelliğini açıkça set et
+			slide.active = slide.active === false ? true : false;
+			
+			// LocalStorage'a kaydet
+			// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+			
+			// Render et
+			renderCarousel();
+		}
+		
+		// Slide sil
+		function deleteSlide(index) {
+			if (index < 0 || index >= carouselData.length) return;
+			
+			carouselData.splice(index, 1);
+			
+			// combinedSlideOrder'dan da kaldır ve index'leri güncelle
+			loadOrInitSlideOrder();
+			var orderIndex = combinedSlideOrder.findIndex(function(item) {
+				return item.type === 'manual' && item.index === index;
+			});
+			if (orderIndex !== -1) {
+				combinedSlideOrder.splice(orderIndex, 1);
+			}
+			
+			// Kalan manuel slide'ların index'lerini güncelle (silinen slide'ın index'inden sonraki tüm index'leri 1 azalt)
+			combinedSlideOrder.forEach(function(item) {
+				if (item.type === 'manual' && item.index > index) {
+					item.index = item.index - 1;
+				}
+			});
+			
+			// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+			// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+			renderCarousel();
+		}
+		
+		// Slide sırasını değiştir
+		function moveSlide(index, direction) {
+			if (index < 0 || index >= carouselData.length) return;
+			var newIndex = index + direction;
+			if (newIndex < 0 || newIndex >= carouselData.length) return;
+			
+			var temp = carouselData[index];
+			carouselData[index] = carouselData[newIndex];
+			carouselData[newIndex] = temp;
+			// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+			
+			// Sıralama bilgisini de güncelle
+			loadOrInitSlideOrder();
+			var orderIndex1 = combinedSlideOrder.findIndex(function(item) {
+				return item.type === 'manual' && item.index === index;
+			});
+			var orderIndex2 = combinedSlideOrder.findIndex(function(item) {
+				return item.type === 'manual' && item.index === newIndex;
+			});
+			if (orderIndex1 !== -1 && orderIndex2 !== -1) {
+				var tempOrder = combinedSlideOrder[orderIndex1];
+				combinedSlideOrder[orderIndex1] = combinedSlideOrder[orderIndex2];
+				combinedSlideOrder[orderIndex2] = tempOrder;
+				// Index'leri güncelle
+				combinedSlideOrder[orderIndex1].index = newIndex;
+				combinedSlideOrder[orderIndex2].index = index;
+				// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+			}
+			
+			renderCarousel();
+		}
+		
+		// Birleşik slide sıralama (manuel ve otomatik karışık)
+		function moveCombinedSlide(index, direction) {
+			
+			// Önce combined slides'ı al (temizlenmiş sıralama ile)
+			var combinedSlides = getCombinedSlides();
+			
+			if (combinedSlides.length === 0) {
+				return;
+			}
+			
+			// index, combinedSlides array'inin index'i
+			// combinedSlideOrder'da karşılık gelen item'ı bulmalıyız
+			if (index < 0 || index >= combinedSlides.length) {
+				return;
+			}
+			
+			var newIndex = index + direction;
+			if (newIndex < 0 || newIndex >= combinedSlides.length) {
+				return;
+			}
+			
+			// combinedSlideOrder'da bu iki item'ın pozisyonlarını bul
+			var currentItem = combinedSlides[index];
+			var targetItem = combinedSlides[newIndex];
+			
+			if (!currentItem || !currentItem.orderItem || !targetItem || !targetItem.orderItem) {
+				return;
+			}
+			
+			// combinedSlideOrder'da bu item'ların index'lerini bul (object referansı yerine özellik karşılaştırması)
+			var orderIndex1 = -1;
+			var orderIndex2 = -1;
+			
+			for (var i = 0; i < combinedSlideOrder.length; i++) {
+				var orderItem = combinedSlideOrder[i];
+				if (orderItem.type === currentItem.orderItem.type) {
+					if (orderItem.type === 'manual' && orderItem.index === currentItem.orderItem.index) {
+						orderIndex1 = i;
+					} else if (orderItem.type === 'auto' && orderItem.slug === currentItem.orderItem.slug) {
+						orderIndex1 = i;
+					}
+				}
+				if (orderItem.type === targetItem.orderItem.type) {
+					if (orderItem.type === 'manual' && orderItem.index === targetItem.orderItem.index) {
+						orderIndex2 = i;
+					} else if (orderItem.type === 'auto' && orderItem.slug === targetItem.orderItem.slug) {
+						orderIndex2 = i;
+					}
+				}
+				if (orderIndex1 !== -1 && orderIndex2 !== -1) break;
+			}
+			
+			if (orderIndex1 === -1 || orderIndex2 === -1) {
+				return;
+			}
+			
+			// Sıralamayı değiştir
+			var temp = combinedSlideOrder[orderIndex1];
+			combinedSlideOrder[orderIndex1] = combinedSlideOrder[orderIndex2];
+			combinedSlideOrder[orderIndex2] = temp;
+			
+			// localStorage'a kaydet
+			// localStorage kullanımı kaldırıldı - backend'e kaydediliyor
+			
+			// Hemen render et
+			renderCarousel();
+			
+			// Backend'e kaydet
+			saveCarouselToServer();
+		}
+		
+		// Sunucuya kaydet
+		function saveCarouselToServer() {
+			// Önce session kontrolü yap
+			$.ajax({
+				url: '/api/admin/check-session',
+				method: 'GET',
+				success: function(sessionResponse) {
+					if (!sessionResponse.authenticated) {
+						showAlert('error', 'Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+						$('#pageContent').hide();
+						$('#loginScreen').show();
+						return;
+					}
+					
+					// Session var, kaydetme işlemini yap
+					performSave();
+				},
+				error: function() {
+					showAlert('error', 'Oturum kontrolü yapılamadı. Lütfen tekrar giriş yapın.');
+					$('#pageContent').hide();
+					$('#loginScreen').show();
+				}
+			});
+			
+			function performSave() {
+				// carouselData her zaman kaydedilmeli (boş array bile olsa)
+				// excludedAutoCategories da kaydedilmeli
+				// products ve mainCategories de gönderilmeli (server endpoint'i bunları bekliyor)
+				
+				// Products ve mainCategories'ı da gönder (çünkü server aynı endpoint'i kullanıyor)
+				var products = [];
+				var mainCategories = [];
+				
+				// Products yükle
+				if (typeof window.productsData !== 'undefined' && Array.isArray(window.productsData)) {
+					products = window.productsData;
+				} else if (typeof productsData !== 'undefined' && Array.isArray(productsData)) {
+					products = productsData;
+				} else {
+					// localStorage kullanımı kaldırıldı - backend'den yükleniyor
+					// products backend'den yüklenmeli
+					console.warn('⚠️ products backend\'den yüklenmemiş');
+				}
+				
+				// mainCategories yükle
+				if (typeof window.mainCategories !== 'undefined' && Array.isArray(window.mainCategories)) {
+					mainCategories = window.mainCategories;
+				} else if (typeof mainCategories !== 'undefined' && Array.isArray(mainCategories)) {
+					mainCategories = mainCategories;
+				} else {
+					// localStorage kullanımı kaldırıldı - backend'den yükleniyor
+					console.warn('⚠️ mainCategories backend\'den yüklenmemiş');
+				}
+				
+				// Sıralama bilgisini yükle - localStorage'dan güncel değeri al
+				loadOrInitSlideOrder();
+				
+				// localStorage kullanımı kaldırıldı - backend'den yükleniyor
+				// combinedSlideOrder zaten loadCarousel() içinde backend'den yüklendi
+				
+				console.log('💾 Kaydedilen slideOrder:', combinedSlideOrder);
+				console.log('💾 slideOrder detayları:', JSON.stringify(combinedSlideOrder, null, 2));
+				
+				// adminCarouselExcluded'ı da gönder
+				// carouselData boş array olabilir (tüm slide'lar silinmiş olabilir)
+				// excludedAutoCategories her zaman gönderilmeli (boş array bile olsa)
+				var carouselObject = {
+					slides: carouselData || [],
+					excludedAutoCategories: autoCategoryExcluded || [],
+					slideOrder: combinedSlideOrder || [] // Sıralama bilgisi - ÖNEMLİ: Bu sıralama ana sayfada kullanılacak
+				};
+				
+				console.log('💾 Backend\'e gönderilen carousel object:', JSON.stringify(carouselObject, null, 2).substring(0, 1000));
+				
+				
+				// Products ve mainCategories boş array olabilir ama her zaman gönderilmeli
+				if (!Array.isArray(products)) products = [];
+				if (!Array.isArray(mainCategories)) mainCategories = [];
+				
+				$.ajax({
+					url: '/api/products/save',
+					method: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify({
+						products: products,
+						mainCategories: mainCategories,
+						carousel: carouselObject
+					}),
+					success: function(response) {
+						// Backend'e kaydedildi, localStorage kullanımı kaldırıldı
+						showAlert('success', 'Carousel başarıyla kaydedildi!');
+					},
+					error: function(xhr) {
+						if (xhr.status === 401) {
+							showAlert('error', 'Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+							$('#pageContent').hide();
+							$('#loginScreen').show();
+						} else {
+							showAlert('error', 'Carousel kaydedilemedi. Lütfen tekrar deneyin.');
+						}
+					}
+				});
+			}
+		}
+		
+		// Global fonksiyonlar
+		window.openAddSlideModal = openAddSlideModal;
+		window.closeSlideModal = closeSlideModal;
+		window.editSlide = editSlide;
+		window.editAutoCategorySlide = editAutoCategorySlide;
+		window.deleteSlide = deleteSlide;
+		window.toggleSlideActive = toggleSlideActive;
+		window.toggleAutoCategorySlide = toggleAutoCategorySlide;
+		window.moveAutoCategorySlide = moveAutoCategorySlide;
+		window.moveCombinedSlide = moveCombinedSlide;
+		window.saveSlide = saveSlide;
+		window.saveCarouselToServer = saveCarouselToServer;
+		window.switchLang = switchLang;
+		window.closePopup = closePopup;
+		window.uploadSlideImage = uploadSlideImage;
+		window.moveSlide = moveSlide;
+		window.addSlideImageUrl = addSlideImageUrl;
+		window.onCategoryLinkChange = onCategoryLinkChange;
+		window.onManualLinkChange = onManualLinkChange;
+		window.populateCategoryDropdown = populateCategoryDropdown;
+		
+		// HTML escape
+		function escapeHtml(text) {
+			if (!text) return '';
+			var map = {
+				'&': '&amp;',
+				'<': '&lt;',
+				'>': '&gt;',
+				'"': '&quot;',
+				"'": '&#039;'
+			};
+			return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
+		}
+		
+		// Sayfa yüklendiğinde - şifre kontrolünden sonra çalışacak
+		function initCarouselPage() {
+			loadCarousel();
+			
+			// Butona event listener ekle (onclick çalışmazsa)
+			setTimeout(function() {
+				$('button').filter(function() {
+					return $(this).attr('onclick') && $(this).attr('onclick').includes('openAddSlideModal');
+				}).off('click').on('click', function(e) {
+					e.preventDefault();
+					e.stopPropagation();
+					if (typeof openAddSlideModal === 'function') {
+						openAddSlideModal();
+					}
+				});
+			}, 100);
+		}
+	</script>
+	
+	<script>
+		// BACKEND SESSION KULLANIYOR - localStorage/sessionStorage yok
+		var MAX_LOGIN_ATTEMPTS = 5;
+		var LOGIN_ATTEMPTS_KEY = 'adminLoginAttempts';
+		var LOCKOUT_TIME_KEY = 'adminLockoutUntil';
+		var LOCKOUT_DURATION = 15 * 60 * 1000;
+
+		function checkLogin() {
+			checkLockout();
+			
+			// Backend'e session kontrolü için istek at
+			$.ajax({
+				url: '/api/admin/check-session',
+				method: 'GET',
+				success: function(response) {
+					if (response.authenticated) {
+						// Session var - içeriği göster
+						$('#loginScreen').hide();
+						$('#pageContent').show();
+						if (typeof initCarouselPage === 'function') {
+							initCarouselPage();
+						}
+					} else {
+						// Session yok veya süresi dolmuş
+						if (response.expired) {
+							showAlert('warning', 'Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+						}
+						$('#loginScreen').show();
+						$('#pageContent').hide();
+					}
+				},
+				error: function() {
+					// Hata durumunda login ekranını göster
+					$('#loginScreen').show();
+					$('#pageContent').hide();
+				}
+			});
+		}
+
+		function checkLockout() {
+			var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+			if (lockoutUntil) {
+				var now = Date.now();
+				var unlockTime = parseInt(lockoutUntil);
+				
+				if (now < unlockTime) {
+					var remainingMinutes = Math.ceil((unlockTime - now) / (60 * 1000));
+					$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Lütfen ' + remainingMinutes + ' dakika sonra tekrar deneyin.').fadeIn(300);
+					$('#adminPassword').prop('disabled', true);
+					$('button[onclick="checkPassword()"]').prop('disabled', true);
+					return true;
+				} else {
+					localStorage.removeItem(LOCKOUT_TIME_KEY);
+					localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+				}
+			}
+			return false;
+		}
+		
+		function checkPassword() {
+			if (checkLockout()) return;
+			
+			var password = $('#adminPassword').val();
+			
+			if (!password) {
+				$('#loginError').text('⚠️ Şifre gerekli!').fadeIn(300);
+				return;
+			}
+			
+			$.ajax({
+				url: '/api/admin/check-password',
+				method: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify({ password: password }),
+				success: function(response) {
+					if (response.success) {
+						localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+						localStorage.removeItem(LOCKOUT_TIME_KEY);
+						
+					// Backend session oluşturuldu - frontend'de bir şey yapmaya gerek yok
+					
+					// Overlay'i gizle
+					$('#pageTransition').removeClass('show').addClass('hide');
+					
+					$('#loginScreen').fadeOut(300);
+					$('#pageContent').fadeIn(300);
+					$('#loginError').hide();
+					$('#adminPassword').val('');
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+					initCarouselPage();
+					}
+				},
+				error: function(xhr) {
+					var attempts = parseInt(localStorage.getItem(LOGIN_ATTEMPTS_KEY) || '0');
+					attempts++;
+					localStorage.setItem(LOGIN_ATTEMPTS_KEY, attempts.toString());
+					
+					var remainingAttempts = MAX_LOGIN_ATTEMPTS - attempts;
+					
+					if (attempts >= MAX_LOGIN_ATTEMPTS) {
+						var lockoutUntil = Date.now() + LOCKOUT_DURATION;
+						localStorage.setItem(LOCKOUT_TIME_KEY, lockoutUntil.toString());
+						
+						$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Hesap 15 dakika süreyle kilitlendi.').fadeIn(300);
+						$('#adminPassword').prop('disabled', true);
+						$('button[onclick="checkPassword()"]').prop('disabled', true);
+						
+						setTimeout(function() {
+							localStorage.removeItem(LOCKOUT_TIME_KEY);
+							localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+							$('#loginError').hide();
+							$('#adminPassword').prop('disabled', false);
+							$('button[onclick="checkPassword()"]').prop('disabled', false);
+							$('#adminPassword').val('').focus();
+						}, LOCKOUT_DURATION);
+					} else {
+						var errorMsg = '❌ Yanlış şifre!';
+						if (xhr.responseJSON && xhr.responseJSON.error) {
+							errorMsg = '❌ ' + xhr.responseJSON.error;
+						}
+						errorMsg += '<br>Kalan deneme hakkı: ' + remainingAttempts;
+						$('#loginError').html(errorMsg).fadeIn(300);
+					}
+					
+					$('#adminPassword').val('').focus();
+				}
+			});
+		}
+
+		$(document).on('keypress', '#adminPassword', function(e) {
+			if (e.which === 13) {
+				checkPassword();
+			}
+		});
+		
+		setInterval(function() {
+			var lockoutUntil = localStorage.getItem(LOCKOUT_TIME_KEY);
+			if (lockoutUntil) {
+				var now = Date.now();
+				var unlockTime = parseInt(lockoutUntil);
+				
+				if (now < unlockTime) {
+					var remainingMinutes = Math.ceil((unlockTime - now) / (60 * 1000));
+					$('#loginError').html('⛔ Çok fazla yanlış deneme!<br>Lütfen ' + remainingMinutes + ' dakika sonra tekrar deneyin.');
+				} else {
+					localStorage.removeItem(LOCKOUT_TIME_KEY);
+					localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+					$('#loginError').hide();
+					$('#adminPassword').prop('disabled', false);
+					$('button[onclick="checkPassword()"]').prop('disabled', false);
+				}
+			}
+			
+			// Backend session kontrolü checkLogin() içinde yapılıyor
+			// Eski sessionStorage kodları kaldırıldı
+		}, 60000);
+
+		// Buton metnini ekran boyutuna göre güncelle
+		function updateUploadButtonText() {
+			var isMobile = window.innerWidth <= 768;
+			var buttonText = isMobile ? '📁 Telefondan Yükle' : '📁 Bilgisayardan Yükle';
+			
+			$('#uploadSlideBtn').text(buttonText);
+		}
+		
+		$(document).ready(function() {
+			checkLogin();
+			
+			// Buton metnini güncelle
+			updateUploadButtonText();
+			$(window).on('resize', updateUploadButtonText);
+			
+			// Backend session kontrolü zaten checkLogin() içinde yapılıyor
+			// Burada sadece overlay'i ayarla
+			$('#pageTransition').removeClass('show').addClass('hide');
+			
+			// Admin Paneli linkine animasyonlu geçiş ekle
+			$('a[href="admin.html"]').on('click', function(e) {
+				e.preventDefault();
+				$('#pageTransition').removeClass('hide').addClass('show');
+				setTimeout(function() {
+					window.location.href = 'admin.html';
+				}, 300);
+			});
+		});
+	</script>
+	
+	<!-- Geçiş Overlay -->
+	<div class="page-transition-overlay" id="pageTransition">
+		<div class="spinner"></div>
+	</div>
+	</div>
+</body>
+</html>
+
